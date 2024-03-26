@@ -12,17 +12,18 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
-  {import = "bryan.plugins"},
-  {import = "bryan.plugins.lsp"},
+  { import = "bryan.plugins" },
+  -- { import = "lazyvim.plugins.extras.linting.eslint" },
+  -- { import = "lazyvim.plugins.extras.formatting.prettier" },
 }, {
   install = {
     colorscheme = { "nightfly" },
   },
   checker = {
     enabled = true,
-    notify = false,
+    notify = true,
   },
   change_detection = {
-    notify = false,
+    notify = true,
   },
 })
