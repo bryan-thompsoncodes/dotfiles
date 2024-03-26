@@ -106,10 +106,28 @@ source $ZSH/oh-my-zsh.sh
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
+alias vim="nvim"
+alias vi="nvim"
+alias fman="compgen -c | fzf | xargs man"
+alias mobduo-tmux="tmux new-session -A -s mobduo"
+
+# Bonusly specific aliases
+alias bonusly-tmux="tmux new-session -A -s bonusly"
+alias special-sauce="cd ~/bonusly_repos/engineering/recognition/special_sauce"
+alias kaleidoscope="cd ~/bonusly_repos/engineering/front-end/kaleidoscope"
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
-alias vim="nvim"
-eval "$(rbenv init - zsh)"
 source /opt/homebrew/share/powerlevel10k/powerlevel10k.zsh-theme
+
+###################################################################################
+############# These lines were added by the Bonusly bootstrap script ##############
+######## removing or changing them may break your development environment #########
+###################################################################################
+export VAULT_ADDR=https://vault.bonus.ly
+eval "$(direnv hook zsh)"
+
+# if command -v tmux &> /dev/null && [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [ -z "$TMUX" ]; then
+#   exec tmux new-session -A -s main
+# fi
