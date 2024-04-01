@@ -115,6 +115,7 @@ alias mobduo-tmux="tmux new-session -A -s mobduo"
 alias bonusly-tmux="tmux new-session -A -s bonusly"
 alias special-sauce="cd ~/bonusly_repos/engineering/recognition/special_sauce"
 alias kaleidoscope="cd ~/bonusly_repos/engineering/front-end/kaleidoscope"
+alias ks-reset="cd ~ && kaleidoscope && yarn install && yarn dev"
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
