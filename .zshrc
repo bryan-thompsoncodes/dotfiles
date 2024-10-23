@@ -109,13 +109,8 @@ source $ZSH/oh-my-zsh.sh
 alias vim="nvim"
 alias vi="nvim"
 alias fman="compgen -c | fzf | xargs man"
-alias mobduo-tmux="tmux new-session -A -s mobduo"
+alias agile-tmux="tmux new-session -A -s agile-six"
 
-# Bonusly specific aliases
-alias bonusly-tmux="tmux new-session -A -s bonusly"
-alias special-sauce="cd ~/bonusly_repos/engineering/recognition/special_sauce"
-alias kaleidoscope="cd ~/bonusly_repos/engineering/front-end/kaleidoscope"
-alias ks-reset="cd ~ && kaleidoscope && yarn install && yarn dev"
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
