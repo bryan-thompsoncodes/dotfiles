@@ -77,7 +77,7 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git web-search zsh-autosuggestions zsh-syntax-highlighting)
+plugins=(git web-search zsh-autosuggestions zsh-syntax-highlighting asdf)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -109,7 +109,7 @@ source $ZSH/oh-my-zsh.sh
 alias vim="nvim"
 alias vi="nvim"
 alias fman="compgen -c | fzf | xargs man"
-alias agile-tmux="tmux new-session -A -s agile-six"
+alias va-tmux="tmux new-session -A -s va.gov"
 
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
@@ -117,13 +117,7 @@ alias agile-tmux="tmux new-session -A -s agile-six"
 
 source /opt/homebrew/share/powerlevel10k/powerlevel10k.zsh-theme
 
-###################################################################################
-############# These lines were added by the Bonusly bootstrap script ##############
-######## removing or changing them may break your development environment #########
-###################################################################################
-export VAULT_ADDR=https://vault.bonus.ly
-eval "$(direnv hook zsh)"
-
-# if command -v tmux &> /dev/null && [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [ -z "$TMUX" ]; then
-#   exec tmux new-session -A -s main
-# fi
+export NVM_DIR="$HOME/.nvm"
+  [ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"  # This loads nvm
+  [ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
+export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
