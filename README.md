@@ -1,5 +1,5 @@
 # Dotfiles
-This contains dotfiles for my personal develop environment config. Meant to be utilized with GNU stow to allow easy referencing of dotfiles.
+This contains dotfiles for my personal develop environment config for macOS. Meant to be utilized with GNU stow to allow easy referencing of dotfiles.
 
 # Installation
 First install [homebrew](https://brew.sh/)
