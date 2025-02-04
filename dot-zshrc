@@ -110,7 +110,13 @@ alias vim="nvim"
 alias vi="nvim"
 alias fman="compgen -c | fzf | xargs man"
 alias va-tmux="tmux new-session -A -s va.gov"
-
+alias trigger-build-commit="git commit --allow-empty -m 'Trigger Build'"
+alias content-build-server="vtk socks on && cd ~/code/department-of-veteran-affairs/content-build && yarn build --pull-drupal && yarn serve"
+alias vets-api-server="cd ~/code/department-of-veteran-affairs/vets-api && foreman start -m all=1,clamd=0,freshclam=0"
+vets-website-server() {
+  local env=${1:-static-pages}
+  cd ~/code/department-of-veteran-affairs/vets-website && yarn watch --env=$env
+}
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
