@@ -113,9 +113,21 @@ alias va-tmux="tmux new-session -A -s va.gov"
 alias trigger-build-commit="git commit --allow-empty -m 'Trigger Build'"
 alias content-build-server="vtk socks on && cd ~/code/department-of-veteran-affairs/content-build && yarn build --pull-drupal && yarn serve"
 alias vets-api-server="cd ~/code/department-of-veteran-affairs/vets-api && foreman start -m all=1,clamd=0,freshclam=0"
-vets-website-server() {
+function vets-website-server {
   local env=${1:-static-pages}
   cd ~/code/department-of-veteran-affairs/vets-website && yarn watch --env=$env
+}
+alias gcob="git checkout -b"
+alias gbd="git branch -d"
+alias gbD="git branch -D"
+alias gpl="git pull"
+alias gcm="git commit -m"
+alias gl="git log"
+alias gpF="git push --force"
+unalias grb
+function grb {
+  local commits=${1:-3}
+  git rebase -i HEAD~$commits
 }
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
