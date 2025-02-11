@@ -127,8 +127,10 @@ alias gpF="git push --force"
 unalias grb
 function grb {
   local commits=${1:-3}
-  git rebase -i HEAD~$commits
+  [[ $commits =~ ^[0-9]+$ ]] && git rebase -i HEAD~$commits || git rebase $commits
 }
+alias cl-storybook="~/.scripts/prepare-component-library-storybook.sh"
+
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
