@@ -1,0 +1,28 @@
+[colors.primary]
+background = "#1e1e1e"
+foreground = "#d4d4d4"
+
+[font]
+size = 14.0
+
+[font.normal]
+family = "MesloLGS NF"
+style = "Regular"
+
+[terminal.shell]
+args = ["--login"]
+program = "/opt/homebrew/bin/zsh"
+
+[window]
+decorations = "full"
+opacity = 0.95
+
+[window.dimensions]
+columns = 120
+lines = 40
+
+[window.padding]
+x = 10
+y = 10
+
+[terminal]

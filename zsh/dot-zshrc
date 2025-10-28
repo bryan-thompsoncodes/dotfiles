@@ -1,0 +1,145 @@
+# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
+# Initialization code that may require console input (password prompts, [y/n]
+# confirmations, etc.) must go above this block; everything else may go below.
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+
+# Initialize Powerlevel10k
+source /opt/homebrew/share/powerlevel10k/powerlevel10k.zsh-theme
+
+# Enhanced completion settings
+zstyle ':completion:*' menu select
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' # Case insensitive completion
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}" # Colored completion
+
+# Zsh plugins
+source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
+# Initialize direnv
+eval "$(direnv hook zsh)"
+
+# Set terminal title to show current command
+autoload -Uz add-zsh-hook
+
+function set_title_precmd {
+  print -Pn "\e]0;%~\a"  # Set title to current directory
+}
+
+function set_title_preexec {
+  # Get the first word of the command (handles aliases, functions, etc.)
+  local cmd="${1%% *}"
+  print -Pn "\e]0;$cmd\a"  # Set title to running command
+}
+
+add-zsh-hook precmd set_title_precmd
+add-zsh-hook preexec set_title_preexec
+
+# Environment variables
+export EDITOR="nvim"
+export VISUAL="nvim"
+export PAGER="less"
+
+# Node
+export NODE_OPTIONS="--max-old-space-size=4096"
+
+# PostgreSQL
+export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
+
+# SSL certificates
+export SSL_CERT_FILE=/opt/homebrew/etc/ca-certificates/cert.pem
+export SSL_CERT_DIR=/opt/homebrew/etc/ca-certificates/
+
+# Custom functions
+
+# VA Server Scripts
+function cl-storybook {
+  cd ~/code/department-of-veterans-affairs/component-library/packages/web-components/
+  yarn install
+  yarn build
+  yarn build-bindings
+  cd ../react-components/
+  yarn install
+  yarn build
+  cd ../core/
+  yarn install
+  yarn build
+  cd ../storybook/
+  yarn install
+  yarn storybook
+}
+
+function vets-api-server {
+  cd ~/code/department-of-veterans-affairs/vets-api
+  # Start Redis in the background if not already running
+  redis-server --daemonize yes 2>/dev/null || true
+  foreman start -m all=1,clamd=0,freshclam=0
+}
+
+function vets-website-server {
+  local env=${1:-static-pages,facilities}
+  cd ~/code/department-of-veterans-affairs/vets-website
+  yarn watch --env=$env
+}
+
+# Git rebase function
+# Defaults to 3 commits back, otherwise use argument passed as:
+# - Count if integer: interactive rebase last N commits
+# - Commit hash or branch name if string: rebase onto that ref
+# Example usage:
+#   grb           # interactive rebase last 3 commits
+#   grb 6         # interactive rebase last 6 commits
+#   grb feature   # rebase onto branch 'feature'
+#   grb abc1234   # rebase onto commit abc1234
+function grb {
+  local commits=${1:-3}
+  if [[ $commits =~ ^[0-9]+$ ]]; then
+    git rebase -i HEAD~$commits
+  else
+    git rebase $commits
+  fi
+}
+
+# Aliases
+
+# Directory navigation
+alias ..="cd .."
+alias ...="cd ../.."
+alias ....="cd ../../.."
+
+# Modern tool replacements
+alias cat="bat"
+alias ls="eza --icons"
+alias ll="eza -lah --icons"
+alias la="eza -a --icons"
+alias lla="eza -la"
+alias lsa="eza -lah"
+alias lt="eza --tree --icons"
+alias vim="nvim"
+alias vi="nvim"
+
+# Utility aliases
+alias clr="clear"
+alias fman="compgen -c | fzf | xargs man"
+alias rebuild-a6mbp="sudo darwin-rebuild switch --flake ~/code/mac-nix-configs#a6mbp"
+alias va-tmux="cd ~/code/department-of-veterans-affairs && tmux new-session -A -s va.gov"
+
+# Git aliases
+alias ga="git add"
+alias gd="git diff"
+alias gs="git status"
+alias gst="git status"
+alias gp="git push"
+alias gl="git log --oneline --graph"
+alias gco="git checkout"
+alias gcob="git checkout -b"
+alias gaa="git add --all"
+alias gcm="git commit -m"
+alias gbd="git branch -d"
+alias gbD="git branch -D"
+alias gpl="git pull"
+alias gpF="git push --force"
+
+# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
