@@ -41,6 +41,10 @@ export EDITOR="nvim"
 export VISUAL="nvim"
 export PAGER="less"
 
+# Prepend /usr/bin to PATH to use macOS system SSH (for UseKeyChain support)
+# This ensures system SSH takes precedence over Nix's OpenSSH
+export PATH="/usr/bin:$PATH"
+
 # Node
 export NODE_OPTIONS="--max-old-space-size=4096"
 
