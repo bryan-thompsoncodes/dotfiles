@@ -126,7 +126,7 @@ alias vi="nvim"
 # Utility aliases
 alias clr="clear"
 alias fman="compgen -c | fzf | xargs man"
-alias va-tmux="cd $VA_CODE_DIR && tmux new-session -A -s va.gov"
+alias va-tmux="~/.tmux/va-dev-session.sh"
 
 # Git aliases
 alias ga="git add"

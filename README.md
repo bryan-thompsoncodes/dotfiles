@@ -91,6 +91,8 @@ dotfiles/
 │   └── nvim/            # Neovim configuration (Lazy.nvim)
 ├── dot-gnupg/           # GPG configuration (~/.gnupg/)
 │   └── gpg-agent.conf   # GPG agent settings
+├── dot-tmux/            # Tmux session templates (~/.tmux/)
+│   └── va-dev-session.sh  # VA development session
 ├── dot-gitconfig        # Git configuration (~/.gitconfig)
 ├── dot-gitconfig.local  # Git signing key (~/.gitconfig.local, not tracked)
 ├── dot-zshrc            # Zsh shell (~/.zshrc)
@@ -136,6 +138,45 @@ dotfiles/
 
 - **direnv**: Automatic environment switching
 - **tmux**: Terminal multiplexer with vim keybindings
+
+### Tmux Session Templates
+
+Pre-configured tmux sessions for common development workflows.
+
+#### VA Development Session
+
+Launch a complete VA development environment with one command:
+
+```bash
+~/.tmux/va-dev-session.sh
+```
+
+Or simply use the alias:
+
+```bash
+va-tmux
+```
+
+This creates a tmux session named `va-dev` with 5 windows:
+
+**Windows 1-4** (split panes):
+
+- **Left pane**: Empty terminal in the repo directory
+- **Right pane**: Server start command pre-populated (press Enter to execute, selected by default)
+
+**Window 5** (single pane):
+
+- Single terminal with CMS startup command
+
+**Window layout:**
+
+1. `vets-website` - Frontend application (`vets-website-server`)
+2. `next-build` - Next.js build (`yarn dev`)
+3. `vets-api` - Rails API (`vets-api-server`)
+4. `component-library` - Component library storybook (`cl-storybook`)
+5. `va.gov-cms` - CMS environment (`ddev start && ddev status`)
+
+If the session already exists, the script will attach to it instead of creating a new one.
 
 ## Updating Configurations
 
