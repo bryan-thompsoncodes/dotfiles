@@ -41,6 +41,9 @@ export EDITOR="nvim"
 export VISUAL="nvim"
 export PAGER="less"
 
+# GPG configuration for commit signing
+export GPG_TTY=$(tty)
+
 # Prepend /usr/bin to PATH to use macOS system SSH (for UseKeyChain support)
 # This ensures system SSH takes precedence over Nix's OpenSSH
 export PATH="/usr/bin:$PATH"
