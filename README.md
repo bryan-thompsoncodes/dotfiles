@@ -62,9 +62,6 @@ The `--adopt` flag will move any existing files in your home directory into the 
 dotfiles/
 ├── dot-config/          # XDG config directory (~/.config/)
 │   ├── alacritty/       # Terminal emulator
-│   ├── bat/             # Cat replacement with syntax highlighting
-│   ├── direnv/          # Environment switcher
-│   ├── git/             # Git configuration
 │   └── nvim/            # Neovim configuration (Lazy.nvim)
 ├── dot-gnupg/           # GPG configuration (~/.gnupg/)
 │   └── gpg-agent.conf   # GPG agent settings
@@ -111,7 +108,6 @@ dotfiles/
 
 ### Tools
 
-- **bat**: Syntax-highlighted cat replacement
 - **direnv**: Automatic environment switching
 - **tmux**: Terminal multiplexer with vim keybindings
 
