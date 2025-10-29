@@ -20,6 +20,7 @@ If you're using [mac-nix-configs](https://github.com/bryan-thompsoncodes/mac-nix
    - All dependencies (Powerlevel10k, zsh plugins, tools, fonts, etc.) are installed via darwin.nix
 
 2. **GNU Stow** - Symlink manager (installed via nix-darwin)
+
    ```bash
    # Already in darwin.nix brews list
    ```
@@ -48,6 +49,7 @@ If not using nix-darwin:
    ```
 
 4. **Fonts**
+
    ```bash
    brew install --cask font-meslo-lg-nerd-font
    ```
@@ -82,9 +84,40 @@ The `--adopt` flag will move any existing files in your home directory into the 
 
 **Warning**: Be careful with `--adopt` as it will move existing files into the repo. Review changes before committing.
 
+## VA Development Setup
+
+For VA.gov development, use the included setup script to clone repositories:
+
+```bash
+./setup-va-repos.sh
+```
+
+This interactive script will:
+
+- Check which VA repositories already exist
+- Display a summary of what needs to be cloned
+- Ask for confirmation before proceeding
+- Clone missing repositories to `~/code/department-of-veterans-affairs/`
+- Show progress and final summary
+
+**Prerequisites:**
+
+- SSH keys must be configured and added to your GitHub account
+- Test your GitHub connection: `ssh -T git@github.com`
+
+**Repositories cloned:**
+
+- `vets-website` - Frontend application
+- `next-build` - Next.js build
+- `vets-api` - Rails API backend
+- `component-library` - Shared component library
+- `va.gov-cms` - Drupal CMS
+
+After setup completes, you can launch the full development environment with `va-tmux`.
+
 ## Structure
 
-```
+```text
 dotfiles/
 ├── dot-config/          # XDG config directory (~/.config/)
 │   ├── alacritty/       # Terminal emulator
