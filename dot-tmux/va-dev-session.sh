@@ -43,7 +43,7 @@ if [ $? != 0 ]; then
 
   # Window 5: va.gov-cms
   tmux new-window -t "$SESSION_NAME:5" -n "va.gov-cms" -c "$BASE_DIR/va.gov-cms"
-  tmux send-keys -t "$SESSION_NAME:5.1" "ddev start && ddev status"
+  tmux send-keys -t "$SESSION_NAME:5.1" "ddev-smart-start"
 
   # Select first window by default
   tmux select-window -t "$SESSION_NAME:1"

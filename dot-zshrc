@@ -92,6 +92,15 @@ function vets-website-server {
   yarn watch --env="$env"
 }
 
+function ddev-smart-start {
+  # Check if ddev is running, start only if needed
+  if ddev describe >/dev/null 2>&1; then
+    ddev status
+  else
+    ddev start && ddev status
+  fi
+}
+
 # Git rebase function
 # Defaults to 3 commits back, otherwise use argument passed as:
 # - Count if integer: interactive rebase last N commits
