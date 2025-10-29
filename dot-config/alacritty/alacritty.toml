@@ -16,5 +16,3 @@ TERM = "xterm-256color"
 opacity = 0.95
 
 decorations = "Buttonless"
-
-[terminal]

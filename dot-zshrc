@@ -47,41 +47,40 @@ export PAGER="less"
 # GPG configuration for commit signing
 export GPG_TTY=$(tty)
 
-# Prepend /usr/bin to PATH to use macOS system SSH (for UseKeyChain support)
-# This ensures system SSH takes precedence over Nix's OpenSSH
-export PATH="/usr/bin:$PATH"
+# Directory paths (can be overridden by setting before sourcing .zshrc)
+export VA_CODE_DIR="${VA_CODE_DIR:-$HOME/code/department-of-veterans-affairs}"
+export NIX_CONFIG_DIR="${NIX_CONFIG_DIR:-$HOME/code/mac-nix-configs}"
+
+# Use macOS system SSH for UseKeyChain support instead of Nix's OpenSSH
+alias ssh='/usr/bin/ssh'
 
 # Node
 export NODE_OPTIONS="--max-old-space-size=4096"
 
-# PostgreSQL
+# PostgreSQL - Add libpq binaries to PATH
 export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
-
-# TODO: Test if this is necessary on a6mbp SSL certificates
-# export SSL_CERT_FILE=/opt/homebrew/etc/ca-certificates/cert.pem
-# export SSL_CERT_DIR=/opt/homebrew/etc/ca-certificates/
 
 # Custom functions
 
 # VA Server Scripts
 function cl-storybook {
-  cd ~/code/department-of-veterans-affairs/component-library/packages/web-components/
+  cd "$VA_CODE_DIR/component-library/packages/web-components/" || return 1
   yarn install
   yarn build
   yarn build-bindings
-  cd ../react-components/
+  cd ../react-components/ || return 1
   yarn install
   yarn build
-  cd ../core/
+  cd ../core/ || return 1
   yarn install
   yarn build
-  cd ../storybook/
+  cd ../storybook/ || return 1
   yarn install
   yarn storybook
 }
 
 function vets-api-server {
-  cd ~/code/department-of-veterans-affairs/vets-api
+  cd "$VA_CODE_DIR/vets-api" || return 1
   # Start Redis in the background if not already running
   redis-server --daemonize yes 2>/dev/null || true
   foreman start -m all=1,clamd=0,freshclam=0
@@ -89,8 +88,8 @@ function vets-api-server {
 
 function vets-website-server {
   local env=${1:-static-pages,facilities}
-  cd ~/code/department-of-veterans-affairs/vets-website
-  yarn watch --env=$env
+  cd "$VA_CODE_DIR/vets-website" || return 1
+  yarn watch --env="$env"
 }
 
 # Git rebase function
@@ -127,8 +126,7 @@ alias vi="nvim"
 # Utility aliases
 alias clr="clear"
 alias fman="compgen -c | fzf | xargs man"
-alias rebuild-a6mbp="sudo darwin-rebuild switch --flake ~/code/mac-nix-configs#a6mbp"
-alias va-tmux="cd ~/code/department-of-veterans-affairs && tmux new-session -A -s va.gov"
+alias va-tmux="cd $VA_CODE_DIR && tmux new-session -A -s va.gov"
 
 # Git aliases
 alias ga="git add"

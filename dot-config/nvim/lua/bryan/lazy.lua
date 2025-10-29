@@ -13,8 +13,6 @@ vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
   { import = "bryan.plugins" },
-  -- { import = "lazyvim.plugins.extras.linting.eslint" },
-  -- { import = "lazyvim.plugins.extras.formatting.prettier" },
 }, {
   install = {
     colorscheme = { "nightfly" },

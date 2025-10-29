@@ -11,20 +11,46 @@ This repository contains dotfiles organized into Stow packages for easy symlinki
 
 ## Prerequisites
 
+### Option A: Using Nix-Darwin (Recommended)
+
+If you're using [mac-nix-configs](https://github.com/bryan-thompsoncodes/mac-nix-configs):
+
+1. **Nix with nix-darwin** - Manages Homebrew packages declaratively
+
+   - All dependencies (Powerlevel10k, zsh plugins, tools, fonts, etc.) are installed via darwin.nix
+
+2. **GNU Stow** - Symlink manager (installed via nix-darwin)
+   ```bash
+   # Already in darwin.nix brews list
+   ```
+
+### Option B: Manual Installation
+
+If not using nix-darwin:
+
 1. **Homebrew** - macOS package manager
 
    ```bash
    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
    ```
 
-2. **GNU Stow** - Symlink manager
+2. **GNU Stow**
 
    ```bash
    brew install stow
    ```
 
-3. **Nix with nix-darwin** (optional) - For system-level package management
-   - See [mac-nix-configs](https://github.com/bryan-thompsoncodes/mac-nix-configs) for system configuration
+3. **Zsh plugins and tools**
+
+   ```bash
+   brew install powerlevel10k zsh-autosuggestions zsh-syntax-highlighting
+   brew install bat eza fzf direnv tmux
+   ```
+
+4. **Fonts**
+   ```bash
+   brew install --cask font-meslo-lg-nerd-font
+   ```
 
 ## Installation
 
@@ -141,3 +167,4 @@ stow -D . --dotfiles --target $HOME
 - The `--dotfiles` flag converts `dot-` prefix to `.` for files/folders
 - ZSA keyboard layouts are stored but not symlinked
 - **GPG config files require manual symlinking**: Since `~/.gnupg/` contains sensitive unmanaged files (private keys, trustdb, sockets), stow cannot symlink the entire directory. Individual config files must be manually symlinked after running stow.
+- **No Brewfile needed**: Dependencies are managed declaratively via [mac-nix-configs](https://github.com/bryan-thompsoncodes/mac-nix-configs) darwin.nix
