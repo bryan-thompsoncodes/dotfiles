@@ -28,13 +28,33 @@ This repository contains dotfiles organized into Stow packages for easy symlinki
 
 ## Installation
 
+### Fresh System Installation
+
 From this repository's root directory:
+
+```bash
+stow . --dotfiles --target $HOME
+```
+
+This will symlink all dotfiles to your home directory.
+
+**Note**: GPG config files require an additional manual step:
+
+```bash
+ln -s ~/code/dotfiles/dot-gnupg/gpg-agent.conf ~/.gnupg/gpg-agent.conf
+```
+
+### Initial Migration (Existing Dotfiles)
+
+If you're setting up this repo for the first time and want to migrate existing dotfiles:
 
 ```bash
 stow . --adopt --dotfiles --target $HOME
 ```
 
-This will symlink all dotfiles to your home directory. The `--adopt` flag will move any existing files in your home directory into the dotfiles repo (useful for first-time setup).
+The `--adopt` flag will move any existing files in your home directory into the dotfiles repo. After adoption, review the changes and commit only the files you want to manage.
+
+**Warning**: Be careful with `--adopt` as it will move existing files into the repo. Review changes before committing.
 
 ## Structure
 
@@ -46,6 +66,8 @@ dotfiles/
 │   ├── direnv/          # Environment switcher
 │   ├── git/             # Git configuration
 │   └── nvim/            # Neovim configuration (Lazy.nvim)
+├── dot-gnupg/           # GPG configuration (~/.gnupg/)
+│   └── gpg-agent.conf   # GPG agent settings
 ├── dot-gitconfig        # Git configuration (~/.gitconfig)
 ├── dot-gitconfig.local  # Git signing key (~/.gitconfig.local, not tracked)
 ├── dot-zshrc            # Zsh shell (~/.zshrc)
@@ -80,6 +102,12 @@ dotfiles/
 - GPG signing enabled
 - Global gitignore for `.envrc` and `.direnv/`
 - Signing key stored in `~/.gitconfig.local` (not tracked in git)
+
+### GPG
+
+- GPG agent configuration for password caching
+- pinentry-mac for GUI password prompts
+- Cache TTL settings (10 min default, 2 hour max)
 
 ### Tools
 
@@ -116,3 +144,4 @@ stow -D . --dotfiles --target $HOME
 - Stow uses relative symlinks by default
 - The `--dotfiles` flag converts `dot-` prefix to `.` for files/folders
 - ZSA keyboard layouts are stored but not symlinked
+- **GPG config files require manual symlinking**: Since `~/.gnupg/` contains sensitive unmanaged files (private keys, trustdb, sockets), stow cannot symlink the entire directory. Individual config files must be manually symlinked after running stow.
