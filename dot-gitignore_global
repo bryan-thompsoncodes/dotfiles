@@ -1,0 +1,3 @@
+# direnv files - loaded per-directory environment variables
+.envrc
+.direnv/

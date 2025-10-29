@@ -5,6 +5,9 @@
 [commit]
 	gpgsign = true
 
+[core]
+	excludesfile = ~/.gitignore_global
+
 # Include local gitconfig for machine-specific settings (signing key, etc.)
 [include]
 	path = ~/.gitconfig.local
