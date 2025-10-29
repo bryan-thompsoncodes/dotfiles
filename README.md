@@ -31,27 +31,10 @@ This repository contains dotfiles organized into Stow packages for easy symlinki
 From this repository's root directory:
 
 ```bash
-# Stow individual packages
-cd ~/code/dotfiles
-
-# Link shell configuration
-stow -v --dotfiles -t ~ zsh
-
-# Link terminal multiplexer config
-stow -v --dotfiles -t ~ tmux
-
-# Link Powerlevel10k theme config
-stow -v --dotfiles -t ~ p10k
-
-# Link .config directory applications
-stow -v -t ~ dot-config
+stow . --adopt --dotfiles --target $HOME
 ```
 
-Or stow everything at once:
-
-```bash
-stow -v --dotfiles -t ~ zsh tmux p10k && stow -v -t ~ dot-config
-```
+This will symlink all dotfiles to your home directory. The `--adopt` flag will move any existing files in your home directory into the dotfiles repo (useful for first-time setup).
 
 ## Structure
 
@@ -63,9 +46,11 @@ dotfiles/
 │   ├── direnv/          # Environment switcher
 │   ├── git/             # Git configuration
 │   └── nvim/            # Neovim configuration (Lazy.nvim)
-├── zsh/                 # Zsh shell (~/.zshrc)
-├── tmux/                # Tmux terminal multiplexer (~/.tmux.conf)
-├── p10k/                # Powerlevel10k theme (~/.p10k.zsh)
+├── dot-gitconfig        # Git configuration (~/.gitconfig)
+├── dot-gitconfig.local  # Git signing key (~/.gitconfig.local, not tracked)
+├── dot-zshrc            # Zsh shell (~/.zshrc)
+├── dot-tmux.conf        # Tmux terminal multiplexer (~/.tmux.conf)
+├── dot-p10k.zsh         # Powerlevel10k theme (~/.p10k.zsh)
 └── zsa-keyboard-layouts/  # ZSA keyboard firmware
 ```
 
@@ -94,6 +79,7 @@ dotfiles/
 
 - GPG signing enabled
 - Global gitignore for `.envrc` and `.direnv/`
+- Signing key stored in `~/.gitconfig.local` (not tracked in git)
 
 ### Tools
 
@@ -115,7 +101,7 @@ To remove symlinks:
 
 ```bash
 cd ~/code/dotfiles
-stow -D -t ~ zsh tmux p10k dot-config
+stow -D . --dotfiles --target $HOME
 ```
 
 ## Related Repositories

@@ -1,0 +1,10 @@
+[user]
+	name = Bryan Thompson
+	email = 18094023+bryan-thompsoncodes@users.noreply.github.com
+
+[commit]
+	gpgsign = true
+
+# Include local gitconfig for machine-specific settings (signing key, etc.)
+[include]
+	path = ~/.gitconfig.local
