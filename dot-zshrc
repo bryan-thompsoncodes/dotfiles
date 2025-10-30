@@ -93,8 +93,9 @@ function vets-website-server {
 }
 
 function ddev-smart-start {
-  # Check if ddev is running, start only if needed
-  if ddev describe >/dev/null 2>&1; then
+  # Check if ddev containers are actually running, start only if needed
+  # Check docker ps directly for running ddev web containers (most reliable method)
+  if docker ps --format '{{.Names}}' 2>/dev/null | grep -qE '^ddev-.*-web$'; then
     ddev status
   else
     ddev start && ddev status
