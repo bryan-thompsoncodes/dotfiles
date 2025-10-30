@@ -1,6 +1,8 @@
 # Dotfiles
 
-Personal development environment configuration for macOS, managed with GNU Stow.
+Personal development environment configuration, managed with GNU Stow.
+
+Cross-platform compatible with macOS and NixOS.
 
 ## Overview
 
@@ -11,48 +13,71 @@ This repository contains dotfiles organized into Stow packages for easy symlinki
 
 ## Prerequisites
 
-### Option A: Using Nix-Darwin (Recommended)
+### Required
 
-If you're using [mac-nix-configs](https://github.com/bryan-thompsoncodes/mac-nix-configs):
+- **GNU Stow** - Symlink manager for dotfiles
 
-1. **Nix with nix-darwin** - Manages Homebrew packages declaratively
+### Platform-Specific Setup
 
-   - All dependencies (Powerlevel10k, zsh plugins, tools, fonts, etc.) are installed via darwin.nix
+#### macOS
 
-2. **GNU Stow** - Symlink manager (installed via nix-darwin)
+**Option A: Using Nix-Darwin (Recommended)**
 
-   ```bash
-   # Already in darwin.nix brews list
-   ```
+If you're using [nix-configs](https://github.com/bryan-thompsoncodes/nix-configs):
 
-### Option B: Manual Installation
+- All dependencies (Powerlevel10k, zsh plugins, tools, fonts, etc.) are installed via nix-darwin configuration
+- GNU Stow is included in the nix configuration
 
-If not using nix-darwin:
+**Option B: Using Homebrew**
 
-1. **Homebrew** - macOS package manager
-
+1. Install Homebrew:
    ```bash
    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
    ```
 
-2. **GNU Stow**
-
+2. Install dependencies:
    ```bash
    brew install stow
-   ```
-
-3. **Zsh plugins and tools**
-
-   ```bash
    brew install powerlevel10k zsh-autosuggestions zsh-syntax-highlighting
-   brew install bat eza fzf direnv tmux
-   ```
-
-4. **Fonts**
-
-   ```bash
+   brew install bat eza fzf direnv tmux tpm
    brew install --cask font-meslo-lg-nerd-font
    ```
+
+#### NixOS
+
+**Option A: Using Nix Flakes (Recommended)**
+
+If you're using [nix-configs](https://github.com/bryan-thompsoncodes/nix-configs):
+
+- All dependencies (Powerlevel10k, zsh plugins, tools, fonts, etc.) are installed via NixOS configuration
+- GNU Stow is included in the nix configuration
+
+**Option B: Manual System Configuration**
+
+Add the following packages to your `configuration.nix`:
+
+```nix
+environment.systemPackages = with pkgs; [
+  stow
+  zsh-powerlevel10k
+  zsh-autosuggestions
+  zsh-syntax-highlighting
+  bat
+  eza
+  fzf
+  direnv
+  tmux
+  tmuxPlugins.tpm
+  (nerdfonts.override { fonts = [ "Meslo" ]; })
+  neovim
+  git
+  gnupg
+  pinentry-curses  # or pinentry-gnome3, pinentry-qt
+];
+```
+
+**Note:** Some configurations may need local overrides:
+- `~/.gnupg/gpg-agent.conf` - Set correct pinentry program path for your system
 
 ## Installation
 
@@ -228,12 +253,42 @@ cd ~/code/dotfiles
 stow -D . --dotfiles --target $HOME
 ```
 
+## Cross-Platform Compatibility
+
+These dotfiles are designed to work on both macOS and NixOS with minimal platform-specific configuration.
+
+### How It Works
+
+**Shell configurations** (`dot-zshrc`, `dot-tmux.conf`) use a "source if exists" pattern that checks multiple paths:
+- macOS (Homebrew): `/opt/homebrew/share/...`
+- NixOS (system): `/run/current-system/sw/share/...`
+- Linux (standard): `/usr/share/...`
+
+### Platform-Specific Settings
+
+Some settings require platform-specific handling:
+
+1. **SSH Keychain (macOS only)** - `dot-zshrc` conditionally aliases SSH to use macOS keychain support
+2. **GPG Pinentry** - `dot-gnupg/gpg-agent.conf` defaults to macOS pinentry-mac; NixOS users should override locally
+
+### NixOS-Specific Notes
+
+On NixOS, you may want to create local overrides for:
+
+```bash
+# Override GPG pinentry for NixOS
+echo "pinentry-program /run/current-system/sw/bin/pinentry-curses" > ~/.gnupg/gpg-agent.conf.local
+```
+
+Or manage these via your NixOS system configuration.
+
 ## Related Repositories
 
-- [mac-nix-configs](https://github.com/bryan-thompsoncodes/mac-nix-configs) - System-level configuration with nix-darwin
-  - Homebrew package management
+- [nix-configs](https://github.com/bryan-thompsoncodes/nix-configs) - Nix system configuration for both macOS and NixOS
+  - macOS: nix-darwin with declarative Homebrew package management
+  - NixOS: System configuration with flakes
   - Development environment shells (vets-api, vets-website, etc.)
-  - System settings
+  - System settings and package management
 
 ## Notes
 
@@ -241,4 +296,4 @@ stow -D . --dotfiles --target $HOME
 - The `--dotfiles` flag converts `dot-` prefix to `.` for files/folders
 - ZSA keyboard layouts are stored but not symlinked
 - **GPG config files require manual symlinking**: Since `~/.gnupg/` contains sensitive unmanaged files (private keys, trustdb, sockets), stow cannot symlink the entire directory. Individual config files must be manually symlinked after running stow.
-- **No Brewfile needed**: Dependencies are managed declaratively via [mac-nix-configs](https://github.com/bryan-thompsoncodes/mac-nix-configs) darwin.nix
+- **Package management**: Dependencies managed via [nix-configs](https://github.com/bryan-thompsoncodes/nix-configs) for both macOS (nix-darwin) and NixOS (system configuration), or manually via Homebrew on macOS

@@ -5,8 +5,14 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
-# Initialize Powerlevel10k
-source /opt/homebrew/share/powerlevel10k/powerlevel10k.zsh-theme
+# Initialize Powerlevel10k (try multiple paths for cross-platform compatibility)
+if [[ -f /opt/homebrew/share/powerlevel10k/powerlevel10k.zsh-theme ]]; then
+  source /opt/homebrew/share/powerlevel10k/powerlevel10k.zsh-theme
+elif [[ -f /run/current-system/sw/share/zsh-powerlevel10k/powerlevel10k.zsh-theme ]]; then
+  source /run/current-system/sw/share/zsh-powerlevel10k/powerlevel10k.zsh-theme
+elif [[ -f /usr/share/zsh-theme-powerlevel10k/powerlevel10k.zsh-theme ]]; then
+  source /usr/share/zsh-theme-powerlevel10k/powerlevel10k.zsh-theme
+fi
 
 # Zsh options
 setopt AUTO_CD  # Type directory name to cd into it (e.g., just type '..' or '/tmp')
@@ -16,9 +22,22 @@ zstyle ':completion:*' menu select
 zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' # Case insensitive completion
 zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}" # Colored completion
 
-# Zsh plugins
-source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+# Zsh plugins (try multiple paths for cross-platform compatibility)
+if [[ -f /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]]; then
+  source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+elif [[ -f /run/current-system/sw/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]]; then
+  source /run/current-system/sw/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+elif [[ -f /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]]; then
+  source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+fi
+
+if [[ -f /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
+  source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+elif [[ -f /run/current-system/sw/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
+  source /run/current-system/sw/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+elif [[ -f /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
+  source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+fi
 
 # Initialize direnv
 eval "$(direnv hook zsh)"
@@ -51,14 +70,18 @@ export GPG_TTY=$(tty)
 export VA_CODE_DIR="${VA_CODE_DIR:-$HOME/code/department-of-veterans-affairs}"
 export NIX_CONFIG_DIR="${NIX_CONFIG_DIR:-$HOME/code/mac-nix-configs}"
 
-# Use macOS system SSH for UseKeyChain support instead of Nix's OpenSSH
-alias ssh='/usr/bin/ssh'
+# Use macOS system SSH for UseKeyChain support (macOS only)
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  alias ssh='/usr/bin/ssh'
+fi
 
 # Node
 export NODE_OPTIONS="--max-old-space-size=4096"
 
-# PostgreSQL - Add libpq binaries to PATH
-export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
+# PostgreSQL - Add libpq binaries to PATH (macOS Homebrew only, NixOS handles via system packages)
+if [[ -d /opt/homebrew/opt/libpq/bin ]]; then
+  export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
+fi
 
 # Custom functions
 
