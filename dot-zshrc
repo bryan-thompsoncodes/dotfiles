@@ -197,7 +197,7 @@ alias vi="nvim"
 alias clr="clear"
 alias fman="compgen -c | fzf | xargs man"
 alias va-tmux="~/.tmux/va-dev-session.sh"
-alias opencode-editor="~/.tmux/opencode-editor.sh"
+alias code="~/.tmux/opencode-editor.sh"
 
 # Git aliases
 alias ga="git add"
