@@ -1,0 +1,8 @@
+# macOS-specific Alacritty configuration
+# Import base config
+import = ["alacritty-base.toml"]
+
+# Override window decorations for macOS
+[window]
+decorations = "None"  # No traffic lights, clean look
+

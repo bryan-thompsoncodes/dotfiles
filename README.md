@@ -88,9 +88,10 @@ From this repository's root directory:
 
 ```bash
 stow . --dotfiles --target $HOME
+./setup-platform-configs.sh
 ```
 
-This will symlink all dotfiles to your home directory.
+This will symlink all dotfiles to your home directory and configure platform-specific overrides.
 
 **Note**: GPG config files require an additional manual step:
 
@@ -276,6 +277,9 @@ Some settings require platform-specific handling:
 
 1. **SSH Keychain (macOS only)** - `dot-zshrc` conditionally aliases SSH to use macOS keychain support
 2. **GPG Pinentry** - `dot-gnupg/gpg-agent.conf` defaults to macOS pinentry-mac; NixOS users should override locally
+3. **Alacritty Window Decorations** - `setup-platform-configs.sh` automatically configures:
+   - macOS: No decorations (clean look, no traffic lights)
+   - Linux: Buttonless decorations (title bar for window management)
 
 ### NixOS-Specific Notes
 

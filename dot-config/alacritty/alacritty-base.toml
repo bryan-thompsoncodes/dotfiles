@@ -1,0 +1,17 @@
+[colors.primary]
+background = "#1e1e1e"
+foreground = "#d4d4d4"
+
+[font]
+size = 16.0
+
+[font.normal]
+family = "MesloLGS Nerd Font"
+style = "Regular"
+
+[env]
+TERM = "xterm-256color"
+
+[window]
+opacity = 0.95
+
