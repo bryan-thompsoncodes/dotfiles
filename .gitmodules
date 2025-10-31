@@ -13,3 +13,6 @@
 [submodule "dot-tmux/plugins/vim-tmux-navigator"]
 	path = dot-tmux/plugins/vim-tmux-navigator
 	url = https://github.com/christoomey/vim-tmux-navigator
+[submodule "dot-tmux/plugins/tmux"]
+	path = dot-tmux/plugins/tmux
+	url = https://github.com/catppuccin/tmux
