@@ -311,5 +311,6 @@ Or manage these via your NixOS system configuration.
 - Stow uses relative symlinks by default
 - The `--dotfiles` flag converts `dot-` prefix to `.` for files/folders
 - ZSA keyboard layouts are stored but not symlinked
+- **AGENTS.md is ignored by Stow** via `.stow-local-ignore` to prevent symlinking documentation to the home directory
 - **GPG config files require manual symlinking**: Since `~/.gnupg/` contains sensitive unmanaged files (private keys, trustdb, sockets), stow cannot symlink the entire directory. Individual config files must be manually symlinked after running stow.
 - **Package management**: Dependencies managed via [nix-configs](https://github.com/bryan-thompsoncodes/nix-configs) for both macOS (nix-darwin) and NixOS (system configuration), or manually via Homebrew on macOS
