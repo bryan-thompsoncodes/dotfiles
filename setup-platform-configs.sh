@@ -17,35 +17,20 @@ fi
 echo "Detected platform: $PLATFORM"
 
 # Alacritty configuration
-ALACRITTY_DIR="$HOME/.config/alacritty"
-ALACRITTY_CONFIG="$ALACRITTY_DIR/alacritty.toml"
-DOTFILES_ALACRITTY="$HOME/code/dotfiles/dot-config/alacritty"
+echo ""
+echo "Setting up Alacritty for $PLATFORM..."
+
+ALACRITTY_CONFIG="$HOME/.config/alacritty/alacritty.toml"
 
 if [[ "$PLATFORM" == "linux" ]]; then
-    echo "Setting up Alacritty for Linux..."
-    
-    # Remove existing config if it exists
-    if [[ -e "$ALACRITTY_CONFIG" ]]; then
-        rm "$ALACRITTY_CONFIG"
-        echo "  Removed existing alacritty.toml"
-    fi
-    
     # Create symlink to Linux-specific config
-    ln -sf "$DOTFILES_ALACRITTY/alacritty-linux.toml" "$ALACRITTY_CONFIG"
-    echo "  Created symlink: $ALACRITTY_CONFIG -> alacritty-linux.toml"
+    ln -sf alacritty-linux.toml "$ALACRITTY_CONFIG"
+    echo "  Linked alacritty.toml -> alacritty-linux.toml"
     
 elif [[ "$PLATFORM" == "macos" ]]; then
-    echo "Setting up Alacritty for macOS..."
-    
-    # Remove existing config if it exists
-    if [[ -e "$ALACRITTY_CONFIG" ]]; then
-        rm "$ALACRITTY_CONFIG"
-        echo "  Removed existing alacritty.toml"
-    fi
-    
     # Create symlink to macOS-specific config
-    ln -sf "$DOTFILES_ALACRITTY/alacritty-macos.toml" "$ALACRITTY_CONFIG"
-    echo "  Created symlink: $ALACRITTY_CONFIG -> alacritty-macos.toml"
+    ln -sf alacritty-macos.toml "$ALACRITTY_CONFIG"
+    echo "  Linked alacritty.toml -> alacritty-macos.toml"
 fi
 
 # Tmux plugin setup
