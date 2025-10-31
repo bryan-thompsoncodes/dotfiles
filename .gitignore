@@ -7,3 +7,4 @@ dot-config/goose/*
 !dot-config/goose/config.yaml
 !dot-config/goose/permission.yaml
 !dot-config/goose/goosehints
+dot-tmux/plugins/
