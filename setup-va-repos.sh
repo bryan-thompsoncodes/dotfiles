@@ -24,7 +24,8 @@ else
 fi
 
 # Configuration
-BASE_DIR="$HOME/code/department-of-veterans-affairs"
+# Use VA_CODE_DIR environment variable if set, otherwise use default
+BASE_DIR="${VA_CODE_DIR:-$HOME/code/department-of-veterans-affairs}"
 GITHUB_ORG="department-of-veterans-affairs"
 
 # Define repositories to clone

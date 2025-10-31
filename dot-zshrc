@@ -87,30 +87,67 @@ fi
 
 # VA Server Scripts
 function cl-storybook {
-  cd "$VA_CODE_DIR/component-library/packages/web-components/" || return 1
-  yarn install
-  yarn build
-  yarn build-bindings
+  local base_dir="$VA_CODE_DIR/component-library/packages"
+
+  # Check if component-library exists
+  if [ ! -d "$VA_CODE_DIR/component-library" ]; then
+    echo "Error: component-library repository not found at $VA_CODE_DIR/component-library"
+    return 1
+  fi
+
+  # Build web-components
+  cd "$base_dir/web-components/" || return 1
+  echo "Building web-components..."
+  yarn install || return 1
+  yarn build || return 1
+  yarn build-bindings || return 1
+
+  # Build react-components
   cd ../react-components/ || return 1
-  yarn install
-  yarn build
+  echo "Building react-components..."
+  yarn install || return 1
+  yarn build || return 1
+
+  # Build core
   cd ../core/ || return 1
-  yarn install
-  yarn build
+  echo "Building core..."
+  yarn install || return 1
+  yarn build || return 1
+
+  # Start storybook
   cd ../storybook/ || return 1
-  yarn install
+  echo "Starting storybook..."
+  yarn install || return 1
   yarn storybook
 }
 
 function vets-api-server {
+  # Check if vets-api exists
+  if [ ! -d "$VA_CODE_DIR/vets-api" ]; then
+    echo "Error: vets-api repository not found at $VA_CODE_DIR/vets-api"
+    return 1
+  fi
+
   cd "$VA_CODE_DIR/vets-api" || return 1
+
   # Start Redis in the background if not already running
-  redis-server --daemonize yes 2>/dev/null || true
+  if ! redis-server --daemonize yes 2>/dev/null; then
+    echo "Warning: Could not start Redis (it may already be running)"
+  fi
+
+  # Start foreman
   foreman start -m all=1,clamd=0,freshclam=0
 }
 
 function vets-website-server {
   local env=${1:-static-pages,facilities}
+
+  # Check if vets-website exists
+  if [ ! -d "$VA_CODE_DIR/vets-website" ]; then
+    echo "Error: vets-website repository not found at $VA_CODE_DIR/vets-website"
+    return 1
+  fi
+
   cd "$VA_CODE_DIR/vets-website" || return 1
   yarn watch --env="$env"
 }

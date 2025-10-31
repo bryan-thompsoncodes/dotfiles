@@ -5,7 +5,30 @@
 # Each window has 2 vertical panes: left for general terminal, right with pre-populated server command
 
 SESSION_NAME="va-dev"
-BASE_DIR="$HOME/code/department-of-veterans-affairs"
+# Use VA_CODE_DIR environment variable if set, otherwise use default
+BASE_DIR="${VA_CODE_DIR:-$HOME/code/department-of-veterans-affairs}"
+
+# Required repositories for this session
+REQUIRED_REPOS=("vets-website" "next-build" "vets-api" "component-library" "va.gov-cms")
+
+# Validate all required repositories exist
+MISSING_REPOS=()
+for repo in "${REQUIRED_REPOS[@]}"; do
+  if [ ! -d "$BASE_DIR/$repo" ]; then
+    MISSING_REPOS+=("$repo")
+  fi
+done
+
+# If any repos are missing, show error and exit
+if [ ${#MISSING_REPOS[@]} -gt 0 ]; then
+  echo "Error: The following required repositories are missing:"
+  for repo in "${MISSING_REPOS[@]}"; do
+    echo "  - $BASE_DIR/$repo"
+  done
+  echo ""
+  echo "Please run 'setup-va-repos.sh' or manually clone the missing repositories."
+  exit 1
+fi
 
 # Check if session already exists
 tmux has-session -t "$SESSION_NAME" 2>/dev/null

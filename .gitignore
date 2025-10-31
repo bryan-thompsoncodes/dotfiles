@@ -1,3 +1,8 @@
 .DS_STORE
 configstore
 dot-gitconfig.local
+
+# Goose - ignore everything except specific config files
+dot-config/goose/*
+!dot-config/goose/config.yaml
+!dot-config/goose/permission.yaml

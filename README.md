@@ -147,6 +147,10 @@ After setup completes, you can launch the full development environment with `va-
 dotfiles/
 ├── dot-config/          # XDG config directory (~/.config/)
 │   ├── alacritty/       # Terminal emulator
+│   ├── direnv/          # Direnv configuration with nix-direnv
+│   ├── goose/           # Goose AI agent configuration
+│   │   ├── config.yaml      # Extension and model settings
+│   │   └── permission.yaml  # Tool permissions
 │   └── nvim/            # Neovim configuration (Lazy.nvim)
 ├── dot-gnupg/           # GPG configuration (~/.gnupg/)
 │   └── gpg-agent.conf   # GPG agent settings
@@ -195,7 +199,7 @@ dotfiles/
 
 ### Tools
 
-- **direnv**: Automatic environment switching
+- **direnv**: Automatic environment switching with nix-direnv for fast Nix shell caching
 - **tmux**: Terminal multiplexer with vim keybindings
 
 ### Tmux Session Templates

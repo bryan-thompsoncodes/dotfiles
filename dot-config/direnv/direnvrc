@@ -1,0 +1,20 @@
+# Enable nix-direnv for fast, persistent Nix development shell caching
+# This dramatically speeds up 'nix develop' shell activation via direnv
+#
+# Documentation: https://github.com/nix-community/nix-direnv
+#
+# Benefits:
+# - Caches Nix development shells (milliseconds instead of seconds)
+# - Survives nix garbage collection
+# - Only rebuilds when flake inputs actually change
+
+if [ -f /nix/var/nix/profiles/default/share/nix-direnv/direnvrc ]; then
+  # NixOS or Nix profile installation
+  source /nix/var/nix/profiles/default/share/nix-direnv/direnvrc
+elif [ -f /run/current-system/sw/share/nix-direnv/direnvrc ]; then
+  # nix-darwin system installation
+  source /run/current-system/sw/share/nix-direnv/direnvrc
+elif [ -f $HOME/.nix-profile/share/nix-direnv/direnvrc ]; then
+  # User profile installation
+  source $HOME/.nix-profile/share/nix-direnv/direnvrc
+fi
