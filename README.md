@@ -40,6 +40,7 @@ If you're using [nix-configs](https://github.com/bryan-thompsoncodes/nix-configs
    brew install stow
    brew install powerlevel10k zsh-autosuggestions zsh-syntax-highlighting
    brew install bat eza fzf direnv tmux tpm
+   brew install neovim git gnupg
    brew install --cask font-meslo-lg-nerd-font
    ```
 
