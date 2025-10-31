@@ -150,7 +150,8 @@ dotfiles/
 │   ├── direnv/          # Direnv configuration with nix-direnv
 │   ├── goose/           # Goose AI agent configuration
 │   │   ├── config.yaml      # Extension and model settings
-│   │   └── permission.yaml  # Tool permissions
+│   │   ├── permission.yaml  # Tool permissions
+│   │   └── goosehints       # Project-specific AI guidance
 │   └── nvim/            # Neovim configuration (Lazy.nvim)
 ├── dot-gnupg/           # GPG configuration (~/.gnupg/)
 │   └── gpg-agent.conf   # GPG agent settings
