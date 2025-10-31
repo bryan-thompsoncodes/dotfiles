@@ -177,5 +177,18 @@ alias gbD="git branch -D"
 alias gpl="git pull"
 alias gpF="git push --force"
 
+# Nix flake update alias
+alias nix-flake-update="nix flake update --flake $HOME/code/nix-configs"
+
+# Nix rebuild aliases
+alias update-mbp="sudo darwin-rebuild switch --flake ~/code/nix-configs/#mbp"
+alias update-a6mbp="sudo darwin-rebuild switch --flake ~/code/nix-configs/#a6mbp"
+alias update-gnarbox="sudo nixos-rebuild switch --flake ~/code/nix-configs/#gnarbox"
+
+# Nix upgrade aliases (update flake.lock first, then rebuild)
+alias upgrade-mbp="nix-flake-update && update-mbp"
+alias upgrade-a6mbp="nix-flake-update && update-a6mbp"
+alias upgrade-gnarbox="nix-flake-update && update-gnarbox"
+
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
