@@ -197,7 +197,6 @@ alias vi="nvim"
 alias clr="clear"
 alias fman="compgen -c | fzf | xargs man"
 alias va-tmux="~/.tmux/va-dev-session.sh"
-alias code="~/.tmux/opencode-editor.sh"
 
 # Git aliases
 alias ga="git add"
@@ -227,6 +226,22 @@ alias update-gnarbox="sudo nixos-rebuild switch --flake ~/code/nix-configs/#gnar
 alias upgrade-mbp="nix-flake-update && update-mbp"
 alias upgrade-a6mbp="nix-flake-update && update-a6mbp"
 alias upgrade-gnarbox="nix-flake-update && update-gnarbox"
+
+# Code function: opens editor in specified project directory or current directory
+function code {
+  if [[ -n $1 ]]; then
+    local dir="$HOME/code/$1"
+    if [[ -d $dir ]]; then
+      cd "$dir"
+      ~/.tmux/opencode-editor.sh
+    else
+      echo "Directory $dir not found"
+      return 1
+    fi
+  else
+    ~/.tmux/opencode-editor.sh
+  fi
+}
 
 # Navigation aliases
 alias dotfiles="cd ~/code/dotfiles"
