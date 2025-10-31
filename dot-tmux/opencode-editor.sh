@@ -3,7 +3,7 @@
 # Tmux session for opencode and editor
 # Creates a session with 3 windows: opencode, terminal, nvim
 
-SESSION_NAME="opencode-editor"
+SESSION_NAME="$(basename "$PWD")-editor"
 
 # Check if session already exists
 tmux has-session -t "$SESSION_NAME" 2>/dev/null
