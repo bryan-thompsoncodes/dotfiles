@@ -93,11 +93,30 @@ stow . --dotfiles --target $HOME
 
 This will symlink all dotfiles to your home directory and configure platform-specific overrides.
 
-**Note**: GPG config files require an additional manual step:
+**Post-Installation Steps:**
 
-```bash
-ln -s ~/code/dotfiles/dot-gnupg/gpg-agent.conf ~/.gnupg/gpg-agent.conf
-```
+1. **GPG configuration** - Link GPG agent config:
+   ```bash
+   ln -s ~/code/dotfiles/dot-gnupg/gpg-agent.conf ~/.gnupg/gpg-agent.conf
+   ```
+
+2. **Tmux plugins** - Install TPM and plugins:
+   ```bash
+   # Remove symlinked plugins directory (if it exists from stow)
+   rm -rf ~/.tmux/plugins
+   
+   # Create local plugins directory
+   mkdir -p ~/.tmux/plugins
+   
+   # Clone TPM
+   git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+   
+   # Install all plugins
+   ~/.tmux/plugins/tpm/scripts/install_plugins.sh
+   
+   # Reload tmux config (if tmux is running)
+   tmux source-file ~/.tmux.conf
+   ```
 
 ### Initial Migration (Existing Dotfiles)
 
