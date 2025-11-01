@@ -7,5 +7,8 @@ dot-config/goose/*
 !dot-config/goose/config.yaml
 !dot-config/goose/permission.yaml
 !dot-config/goose/goosehints
+
+# Opencode - ignore all config files
+dot-config/opencode/
 dot-tmux/plugins/
 dot-config/alacritty/alacritty.toml
