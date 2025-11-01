@@ -1,8 +1,22 @@
-GOOSE_ENABLE_ROUTER: 'true'
-GOOSE_MODE: smart_approve
-GOOSE_PROVIDER: openrouter
-security_prompt_enabled: false
 extensions:
+  memory:
+    enabled: true
+    type: builtin
+    name: memory
+    description: Teach goose your preferences as you go.
+    display_name: Memory
+    timeout: 300
+    bundled: true
+    available_tools: []
+  developer:
+    enabled: true
+    type: builtin
+    name: developer
+    description: General development tools useful for software engineering.
+    display_name: Developer
+    timeout: 300
+    bundled: true
+    available_tools: []
   computercontroller:
     enabled: false
     type: builtin
@@ -10,6 +24,13 @@ extensions:
     description: General computer control tools that don't require you to be a developer or engineer.
     display_name: Computer Controller
     timeout: 300
+    bundled: true
+    available_tools: []
+  extensionmanager:
+    enabled: true
+    type: platform
+    name: Extension Manager
+    description: Enable extension management tools for discovering, enabling, and disabling extensions
     bundled: true
     available_tools: []
   autovisualiser:
@@ -21,11 +42,13 @@ extensions:
     timeout: 300
     bundled: true
     available_tools: []
-  extensionmanager:
-    enabled: true
-    type: platform
-    name: Extension Manager
-    description: Enable extension management tools for discovering, enabling, and disabling extensions
+  tutorial:
+    enabled: false
+    type: builtin
+    name: tutorial
+    description: Access interactive tutorials and guides
+    display_name: Tutorial
+    timeout: 300
     bundled: true
     available_tools: []
   todo:
@@ -35,116 +58,7 @@ extensions:
     description: Enable a todo list for Goose so it can keep track of what it is doing
     bundled: true
     available_tools: []
-  memory:
-    enabled: false
-    type: builtin
-    name: memory
-    description: Teach goose your preferences as you go.
-    display_name: Memory
-    timeout: 300
-    bundled: true
-    available_tools: []
-  context7:
-    enabled: true
-    type: stdio
-    name: Context7
-    description: Use up-to-date code and docs
-    cmd: npx
-    args:
-    - -y
-    - '@upstash/context7-mcp'
-    envs: {}
-    env_keys: []
-    timeout: 300
-    bundled: null
-    available_tools: []
-  vscode:
-    enabled: false
-    type: stdio
-    name: VSCode
-    description: Provides a VSCode IDE integration for development workflows
-    cmd: npx
-    args:
-    - vscode-mcp-server
-    envs: {}
-    env_keys: []
-    timeout: 300
-    bundled: null
-    available_tools: []
-  gitmcp:
-    enabled: false
-    type: stdio
-    name: GitMCP
-    description: Gets latest documentation for any GitHub project
-    cmd: npx
-    args:
-    - -y
-    - mcp-remote
-    - https://gitmcp.io/docs
-    envs: {}
-    env_keys: []
-    timeout: 300
-    bundled: null
-    available_tools: []
-  fetch:
-    enabled: false
-    type: stdio
-    name: Fetch
-    description: Web content fetching and processing capabilities
-    cmd: uvx
-    args:
-    - mcp-server-fetch
-    envs: {}
-    env_keys: []
-    timeout: 300
-    bundled: null
-    available_tools: []
-  developer:
-    enabled: true
-    type: builtin
-    name: developer
-    description: General development tools useful for software engineering.
-    display_name: Developer
-    timeout: 300
-    bundled: true
-    available_tools: []
-  playwright:
-    enabled: false
-    type: stdio
-    name: Playwright
-    description: Interact with web pages through structured accessibility snapshots using Playwright
-    cmd: npx
-    args:
-    - '@playwright/mcp@latest'
-    envs: {}
-    env_keys: []
-    timeout: 300
-    bundled: null
-    available_tools: []
-  blender:
-    enabled: false
-    type: stdio
-    name: Blender
-    description: 3D modeling and animation integration (requires local server setup)
-    cmd: uvx
-    args:
-    - blender-mcp
-    envs: {}
-    env_keys: []
-    timeout: 300
-    bundled: null
-    available_tools: []
-  tutorial:
-    enabled: true
-    type: builtin
-    name: tutorial
-    description: Access interactive tutorials and guides
-    display_name: Tutorial
-    timeout: 300
-    bundled: true
-    available_tools: []
-CURSOR_AGENT_COMMAND: cursor-agent
-GOOSE_MODEL: qwen/qwen3-coder
-cursor-agent_configured: true
-OPENROUTER_HOST: https://openrouter.ai
-claude-code_configured: true
+GOOSE_PROVIDER: ollama
+GOOSE_MODEL: llama3.1
+OLLAMA_TIMEOUT: '600'
+OLLAMA_HOST: ai.thompson.codes
