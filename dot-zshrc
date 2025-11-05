@@ -234,14 +234,20 @@ alias upgrade-gnarbox="nix-flake-update && update-gnarbox"
 
 # Code function: opens editor in specified project directory or current directory
 function code {
-  if [[ -n $1 ]]; then
+  if [[ -n $1 && $1 != "." ]]; then
     local dir="$HOME/code/$1"
     if [[ -d $dir ]]; then
       cd "$dir"
       ~/.tmux/opencode-editor.sh
     else
-      echo "Directory $dir not found"
-      return 1
+      local va_dir="$HOME/code/department-of-veterans-affairs/$1"
+      if [[ -d $va_dir ]]; then
+        cd "$va_dir"
+        ~/.tmux/opencode-editor.sh
+      else
+        echo "Directory $1 not found in ~/code or ~/code/department-of-veterans-affairs"
+        return 1
+      fi
     fi
   else
     ~/.tmux/opencode-editor.sh
