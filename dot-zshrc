@@ -152,7 +152,7 @@ function vets-website-server {
   fi
 
   cd "$VA_CODE_DIR/vets-website" || return 1
-  yarn watch --env="$env"
+  yarn watch --env="$env" --watch-options-aggregate-timeout 600
 }
 
 function ddev-smart-start {
@@ -203,6 +203,7 @@ alias va-tmux="~/.tmux/va-dev-session.sh"
 
 # Git aliases
 alias ga="git add"
+alias gb="git branch"
 alias gd="git diff"
 alias gs="git status"
 alias gst="git status"
