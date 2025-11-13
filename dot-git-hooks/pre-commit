@@ -1,0 +1,13 @@
+#!/bin/bash
+remote_url=$(git remote get-url origin 2>/dev/null || echo "")
+if [[ $remote_url == *github.com* ]]; then
+  email=$(git config --file ~/.gitconfig.github --get user.email)
+  key=$(git config --file ~/.gitconfig.github --get user.signingkey)
+  git config user.email "$email"
+  git config user.signingkey "$key"
+elif [[ $remote_url == *git.snowboardtechie.com* ]]; then
+  email=$(git config --file ~/.gitconfig.snowboardtechie --get user.email)
+  key=$(git config --file ~/.gitconfig.snowboardtechie --get user.signingkey)
+  git config user.email "$email"
+  git config user.signingkey "$key"
+fi

@@ -1,6 +1,7 @@
 .DS_STORE
 configstore
-dot-gitconfig.local
+dot-gitconfig.github
+dot-gitconfig.snowboardtechie
 
 # Goose - ignore everything except specific config files
 dot-config/goose/*
