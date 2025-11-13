@@ -300,11 +300,15 @@ Or manage these via your NixOS system configuration.
 
 ## Related Repositories
 
-- [nix-configs](https://github.com/bryan-thompsoncodes/nix-configs) - Nix system configuration for both macOS and NixOS
+- [nix-configs](https://git.snowboardtechie.com/bryan/nix-configs) - Nix system configuration for both macOS and NixOS
   - macOS: nix-darwin with declarative Homebrew package management
   - NixOS: System configuration with flakes
   - Development environment shells (vets-api, vets-website, etc.)
   - System settings and package management
+
+### 3 gits, one repo
+
+This repository syncs to multiple remotes. The primary repository is at [git.snowboardtechie.com](https://git.snowboardtechie.com/bryan/dotfiles), with backups on [Codeberg](https://codeberg.org/SnowboardTechie/dotfiles) and [GitHub](https://github.com/bryan-thompsoncodes/dotfiles).
 
 ## Notes
 
