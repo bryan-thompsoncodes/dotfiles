@@ -18,9 +18,3 @@
 	autosetuprebase = always
 	rebase = true
 
-# Include specific git configs from local machines based on repo's origin
-# These files are .gitignored
-[includeIf "hasconfig:remote.origin.url:*github.com*"]
-	path = ~/.gitconfig.github
-[includeIf "hasconfig:remote.origin.url:*git.snowboardtechie.com*"]
-	path = ~/.gitconfig.snowboardtechie
