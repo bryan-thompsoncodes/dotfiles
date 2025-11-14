@@ -31,6 +31,7 @@ If you're using [nix-configs](https://github.com/bryan-thompsoncodes/nix-configs
 **Option B: Using Homebrew**
 
 1. Install Homebrew:
+
    ```bash
    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
    ```
@@ -78,6 +79,7 @@ environment.systemPackages = with pkgs; [
 ```
 
 **Note:** Some configurations may need local overrides:
+
 - `~/.gnupg/gpg-agent.conf` - Set correct pinentry program path for your system
 
 ## Installation
@@ -96,11 +98,13 @@ This will symlink all dotfiles to your home directory, configure platform-specif
 **Additional Manual Step:**
 
 **GPG configuration** - Link GPG agent config:
+
 ```bash
 ln -s ~/code/dotfiles/dot-gnupg/gpg-agent.conf ~/.gnupg/gpg-agent.conf
 ```
 
 If tmux is already running, reload the config to apply the newly installed plugins:
+
 ```bash
 tmux source-file ~/.tmux.conf
 ```
@@ -273,6 +277,7 @@ These dotfiles are designed to work on both macOS and NixOS with minimal platfor
 ### How It Works
 
 **Shell configurations** (`dot-zshrc`, `dot-tmux.conf`) use a "source if exists" pattern that checks multiple paths:
+
 - macOS (Homebrew): `/opt/homebrew/share/...`
 - NixOS (system): `/run/current-system/sw/share/...`
 - Linux (standard): `/usr/share/...`
@@ -316,5 +321,6 @@ This repository syncs to multiple remotes. The primary repository is at [git.sno
 - The `--dotfiles` flag converts `dot-` prefix to `.` for files/folders
 - ZSA keyboard layouts are stored but not symlinked
 - **AGENTS.md is ignored by Stow** via `.stow-local-ignore` to prevent symlinking documentation to the home directory
+- **Repository files are ignored**: `.git`, `README.md`, `.gitignore`, and `.stow-local-ignore` are excluded via `.stow-local-ignore` to prevent symlinking repository metadata
 - **GPG config files require manual symlinking**: Since `~/.gnupg/` contains sensitive unmanaged files (private keys, trustdb, sockets), stow cannot symlink the entire directory. Individual config files must be manually symlinked after running stow.
 - **Package management**: Dependencies managed via [nix-configs](https://github.com/bryan-thompsoncodes/nix-configs) for both macOS (nix-darwin) and NixOS (system configuration), or manually via Homebrew on macOS

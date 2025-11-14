@@ -1,1 +1,9 @@
 AGENTS.md
+.git
+.gitmodules
+README.md
+.gitignore
+.stow-local-ignore
+setup-platform-configs.sh
+setup-va-repos.sh
+.DS_Store
