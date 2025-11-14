@@ -2,9 +2,6 @@
 background = "#1e1e1e"
 foreground = "#d4d4d4"
 
-[font]
-size = 16.0
-
 [font.normal]
 family = "MesloLGS Nerd Font"
 style = "Regular"

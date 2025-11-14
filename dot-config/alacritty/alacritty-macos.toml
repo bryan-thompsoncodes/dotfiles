@@ -6,3 +6,5 @@ import = ["alacritty-base.toml"]
 [window]
 decorations = "None"  # No traffic lights, clean look
 
+[font]
+size = 16
