@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 remote_url=$(git remote get-url origin 2>/dev/null || echo "")
 if [[ $remote_url == *github.com* ]]; then
   email=$(git config --file ~/.gitconfig.github --get user.email)
