@@ -11,12 +11,32 @@ return {
     -- Required for auto_reload
     vim.o.autoread = true
 
-    -- Keymaps
-    vim.keymap.set({ "n", "x" }, "<C-a>", function() require("opencode").ask("@this: ", { submit = true }) end, { desc = "Ask opencode" })
-    vim.keymap.set({ "n", "x" }, "<C-x>", function() require("opencode").select() end, { desc = "Execute opencode action…" })
-    vim.keymap.set({ "n", "x" }, "ga",    function() require("opencode").prompt("@this") end, { desc = "Add to opencode" })
-    vim.keymap.set("n", "<C-.>",   function() require("opencode").toggle() end, { desc = "Toggle opencode" })
-    vim.keymap.set("n", "<S-C-u>", function() require("opencode").command("messages_half_page_up") end, { desc = "opencode half page up" })
-    vim.keymap.set("n", "<S-C-d>", function() require("opencode").command("messages_half_page_down") end, { desc = "opencode half page down" })
+    -- Keymaps (prefixed to avoid clobbering core motions)
+    local map = vim.keymap.set
+    local opencode_prefix = "<leader>o"
+
+    map({ "n", "x" }, opencode_prefix .. "a", function()
+      require("opencode").ask("@this: ", { submit = true })
+    end, { desc = "Opencode ask (selection)" })
+
+    map({ "n", "x" }, opencode_prefix .. "x", function()
+      require("opencode").select()
+    end, { desc = "Opencode actions" })
+
+    map({ "n", "x" }, opencode_prefix .. "g", function()
+      require("opencode").prompt("@this")
+    end, { desc = "Opencode add context" })
+
+    map("n", opencode_prefix .. "t", function()
+      require("opencode").toggle()
+    end, { desc = "Opencode toggle panel" })
+
+    map("n", "<S-C-u>", function()
+      require("opencode").command("messages_half_page_up")
+    end, { desc = "Opencode messages page up" })
+
+    map("n", "<S-C-d>", function()
+      require("opencode").command("messages_half_page_down")
+    end, { desc = "Opencode messages page down" })
   end,
 }
