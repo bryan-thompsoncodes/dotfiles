@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
-remote_url=$(git remote get-url origin 2>/dev/null || echo "")
-if [[ $remote_url == *github.com* ]]; then
-  email=$(git config --file ~/.gitconfig.github --get user.email)
-  key=$(git config --file ~/.gitconfig.github --get user.signingkey)
-  git config user.email "$email"
-  git config user.signingkey "$key"
-elif [[ $remote_url == *git.snowboardtechie.com* ]]; then
-  email=$(git config --file ~/.gitconfig.snowboardtechie --get user.email)
-  key=$(git config --file ~/.gitconfig.snowboardtechie --get user.signingkey)
-  git config user.email "$email"
-  git config user.signingkey "$key"
+set -euo pipefail
+
+if [[ -z "$(git config --get user.email 2>/dev/null || true)" ]]; then
+  cat <<'EOF'
+Error: user.email is not configured for this repository.
+Make sure your ~/.gitconfig.snowboardtechie (default) and
+~/.gitconfig.github (VA repos) files exist with the appropriate
+user.email and user.signingkey entries. Git's includeIf directives in
+~/.gitconfig should pick the right identity automatically based on the
+repository path.
+EOF
+  exit 1
 fi

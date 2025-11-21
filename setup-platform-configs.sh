@@ -38,31 +38,32 @@ echo ""
 echo "Setting up Tmux plugins..."
 
 TMUX_PLUGINS_DIR="$HOME/.tmux/plugins"
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_PLUGINS_DIR="$REPO_ROOT/dot-tmux/plugins"
 
-# Remove symlinked plugins directory if it exists from stow
-if [[ -L "$TMUX_PLUGINS_DIR" ]] || [[ -d "$TMUX_PLUGINS_DIR" ]]; then
-    rm -rf "$TMUX_PLUGINS_DIR"
-    echo "  Removed existing plugins directory"
-fi
+resolve_path() {
+    perl -MCwd -le 'print Cwd::abs_path($ARGV[0])' "$1"
+}
 
-# Create local plugins directory
-mkdir -p "$TMUX_PLUGINS_DIR"
-echo "  Created local plugins directory"
-
-# Clone TPM if not already present
-if [[ ! -d "$TMUX_PLUGINS_DIR/tpm" ]]; then
-    echo "  Cloning TPM (Tmux Plugin Manager)..."
-    git clone --quiet https://github.com/tmux-plugins/tpm "$TMUX_PLUGINS_DIR/tpm"
-    echo "  TPM installed"
+if [[ ! -d "$REPO_PLUGINS_DIR" ]]; then
+    echo "  ERROR: Expected plugin source directory at $REPO_PLUGINS_DIR was not found."
+    echo "  Ensure the repository is intact before re-running this script."
+elif [[ -L "$TMUX_PLUGINS_DIR" ]]; then
+    LINK_TARGET="$(resolve_path "$TMUX_PLUGINS_DIR")"
+    SOURCE_TARGET="$(resolve_path "$REPO_PLUGINS_DIR")"
+    if [[ "$LINK_TARGET" == "$SOURCE_TARGET" ]]; then
+        echo "  ~/.tmux/plugins already points at the vendored plugins. Nothing to do."
+    else
+        echo "  WARNING: ~/.tmux/plugins points to $LINK_TARGET (expected $SOURCE_TARGET)."
+        echo "  Leaving the existing link untouched to avoid clobbering local data."
+    fi
+elif [[ -e "$TMUX_PLUGINS_DIR" ]]; then
+    echo "  WARNING: Found a real directory at ~/.tmux/plugins."
+    echo "  Skipping auto-link to keep your local plugins intact."
+    echo "  Remove or move that directory if you want to use the vendored plugins."
 else
-    echo "  TPM already installed"
-fi
-
-# Install tmux plugins
-if [[ -f "$TMUX_PLUGINS_DIR/tpm/scripts/install_plugins.sh" ]]; then
-    echo "  Installing tmux plugins..."
-    "$TMUX_PLUGINS_DIR/tpm/scripts/install_plugins.sh" > /dev/null 2>&1
-    echo "  Tmux plugins installed"
+    ln -s "$REPO_PLUGINS_DIR" "$TMUX_PLUGINS_DIR"
+    echo "  Linked ~/.tmux/plugins -> $REPO_PLUGINS_DIR"
 fi
 
 echo ""
