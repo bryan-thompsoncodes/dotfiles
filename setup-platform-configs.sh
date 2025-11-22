@@ -66,6 +66,30 @@ else
     echo "  Linked ~/.tmux/plugins -> $REPO_PLUGINS_DIR"
 fi
 
+# OpenCode provider config
+echo ""
+echo "Copying OpenCode provider config..."
+
+OPENCODE_CONFIG_DIR="$HOME/.config/opencode"
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_OPENCODE_DIR="$REPO_ROOT/dot-config/opencode"
+TEMPLATE_FILE="$REPO_OPENCODE_DIR/opencode.template.json"
+DEST_FILE="$OPENCODE_CONFIG_DIR/opencode.json"
+
+if [[ -f "$TEMPLATE_FILE" ]]; then
+    mkdir -p "$OPENCODE_CONFIG_DIR"
+    if [[ -f "$DEST_FILE" ]]; then
+        echo "  Found existing $DEST_FILE; leaving it untouched (API key lives there)."
+    else
+        cp "$TEMPLATE_FILE" "$DEST_FILE"
+        echo "  Wrote $DEST_FILE from template."
+    fi
+    echo "  Template lives at $TEMPLATE_FILE; edit that if you need to update the defaults."
+    echo "  Next step: edit $DEST_FILE and set \"options.apiKey\" to your Open WebUI token."
+else
+    echo "  WARNING: $TEMPLATE_FILE not found; skipping OpenCode setup"
+fi
+
 echo ""
 echo "Platform-specific configuration complete!"
 echo ""
@@ -74,4 +98,5 @@ echo ""
 echo "Additional manual steps:"
 echo "  - GPG: ln -s ~/code/dotfiles/dot-gnupg/gpg-agent.conf ~/.gnupg/gpg-agent.conf"
 echo "  - Tmux: Run 'tmux source-file ~/.tmux.conf' if tmux is already running"
+echo "  - OpenCode: Set \"options.apiKey\" in ~/.config/opencode/opencode.json (Keychain helper: security find-generic-password -a \"\$LOGNAME\" -s ai.thompson.codes-openwebui -w)"
 

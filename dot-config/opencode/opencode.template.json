@@ -1,0 +1,32 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "ollama": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Open WebUI (ai.thompson.codes)",
+      "options": {
+        "baseURL": "https://ai.thompson.codes/api/v1",
+        "apiKey": ""
+      },
+      "models": {
+        "gpt-oss:120b": { "name": "gpt-oss 120B" },
+        "gemma3:27b": { "name": "Gemma 3 27B" },
+        "deepseek-coder-v2:16b": { "name": "DeepSeek Coder v2 16B" },
+        "llama3.3:70b": { "name": "Llama 3.3 70B" },
+        "deepseek-r1:70b": { "name": "DeepSeek R1 70B" },
+        "qwen3-coder:30b": { "name": "Qwen3 Coder 30B" },
+        "qwen3:32b": { "name": "Qwen3 32B" }
+      }
+    }
+  },
+  "instructions": [
+    "README.md",
+    "AGENTS.md"
+  ],
+  "permission": {
+    "edit": "ask",
+    "bash": "ask"
+  },
+  "model": "ollama/gpt-oss:120b"
+}
+

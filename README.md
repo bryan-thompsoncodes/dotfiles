@@ -214,6 +214,16 @@ dotfiles/
 - **direnv**: Automatic environment switching with nix-direnv for fast Nix shell caching
 - **tmux**: Terminal multiplexer with vim keybindings
 
+### AI / OpenCode
+
+- Provider template lives in `dot-config/opencode/opencode.template.json` (tracked); it already lists all of the local models plus `README.md`/`AGENTS.md` as default instructions.
+- `dot-config/opencode/opencode.json` mirrors `~/.config/opencode/opencode.json`, is gitignored, and stores the per-host API key.
+- `setup-platform-configs.sh` only copies the template when the host-local `opencode.json` is missing so reruns avoid clobbering your key.
+- Keep the API key in macOS Keychain per host (optional but recommended):  
+  `security add-generic-password -a "$LOGNAME" -s ai.thompson.codes-openwebui -w '<api-key>'`
+- After running the setup script (or copying the template once), edit `~/.config/opencode/opencode.json` and set `"options.apiKey"` to the value from Keychain. OpenCode reads that file directly on startup—no wrapper required.
+- For repo-specific tweaks (extra docs, different permissions, etc.), create `.opencode/project.json` inside the repo and add overrides there.
+
 ### Tmux Session Templates
 
 Pre-configured tmux sessions for common development workflows.

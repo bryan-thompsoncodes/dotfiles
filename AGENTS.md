@@ -50,3 +50,9 @@ This is a dotfiles repository with no traditional build process. For validation:
 - Never commit API keys, tokens, or secrets
 - Use .gitconfig.local for signing keys
 - Whitelist specific config files rather than blacklisting cache patterns
+
+### OpenCode Configuration
+- OpenCode AI assistant configured to use Open WebUI server at ai.thompson.codes
+- Provider template lives in `dot-config/opencode/opencode.template.json`; `setup-platform-configs.sh` seeds `opencode.json` from that template only when the host-local file is missing
+- `dot-config/opencode/opencode.json` mirrors `~/.config/opencode/opencode.json`, is gitignored, and should contain the per-host `"options.apiKey"` (Keychain helper: `security find-generic-password -a "$LOGNAME" -s ai.thompson.codes-openwebui -w`)
+- Default instructions reference `README.md` and `AGENTS.md`; add repo-specific overrides via `.opencode/project.json` if needed

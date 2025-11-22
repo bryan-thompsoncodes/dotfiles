@@ -49,13 +49,16 @@ eval "$(direnv hook zsh)"
 autoload -Uz add-zsh-hook
 
 function set_title_precmd {
-  print -Pn "\e]0;%~\a"  # Set title to current directory
+  # Use printf to avoid prompt expansion edge cases
+  local dir="${PWD/#$HOME/~}"
+  printf '\e]0;%s\a' "$dir"
 }
 
 function set_title_preexec {
   # Get the first word of the command (handles aliases, functions, etc.)
-  local cmd="${1%% *}"
-  print -Pn "\e]0;$cmd\a"  # Set title to running command
+  local cmd="${1:-}"
+  [[ -n "$cmd" ]] || return
+  printf '\e]0;%s\a' "${cmd%% *}"
 }
 
 add-zsh-hook precmd set_title_precmd
