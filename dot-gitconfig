@@ -17,6 +17,7 @@
 	excludesfile = ~/.gitignore_global
 	fileMode = false
 	hooksPath = ~/.git-hooks
+	editor = nvim
 
 [credential]
 	helper = cache --timeout=3600
