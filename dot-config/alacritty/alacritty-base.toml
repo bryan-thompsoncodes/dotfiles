@@ -1,6 +1,15 @@
+# ==============================================================================
+# NIGHTFLY COLOR SCHEME
+# ==============================================================================
+# To change the theme, update these color values to match your desired palette
+# These colors should match:
+# - nvim: dot-config/nvim/lua/bryan/core/colors.lua
+# - tmux: dot-tmux.conf (NIGHTFLY_* variables)
+# ==============================================================================
+
 [colors.primary]
-background = "#1e1e1e"
-foreground = "#d4d4d4"
+background = "#011627"  # NIGHTFLY_BG - Main background
+foreground = "#c3ccdc"  # NIGHTFLY_FG - Main foreground
 
 [font.normal]
 family = "MesloLGS Nerd Font"

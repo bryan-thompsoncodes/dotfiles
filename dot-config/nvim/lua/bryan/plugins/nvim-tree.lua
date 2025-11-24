@@ -3,14 +3,15 @@ return {
   dependencies = { "nvim-tree/nvim-web-devicons" },
   config = function()
     local nvimtree = require("nvim-tree")
+    local colors = require("bryan.core.colors")
 
     -- recommended settings from nvim-tree documentation
     vim.g.loaded_netrw = 1
     vim.g.loaded_netrwPlugin = 1
 
-    -- change color for arrows in tree to light blue
-    vim.cmd([[ highlight NvimTreeFolderArrowClosed guifg=#3FC5FF ]])
-    vim.cmd([[ highlight NvimTreeFolderArrowOpen guifg=#3FC5FF ]])
+    -- change color for arrows in tree to match theme
+    vim.cmd(string.format([[ highlight NvimTreeFolderArrowClosed guifg=%s ]], colors.cyan))
+    vim.cmd(string.format([[ highlight NvimTreeFolderArrowOpen guifg=%s ]], colors.cyan))
 
     -- configure nvim-tree
     nvimtree.setup({
