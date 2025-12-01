@@ -3,6 +3,11 @@
 # Tmux session for opencode and editor
 # Creates a session with 3 windows: opencode, terminal, nvim
 
+# Ensure we have a proper TTY for tmux
+if [[ ! -t 0 ]]; then
+  exec </dev/tty
+fi
+
 SESSION_NAME="$(basename "$PWD")-editor"
 
 # Check if session already exists
@@ -24,5 +29,9 @@ if [ $? != 0 ]; then
   tmux select-window -t "$SESSION_NAME:1"
 fi
 
-# Attach to the session
-tmux attach-session -t "$SESSION_NAME"
+# Attach to the session (or switch if already in tmux)
+if [[ -n "$TMUX" ]]; then
+  tmux switch-client -t "$SESSION_NAME"
+else
+  tmux attach-session -t "$SESSION_NAME"
+fi

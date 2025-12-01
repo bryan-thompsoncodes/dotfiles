@@ -4,6 +4,11 @@
 # Creates a session with 4 windows for different VA repos
 # Each window has 2 vertical panes: left for general terminal, right with pre-populated server command
 
+# Ensure we have a proper TTY for tmux
+if [[ ! -t 0 ]]; then
+  exec </dev/tty
+fi
+
 SESSION_NAME="va-dev"
 # Use VA_CODE_DIR environment variable if set, otherwise use default
 BASE_DIR="${VA_CODE_DIR:-$HOME/code/department-of-veterans-affairs}"
@@ -72,5 +77,9 @@ if [ $? != 0 ]; then
   tmux select-window -t "$SESSION_NAME:1"
 fi
 
-# Attach to the session
-tmux attach-session -t "$SESSION_NAME"
+# Attach to the session (or switch if already in tmux)
+if [[ -n "$TMUX" ]]; then
+  tmux switch-client -t "$SESSION_NAME"
+else
+  tmux attach-session -t "$SESSION_NAME"
+fi
