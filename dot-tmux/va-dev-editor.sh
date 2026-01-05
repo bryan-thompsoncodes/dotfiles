@@ -15,19 +15,15 @@ tmux has-session -t "$SESSION_NAME" 2>/dev/null
 
 if [ $? != 0 ]; then
   # Window 1: cursor-agent
-  tmux new-session -d -s "$SESSION_NAME" -n "cursor-agent"
-  tmux send-keys -t "$SESSION_NAME:1" "cursor-agent" C-m
+  tmux new-session -d -s "$SESSION_NAME" -n "claude code"
+  tmux send-keys -t "$SESSION_NAME:1" "claude ." C-m
 
-  # Window 2: codex
-  tmux new-window -t "$SESSION_NAME:2" -n "codex"
-  tmux send-keys -t "$SESSION_NAME:2" "codex" C-m
+  # Window 2: terminal
+  tmux new-window -t "$SESSION_NAME:2" -n "terminal"
 
-  # Window 3: terminal
-  tmux new-window -t "$SESSION_NAME:3" -n "terminal"
-
-  # Window 4: nvim
-  tmux new-window -t "$SESSION_NAME:4" -n "nvim"
-  tmux send-keys -t "$SESSION_NAME:4" "nvim ." C-m
+  # Window 3: nvim
+  tmux new-window -t "$SESSION_NAME:3" -n "nvim"
+  tmux send-keys -t "$SESSION_NAME:3" "nvim ." C-m
 
   # Select first window by default
   tmux select-window -t "$SESSION_NAME:1"
