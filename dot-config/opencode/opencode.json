@@ -9,13 +9,38 @@
         "apiKey": "{file:~/.secrets/opencode-api-key}"
       },
       "models": {
-        "gpt-oss:120b": { "name": "gpt-oss 120B" },
-        "gemma3:27b": { "name": "Gemma 3 27B" },
-        "deepseek-coder-v2:16b": { "name": "DeepSeek Coder v2 16B" },
-        "llama3.3:70b": { "name": "Llama 3.3 70B" },
-        "deepseek-r1:70b": { "name": "DeepSeek R1 70B" },
-        "qwen3-coder:30b": { "name": "Qwen3 Coder 30B" },
-        "qwen3:32b": { "name": "Qwen3 32B" }
+        "llama3.3:70b": {
+          "name": "Llama 3.3 70B",
+          "limit": { "context": 131072, "output": 8192 }
+        },
+        "deepseek-r1:70b": {
+          "name": "DeepSeek R1 70B",
+          "limit": { "context": 65536, "output": 8192 }
+        },
+        "qwen3-coder:30b": {
+          "name": "Qwen3 Coder 30B",
+          "limit": { "context": 32768, "output": 4096 }
+        },
+        "gpt-oss:120b": {
+          "name": "gpt-oss 120B",
+          "limit": { "context": 65536, "output": 8192 }
+        },
+        "qwen3:32b": {
+          "name": "Qwen3 32B",
+          "limit": { "context": 32768, "output": 4096 }
+        },
+        "gemma3:27b": {
+          "name": "Gemma 3 27B",
+          "limit": { "context": 16384, "output": 2048 }
+        },
+        "deepseek-coder-v2:16b": {
+          "name": "DeepSeek Coder v2 16B",
+          "limit": { "context": 16384, "output": 2048 }
+        },
+        "llama3.2-vision:90b": {
+          "name": "Llama 3.2 Vision 90B",
+          "limit": { "context": 131072, "output": 4096 }
+        }
       }
     },
     "openai": {
@@ -82,7 +107,7 @@
     "edit": "ask",
     "bash": "ask"
   },
-  "model": "ollama/gpt-oss:120b",
+  "model": "ollama/llama3.3:70b",
   "plugin": [
     "oh-my-opencode",
     "opencode-openai-codex-auth"
