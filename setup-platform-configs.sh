@@ -66,28 +66,41 @@ else
     echo "  Linked ~/.tmux/plugins -> $REPO_PLUGINS_DIR"
 fi
 
-# OpenCode provider config
+# Secrets directory setup
 echo ""
-echo "Copying OpenCode provider config..."
+echo "Setting up secrets directory..."
 
-OPENCODE_CONFIG_DIR="$HOME/.config/opencode"
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_OPENCODE_DIR="$REPO_ROOT/dot-config/opencode"
-TEMPLATE_FILE="$REPO_OPENCODE_DIR/opencode.template.json"
-DEST_FILE="$OPENCODE_CONFIG_DIR/opencode.json"
+SECRETS_DIR="$HOME/.secrets"
 
-if [[ -f "$TEMPLATE_FILE" ]]; then
-    mkdir -p "$OPENCODE_CONFIG_DIR"
-    if [[ -f "$DEST_FILE" ]]; then
-        echo "  Found existing $DEST_FILE; leaving it untouched (API key lives there)."
-    else
-        cp "$TEMPLATE_FILE" "$DEST_FILE"
-        echo "  Wrote $DEST_FILE from template."
-    fi
-    echo "  Template lives at $TEMPLATE_FILE; edit that if you need to update the defaults."
-    echo "  Next step: edit $DEST_FILE and set \"options.apiKey\" to your Open WebUI token."
+if [[ ! -d "$SECRETS_DIR" ]]; then
+    mkdir -p "$SECRETS_DIR"
+    chmod 700 "$SECRETS_DIR"
+    echo "  Created $SECRETS_DIR with restricted permissions (700)"
 else
-    echo "  WARNING: $TEMPLATE_FILE not found; skipping OpenCode setup"
+    echo "  $SECRETS_DIR already exists"
+fi
+
+# OpenCode API key from Keychain (macOS only)
+OPENCODE_SECRET_FILE="$SECRETS_DIR/opencode-api-key"
+
+if [[ ! -f "$OPENCODE_SECRET_FILE" ]]; then
+    if [[ "$PLATFORM" == "macos" ]]; then
+        echo "  Attempting to retrieve OpenCode API key from Keychain..."
+        if API_KEY=$(security find-generic-password -a "$LOGNAME" -s ai.thompson.codes-openwebui -w 2>/dev/null); then
+            echo "$API_KEY" > "$OPENCODE_SECRET_FILE"
+            chmod 600 "$OPENCODE_SECRET_FILE"
+            echo "  Wrote API key to $OPENCODE_SECRET_FILE from Keychain"
+        else
+            echo "  No Keychain entry found for ai.thompson.codes-openwebui"
+            echo "  To add your API key to Keychain, run:"
+            echo "    security add-generic-password -a \"\$LOGNAME\" -s ai.thompson.codes-openwebui -w '<api-key>'"
+            echo "  Then re-run this script, or manually create $OPENCODE_SECRET_FILE"
+        fi
+    else
+        echo "  Please create $OPENCODE_SECRET_FILE with your OpenCode API key"
+    fi
+else
+    echo "  $OPENCODE_SECRET_FILE already exists"
 fi
 
 echo ""
@@ -98,5 +111,4 @@ echo ""
 echo "Additional manual steps:"
 echo "  - GPG: ln -s ~/code/dotfiles/dot-gnupg/gpg-agent.conf ~/.gnupg/gpg-agent.conf"
 echo "  - Tmux: Run 'tmux source-file ~/.tmux.conf' if tmux is already running"
-echo "  - OpenCode: Set \"options.apiKey\" in ~/.config/opencode/opencode.json (Keychain helper: security find-generic-password -a \"\$LOGNAME\" -s ai.thompson.codes-openwebui -w)"
 

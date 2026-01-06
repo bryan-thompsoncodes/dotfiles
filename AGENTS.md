@@ -53,6 +53,7 @@ This is a dotfiles repository with no traditional build process. For validation:
 
 ### OpenCode Configuration
 - OpenCode AI assistant configured to use Open WebUI server at ai.thompson.codes
-- Provider template lives in `dot-config/opencode/opencode.template.json`; `setup-platform-configs.sh` seeds `opencode.json` from that template only when the host-local file is missing
-- `dot-config/opencode/opencode.json` mirrors `~/.config/opencode/opencode.json`, is gitignored, and should contain the per-host `"options.apiKey"` (Keychain helper: `security find-generic-password -a "$LOGNAME" -s ai.thompson.codes-openwebui -w`)
+- Config lives in `dot-config/opencode/opencode.json` (tracked, stowed to `~/.config/opencode/`)
+- API key stored in `~/.secrets/opencode-api-key` (outside repo); config uses `{file:~/.secrets/opencode-api-key}` reference
+- `setup-platform-configs.sh` creates `~/.secrets/` and populates the key from macOS Keychain automatically
 - Default instructions reference `README.md` and `AGENTS.md`; add repo-specific overrides via `.opencode/project.json` if needed

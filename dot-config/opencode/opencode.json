@@ -6,7 +6,7 @@
       "name": "Open WebUI (ai.thompson.codes)",
       "options": {
         "baseURL": "https://ai.thompson.codes/api/v1",
-        "apiKey": ""
+        "apiKey": "{file:~/.secrets/opencode-api-key}"
       },
       "models": {
         "gpt-oss:120b": { "name": "gpt-oss 120B" },
@@ -27,6 +27,12 @@
     "edit": "ask",
     "bash": "ask"
   },
-  "model": "ollama/gpt-oss:120b"
+  "model": "ollama/gpt-oss:120b",
+  "mcp": {
+    "vads": {
+      "type": "remote",
+      "url": "https://vads-mcp.a6lab.ai/sse"
+    }
+  }
 }
 

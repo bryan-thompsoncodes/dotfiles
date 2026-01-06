@@ -9,11 +9,11 @@ dot-config/goose/*
 !dot-config/goose/permission.yaml
 !dot-config/goose/goosehints
 
-# Opencode - track manifest/template/lock, ignore local artifacts
+# Opencode - track config and lock files, ignore local artifacts
 dot-config/opencode/*
 !dot-config/opencode/
 !dot-config/opencode/package.json
 !dot-config/opencode/bun.lock
-!dot-config/opencode/opencode.template.json
+!dot-config/opencode/opencode.json
 dot-tmux/plugins/
 dot-config/alacritty/alacritty.toml

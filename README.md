@@ -93,7 +93,7 @@ stow . --dotfiles --target $HOME
 ./setup-platform-configs.sh
 ```
 
-This will symlink all dotfiles to your home directory, configure platform-specific overrides (Alacritty), and install tmux plugins automatically.
+This will symlink all dotfiles to your home directory, configure platform-specific overrides (Alacritty), install tmux plugins, and set up the secrets directory (populating the OpenCode API key from Keychain on macOS).
 
 **Additional Manual Step:**
 
@@ -163,7 +163,9 @@ dotfiles/
 │   │   ├── config.yaml      # Extension and model settings
 │   │   ├── permission.yaml  # Tool permissions
 │   │   └── goosehints       # Project-specific AI guidance
-│   └── nvim/            # Neovim configuration (Lazy.nvim)
+│   ├── nvim/            # Neovim configuration (Lazy.nvim)
+│   └── opencode/        # OpenCode AI assistant
+│       └── opencode.json    # Provider config (uses {file:...} for API key)
 ├── dot-gnupg/           # GPG configuration (~/.gnupg/)
 │   └── gpg-agent.conf   # GPG agent settings
 ├── dot-tmux/            # Tmux session templates (~/.tmux/)
@@ -216,13 +218,14 @@ dotfiles/
 
 ### AI / OpenCode
 
-- Provider template lives in `dot-config/opencode/opencode.template.json` (tracked); it already lists all of the local models plus `README.md`/`AGENTS.md` as default instructions.
-- `dot-config/opencode/opencode.json` mirrors `~/.config/opencode/opencode.json`, is gitignored, and stores the per-host API key.
-- `setup-platform-configs.sh` only copies the template when the host-local `opencode.json` is missing so reruns avoid clobbering your key.
-- Keep the API key in macOS Keychain per host (optional but recommended):  
+- Config lives in `dot-config/opencode/opencode.json` (tracked, stowed to `~/.config/opencode/`)
+- API key is stored in `~/.secrets/opencode-api-key` (outside repo, never tracked)
+- Config uses `{file:~/.secrets/opencode-api-key}` reference for safe stowing
+- `setup-platform-configs.sh` creates `~/.secrets/` and populates the key from Keychain (macOS)
+- On macOS, store your API key in Keychain:
   `security add-generic-password -a "$LOGNAME" -s ai.thompson.codes-openwebui -w '<api-key>'`
-- After running the setup script (or copying the template once), edit `~/.config/opencode/opencode.json` and set `"options.apiKey"` to the value from Keychain. OpenCode reads that file directly on startup—no wrapper required.
-- For repo-specific tweaks (extra docs, different permissions, etc.), create `.opencode/project.json` inside the repo and add overrides there.
+- On Linux, manually create `~/.secrets/opencode-api-key` with your API key
+- For repo-specific tweaks (extra docs, different permissions, etc.), create `.opencode/project.json` inside the repo
 
 ### Tmux Session Templates
 
