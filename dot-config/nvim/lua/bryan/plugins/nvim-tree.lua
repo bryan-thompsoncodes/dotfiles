@@ -10,8 +10,8 @@ return {
     vim.g.loaded_netrwPlugin = 1
 
     -- change color for arrows in tree to match theme
-    vim.cmd(string.format([[ highlight NvimTreeFolderArrowClosed guifg=%s ]], colors.cyan))
-    vim.cmd(string.format([[ highlight NvimTreeFolderArrowOpen guifg=%s ]], colors.cyan))
+    vim.api.nvim_set_hl(0, "NvimTreeFolderArrowClosed", { fg = colors.cyan })
+    vim.api.nvim_set_hl(0, "NvimTreeFolderArrowOpen", { fg = colors.cyan })
 
     -- configure nvim-tree
     nvimtree.setup({
