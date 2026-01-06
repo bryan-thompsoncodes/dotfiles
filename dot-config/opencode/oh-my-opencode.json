@@ -2,25 +2,25 @@
   "$schema": "https://raw.githubusercontent.com/code-yeongyu/oh-my-opencode/master/assets/oh-my-opencode.schema.json",
   "agents": {
     "Sisyphus": {
-      "model": "ollama/llama3.3:70b"
+      "model": "ollama/qwen3-coder:30b"
     },
     "oracle": {
-      "model": "ollama/gpt-oss:120b"
+      "model": "ollama/qwen3:32b"
     },
     "librarian": {
-      "model": "ollama/llama3.3:70b"
+      "model": "ollama/qwen3-coder:30b"
     },
     "explore": {
       "model": "ollama/qwen3-coder:30b"
     },
     "frontend-ui-ux-engineer": {
-      "model": "ollama/gpt-oss:120b"
+      "model": "ollama/qwen3:32b"
     },
     "document-writer": {
-      "model": "ollama/llama3.3:70b"
+      "model": "ollama/qwen3-coder:30b"
     },
     "multimodal-looker": {
-      "model": "ollama/llama3.2-vision:90b"
+      "model": "ollama/gemma3:27b"
     }
   }
 }

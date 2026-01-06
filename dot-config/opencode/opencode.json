@@ -6,24 +6,24 @@
       "name": "Open WebUI (ai.thompson.codes)",
       "options": {
         "baseURL": "https://ai.thompson.codes/api/v1",
-        "apiKey": "{file:~/.secrets/opencode-api-key}"
+        "apiKey": "{env:OPENWEBUI_API_KEY}"
       },
       "models": {
         "llama3.3:70b": {
           "name": "Llama 3.3 70B",
-          "limit": { "context": 8192, "output": 2048 }
+          "limit": { "context": 131072, "output": 8192 }
         },
         "deepseek-r1:70b": {
           "name": "DeepSeek R1 70B",
-          "limit": { "context": 8192, "output": 2048 }
+          "limit": { "context": 65536, "output": 8192 }
         },
         "qwen3-coder:30b": {
           "name": "Qwen3 Coder 30B",
-          "limit": { "context": 8192, "output": 2048 }
+          "limit": { "context": 32768, "output": 4096 }
         },
         "gpt-oss:120b": {
           "name": "gpt-oss 120B",
-          "limit": { "context": 8192, "output": 2048 }
+          "limit": { "context": 65536, "output": 8192 }
         },
         "qwen3:32b": {
           "name": "Qwen3 32B",
@@ -107,7 +107,7 @@
     "edit": "ask",
     "bash": "ask"
   },
-  "model": "ollama/llama3.3:70b",
+  "model": "ollama/qwen3-coder:30b",
   "plugin": [
     "oh-my-opencode",
     "opencode-openai-codex-auth"
