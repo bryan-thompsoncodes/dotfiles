@@ -165,7 +165,9 @@ dotfiles/
 │   │   └── goosehints       # Project-specific AI guidance
 │   ├── nvim/            # Neovim configuration (Lazy.nvim)
 │   └── opencode/        # OpenCode AI assistant
-│       └── opencode.json    # Provider config (uses {file:...} for API key)
+│       ├── AGENTS.md            # Global agent instructions
+│       ├── oh-my-opencode.json  # OhMyOpenCode agent model assignments
+│       └── opencode.json        # Provider config (uses {file:...} for API key)
 ├── dot-gnupg/           # GPG configuration (~/.gnupg/)
 │   └── gpg-agent.conf   # GPG agent settings
 ├── dot-tmux/            # Tmux session templates (~/.tmux/)

@@ -103,6 +103,22 @@ else
     echo "  $OPENCODE_SECRET_FILE already exists"
 fi
 
+# OpenCode AGENTS.md (stow can't selectively ignore root vs nested AGENTS.md)
+echo ""
+echo "Setting up OpenCode AGENTS.md..."
+
+OPENCODE_AGENTS_SRC="$REPO_ROOT/dot-config/opencode/AGENTS.md"
+OPENCODE_AGENTS_DEST="$HOME/.config/opencode/AGENTS.md"
+
+if [[ -L "$OPENCODE_AGENTS_DEST" ]]; then
+    echo "  $OPENCODE_AGENTS_DEST already symlinked"
+elif [[ -f "$OPENCODE_AGENTS_DEST" ]]; then
+    echo "  WARNING: $OPENCODE_AGENTS_DEST exists as regular file, skipping"
+else
+    ln -s "$OPENCODE_AGENTS_SRC" "$OPENCODE_AGENTS_DEST"
+    echo "  Linked $OPENCODE_AGENTS_DEST -> $OPENCODE_AGENTS_SRC"
+fi
+
 echo ""
 echo "Platform-specific configuration complete!"
 echo ""

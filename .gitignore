@@ -15,5 +15,7 @@ dot-config/opencode/*
 !dot-config/opencode/package.json
 !dot-config/opencode/bun.lock
 !dot-config/opencode/opencode.json
+!dot-config/opencode/oh-my-opencode.json
+!dot-config/opencode/AGENTS.md
 dot-tmux/plugins/
 dot-config/alacritty/alacritty.toml
