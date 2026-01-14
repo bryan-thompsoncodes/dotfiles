@@ -2,7 +2,7 @@
 
 # Tmux session template for VA development
 # Creates a session with 4 windows for different VA repos
-# Each window has 2 vertical panes: left for general terminal, right with pre-populated server command
+# Each window has 2 horizontal panes: top for general terminal, bottom with pre-populated server command
 
 # Ensure we have a proper TTY for tmux
 if [[ ! -t 0 ]]; then
@@ -42,30 +42,30 @@ if [ $? != 0 ]; then
   # Create new session with first window (vets-website)
   tmux new-session -d -s "$SESSION_NAME" -n "vets-website" -c "$BASE_DIR/vets-website"
 
-  # Split window vertically (left and right panes)
-  tmux split-window -h -t "$SESSION_NAME:1" -c "$BASE_DIR/vets-website"
+  # Split window horizontally (top and bottom panes)
+  tmux split-window -v -t "$SESSION_NAME:1" -c "$BASE_DIR/vets-website"
 
-  # Pre-populate command in right pane (pane 2) without executing
+  # Pre-populate command in bottom pane (pane 2) without executing
   tmux send-keys -t "$SESSION_NAME:1.2" "vets-website-server"
 
-  # Select right pane as default
+  # Select bottom pane as default
   tmux select-pane -t "$SESSION_NAME:1.2"
 
   # Window 2: next-build
   tmux new-window -t "$SESSION_NAME:2" -n "next-build" -c "$BASE_DIR/next-build"
-  tmux split-window -h -t "$SESSION_NAME:2" -c "$BASE_DIR/next-build"
+  tmux split-window -v -t "$SESSION_NAME:2" -c "$BASE_DIR/next-build"
   tmux send-keys -t "$SESSION_NAME:2.2" "yarn dev"
   tmux select-pane -t "$SESSION_NAME:2.2"
 
   # Window 3: vets-api
   tmux new-window -t "$SESSION_NAME:3" -n "vets-api" -c "$BASE_DIR/vets-api"
-  tmux split-window -h -t "$SESSION_NAME:3" -c "$BASE_DIR/vets-api"
+  tmux split-window -v -t "$SESSION_NAME:3" -c "$BASE_DIR/vets-api"
   tmux send-keys -t "$SESSION_NAME:3.2" "vets-api-server"
   tmux select-pane -t "$SESSION_NAME:3.2"
 
   # Window 4: component-library
   tmux new-window -t "$SESSION_NAME:4" -n "component-library" -c "$BASE_DIR/component-library"
-  tmux split-window -h -t "$SESSION_NAME:4" -c "$BASE_DIR/component-library"
+  tmux split-window -v -t "$SESSION_NAME:4" -c "$BASE_DIR/component-library"
   tmux send-keys -t "$SESSION_NAME:4.2" "cl-storybook"
   tmux select-pane -t "$SESSION_NAME:4.2"
 

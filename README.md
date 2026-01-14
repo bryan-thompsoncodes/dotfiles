@@ -251,8 +251,8 @@ This creates a tmux session named `va-dev` with 5 windows:
 
 **Windows 1-4** (split panes):
 
-- **Left pane**: Empty terminal in the repo directory
-- **Right pane**: Server start command pre-populated (press Enter to execute, selected by default)
+- **Top pane**: Empty terminal in the repo directory
+- **Bottom pane**: Server start command pre-populated (press Enter to execute, selected by default)
 
 **Window 5** (single pane):
 
