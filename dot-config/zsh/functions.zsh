@@ -98,7 +98,7 @@ function grb {
 
 # Code function: opens editor in specified project directory or current directory
 function code {
-  local target_dir session_script
+  local target_dir
 
   if [[ -n $1 && $1 != "." ]]; then
     local dir="$HOME/code/$1"
@@ -118,12 +118,7 @@ function code {
 
   cd "$target_dir" || return 1
 
-  if [[ "$target_dir" == "$HOME/code/department-of-veterans-affairs"* || "$target_dir" == "$HOME/code/va_dev"* ]]; then
-    session_script="$HOME/.tmux/va-dev-editor.sh"
-  else
-    session_script="$HOME/.tmux/opencode-editor.sh"
-  fi
-
+  local session_script="$HOME/.tmux/opencode-editor.sh"
   if [[ ! -x $session_script ]]; then
     echo "Session script $session_script not found or not executable"
     return 1

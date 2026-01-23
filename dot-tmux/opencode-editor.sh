@@ -14,11 +14,11 @@ SESSION_NAME="$(basename "$PWD")-editor"
 tmux has-session -t "$SESSION_NAME" 2>/dev/null
 
 if [ $? != 0 ]; then
-  # Create new session with first window (terminal)
-  tmux new-session -d -s "$SESSION_NAME" -n "terminal"
+  # Create new session with first window (cli)
+  tmux new-session -d -s "$SESSION_NAME" -n "cli"
 
   # Window 2: opencode
-  tmux new-window -t "$SESSION_NAME:2" -n "opencode"
+  tmux new-window -t "$SESSION_NAME:2" -n "code"
   tmux send-keys -t "$SESSION_NAME:2" "opencode" C-m
 
   # Window 3: nvim

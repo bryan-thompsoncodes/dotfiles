@@ -177,7 +177,7 @@ dotfiles/
 ├── dot-gnupg/           # GPG configuration (~/.gnupg/)
 │   └── gpg-agent.conf   # GPG agent settings
 ├── dot-tmux/            # Tmux session templates (~/.tmux/)
-│   └── va-dev-session.sh  # VA development session
+│   └── va-server-stack.sh # VA server stack (multi-repo dev environment)
 ├── dot-gitconfig        # Git configuration (~/.gitconfig)
 ├── dot-gitconfig.local  # Git signing key (~/.gitconfig.local, not tracked)
 ├── dot-zshrc            # Zsh shell loader (~/.zshrc) - sources modular configs
@@ -249,7 +249,7 @@ Pre-configured tmux sessions for common development workflows.
 Launch a complete VA development environment with one command:
 
 ```bash
-~/.tmux/va-dev-session.sh
+~/.tmux/va-server-stack.sh
 ```
 
 Or simply use the alias:

@@ -15,7 +15,7 @@ alias vi="nvim"
 # Utility aliases
 alias clr="clear"
 alias fman="compgen -c | fzf | xargs man"
-alias va-tmux="~/.tmux/va-dev-session.sh"
+alias va-tmux="~/.tmux/va-server-stack.sh"
 
 # Git aliases
 alias ga="git add"
