@@ -164,17 +164,23 @@ dotfiles/
 │   │   ├── permission.yaml  # Tool permissions
 │   │   └── goosehints       # Project-specific AI guidance
 │   ├── nvim/            # Neovim configuration (Lazy.nvim)
-│   └── opencode/        # OpenCode AI assistant
-│       ├── AGENTS.md            # Global agent instructions
-│       ├── oh-my-opencode.json  # OhMyOpenCode agent model assignments
-│       └── opencode.json        # Provider config (uses {file:...} for API key)
+│   ├── opencode/        # OpenCode AI assistant
+│   │   ├── AGENTS.md            # Global agent instructions
+│   │   ├── oh-my-opencode.json  # OhMyOpenCode agent model assignments
+│   │   └── opencode.json        # Provider config (uses {file:...} for API key)
+│   └── zsh/             # Modular zsh configuration (~/.config/zsh/)
+│       ├── aliases.zsh      # All aliases (git, tools, nix, navigation)
+│       ├── env.zsh          # Environment variables
+│       ├── functions.zsh    # Custom shell functions (VA servers, etc.)
+│       ├── options.zsh      # Zsh options, vi-mode, completion styles
+│       └── plugins.zsh      # Cross-platform plugin loading
 ├── dot-gnupg/           # GPG configuration (~/.gnupg/)
 │   └── gpg-agent.conf   # GPG agent settings
 ├── dot-tmux/            # Tmux session templates (~/.tmux/)
 │   └── va-dev-session.sh  # VA development session
 ├── dot-gitconfig        # Git configuration (~/.gitconfig)
 ├── dot-gitconfig.local  # Git signing key (~/.gitconfig.local, not tracked)
-├── dot-zshrc            # Zsh shell (~/.zshrc)
+├── dot-zshrc            # Zsh shell loader (~/.zshrc) - sources modular configs
 ├── dot-tmux.conf        # Tmux terminal multiplexer (~/.tmux.conf)
 ├── dot-p10k.zsh         # Powerlevel10k theme (~/.p10k.zsh)
 └── zsa-keyboard-layouts/  # ZSA keyboard firmware
@@ -186,8 +192,13 @@ dotfiles/
 
 - Powerlevel10k theme (no Oh My Zsh)
 - Plugins: zsh-autosuggestions, zsh-syntax-highlighting
-- Custom aliases and functions for VA development
 - Direnv integration for per-project environments
+- **Modular configuration** in `~/.config/zsh/`:
+  - `aliases.zsh` - Git, tools (bat/eza/nvim), Nix rebuild, navigation
+  - `functions.zsh` - VA server scripts, git helpers, `code` launcher
+  - `env.zsh` - EDITOR, GPG_TTY, paths, NODE_OPTIONS
+  - `options.zsh` - setopt, vi-mode, completion styles
+  - `plugins.zsh` - Cross-platform plugin loading, direnv
 
 ### Terminal (Alacritty)
 
