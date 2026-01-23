@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Tmux session for VA dev repos with agent windows
-# Creates a session with 3 windows: opencode, terminal, nvim
+# Creates a session with 3 windows: cli, opencode, nvim
 
 # Ensure we have a proper TTY for tmux
 if [[ ! -t 0 ]]; then
@@ -14,11 +14,14 @@ SESSION_NAME="$(basename "$PWD")-va-dev"
 tmux has-session -t "$SESSION_NAME" 2>/dev/null
 
 if [ $? != 0 ]; then
-  tmux new-session -d -s "$SESSION_NAME" -n "code"
-  tmux send-keys -t "$SESSION_NAME:1" "opencode" C-m
+  # Window 1: terminal
+  tmux new-session -d -s "$SESSION_NAME" -n "cli"
 
-  tmux new-window -t "$SESSION_NAME:2" -n "cli"
+  # Window 2: opencode
+  tmux new-window -t "$SESSION_NAME:2" -n "code"
+  tmux send-keys -t "$SESSION_NAME:2" "opencode" C-m
 
+  # Window 3: nvim
   tmux new-window -t "$SESSION_NAME:3" -n "nvim"
   tmux send-keys -t "$SESSION_NAME:3" "nvim ." C-m
 

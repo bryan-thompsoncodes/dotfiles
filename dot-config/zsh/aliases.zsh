@@ -36,7 +36,6 @@ alias gpF="git push --force"
 
 # Nix flake update alias
 alias nix-flake-update="nix flake update --flake $HOME/code/nix-configs"
-alias cursor-update="~/code/nix-configs/pkgs/cursor/update.sh"
 
 # Nix rebuild aliases
 alias update-mbp="sudo darwin-rebuild switch --flake ~/code/nix-configs/#mbp"
@@ -48,7 +47,7 @@ alias update-gnarbox="sudo nixos-rebuild switch --flake ~/code/nix-configs/#gnar
 alias upgrade-mbp="nix-flake-update && update-mbp"
 alias upgrade-a6mbp="nix-flake-update && update-a6mbp"
 alias upgrade-studio="nix-flake-update && update-studio"
-alias upgrade-gnarbox="cursor-update && nix-flake-update && update-gnarbox"
+alias upgrade-gnarbox="nix-flake-update && update-gnarbox"
 
 # Navigation aliases
 alias dotfiles="cd ~/code/dotfiles"
