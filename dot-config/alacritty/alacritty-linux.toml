@@ -1,8 +1,7 @@
 # Linux-specific Alacritty configuration
-# Import base config
+[general]
 import = ["alacritty-base.toml"]
 
-# Override window decorations for Linux
 [window]
 decorations = "Buttonless"  # Provides title bar for window management on GNOME
 
