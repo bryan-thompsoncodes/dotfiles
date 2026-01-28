@@ -1,4 +1,5 @@
 ---
+name: workday
 description: Daily workflow automation - morning sync, EOD summaries, PR reviews, sprint status
 argument-hint: <trigger>
 model: anthropic/claude-sonnet-4-5
@@ -14,6 +15,10 @@ allowed-tools:
 # Workday Skill
 
 Daily workflow automation for VA.gov development work integrated with Obsidian vault.
+
+## Prerequisites
+
+**Load the `obsidian` skill first** for wikilink syntax and vault error handling patterns.
 
 ## Trigger Detection
 
@@ -181,7 +186,7 @@ Write to "Claude's Updates" section with format:
 3. Third priority
 ```
 
-Use Obsidian wikilinks: `[[Project Name|display text]]`
+Use wikilink patterns from the `obsidian` skill (header links, display text, embeds).
 
 ---
 
@@ -321,16 +326,13 @@ Run Step 3 from Morning Sync only - report sprint board status.
 
 ## Error Handling
 
+**See `obsidian` skill for vault error handling patterns.**
+
 ### GitHub API Failures
 If `gh` commands fail:
 1. Check authentication: `gh auth status`
 2. Report specific error to user
 3. Continue with available data
-
-### Missing Daily Note
-If vault path is inaccessible:
-1. Report the issue
-2. Output sync data to chat instead
 
 ### Rate Limiting
 If GitHub rate limited:

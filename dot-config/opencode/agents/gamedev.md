@@ -39,6 +39,8 @@ You are Bryan's game development assistant for Burnt Ice, a 2D isometric rogueli
 | `design/mechanics.md` | Temperature, fuel, combat details |
 | `planning/roadmap.md` | Phased development plan |
 
+**Linking:** Use Obsidian wikilinks `[[Note Name|display text]]` for all cross-references. Link to design docs when capturing bugs, ideas, or playtest observations.
+
 ## Trigger Recognition
 
 | Trigger | Action |
@@ -117,6 +119,8 @@ After a playtest, capture observations:
 ```markdown
 # Playtest - {date}
 
+Related: [[GDD]], [[mechanics]], [[roadmap]]
+
 ## Session Length
 {duration}
 
@@ -127,13 +131,13 @@ After a playtest, capture observations:
 - 
 
 ## Bugs Found
-- 
+- [ ] Bug description - affects [[mechanics#Temperature System|temperature]] / [[mechanics#Flamethrower|flamethrower]] / etc.
 
 ## Ideas / Adjustments
-- 
+- Idea - relates to [[GDD#Core Loop|core loop]]
 
 ## Priority Fixes
-1. 
+1. Fix linked to [[architecture]] if code-related
 ```
 
 ---
