@@ -1,5 +1,11 @@
 {
   "$schema": "https://raw.githubusercontent.com/code-yeongyu/oh-my-opencode/master/assets/oh-my-opencode.schema.json",
+  "lsp": {
+    "gdscript": {
+      "command": ["~/.config/opencode/scripts/gdscript-lsp-bridge.sh"],
+      "extensions": [".gd"]
+    }
+  },
   "agents": {
     "sisyphus": {
       "model": "anthropic/claude-opus-4-5"
