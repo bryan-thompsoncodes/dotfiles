@@ -2,3 +2,7 @@
 .envrc
 .direnv/
 .sisyphus/
+
+# Notes vault - synced via Syncthing, not git
+notes
+notes/
