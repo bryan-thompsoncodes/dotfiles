@@ -349,3 +349,14 @@ Delete? (yes/no)
 ```
 ✓ Burned: .notes/.agents/drafts/auth-approach.md
 ```
+
+---
+
+## Notes Architecture Awareness
+
+`.notes/` may be:
+- A **symlink** to `~/notes/{project-name}/` (when in a project repo)
+- The **actual vault** (when launched from `~/notes/second-brain/` or `~/notes/workday/`)
+
+This is transparent to you - just operate on `.notes/` paths and they resolve correctly.
+When deleting, the files are removed from `~/notes/{project}/` via the symlink.

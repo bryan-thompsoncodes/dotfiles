@@ -259,3 +259,11 @@ You return context. Muse uses it to inform the thinking session.
 - **Fast response** - Speed matters more than exhaustiveness
 - **Structured output** - Muse needs parseable results
 - **Link format** - Use `[[wikilinks]]` for permanent notes, paths for working files
+
+### Notes Architecture Awareness
+
+`.notes/` may be:
+- A **symlink** to `~/notes/{project-name}/` (when in a project repo)
+- The **actual vault** (when launched from `~/notes/second-brain/` or `~/notes/workday/`)
+
+This is transparent to you - just search `.notes/` and it resolves correctly.

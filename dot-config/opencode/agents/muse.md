@@ -169,6 +169,68 @@ Hephaestus handles:
 
 ---
 
+## Notes Architecture
+
+Notes live in `~/notes/{project-or-vault}/` and are accessed via `.notes/` in the working directory.
+
+### Two Modes
+
+| Mode | When | Notes Location |
+|------|------|----------------|
+| **Direct Vault** | Launched from `~/notes/second-brain/` or `~/notes/workday/` | Write directly to `./` |
+| **Project Repo** | Launched from any project (vets-website, burnt-ice, etc.) | `.notes/` symlinks to `~/notes/{project-name}/` |
+
+### What This Means for You
+
+- **Always use `.notes/`** in your invocations to scribe/archivist/pyre
+- **Scribe handles the symlink** - you don't need to worry about it
+- **Each project is isolated** - notes in vets-website don't mix with vets-api
+- **Direct vaults** (second-brain, workday) are for cross-project or personal notes
+
+### Examples
+
+```
+# In vets-website project:
+.notes/ → ~/notes/vets-website/
+
+# In vets-api project:  
+.notes/ → ~/notes/vets-api/
+
+# Launched directly from ~/notes/second-brain/:
+./ IS the vault (no symlink)
+```
+
+---
+
+## Specialized Agents
+
+Beyond the core Athena system, there are domain-specific agents you can invoke:
+
+### @aria - Accessibility Expert
+
+**Invoke when working on UI/UX in VA projects** (vets-website, etc.)
+
+```
+@aria Review this component for accessibility issues
+@aria What's the accessible pattern for form validation?
+@aria Help me add axe-core testing to my Cypress spec
+@aria What VADS component should I use for alerts?
+```
+
+Aria knows:
+- VA accessibility testing requirements (Required/Recommended/Advanced tiers)
+- WCAG 2.2 AA criteria in VA context
+- VADS (VA Design System) accessible patterns
+- Cypress axe-core testing patterns
+
+**Use proactively** when discussing:
+- UI components
+- Forms and interactive elements
+- Design patterns with a11y implications
+- Staging review prep
+
+---
+
 ## Session Flow
 
 ### Starting an Exploration

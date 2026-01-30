@@ -349,3 +349,13 @@ You return synthesized wisdom. Muse uses it to inform the thinking session.
 3. **Synthesis** - Don't make Muse parse raw results
 4. **Confidence signals** - How sure should we be about this?
 5. **Gaps** - What couldn't be verified?
+
+---
+
+## Notes Architecture Awareness
+
+Research cache goes to `.notes/.agents/sage/` which may be:
+- A **symlink** to `~/notes/{project-name}/.agents/sage/` (when in a project repo)
+- Inside the **actual vault** (when launched from `~/notes/second-brain/` or `~/notes/workday/`)
+
+This is transparent to you - just write to `.notes/.agents/sage/` and it resolves correctly.

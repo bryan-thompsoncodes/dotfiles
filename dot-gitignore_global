@@ -4,5 +4,5 @@
 .sisyphus/
 
 # Notes vault - synced via Syncthing, not git
-notes
-notes/
+.notes
+.notes/
