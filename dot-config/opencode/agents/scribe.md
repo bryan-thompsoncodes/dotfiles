@@ -49,15 +49,18 @@ vault="$project_name"
 ```
 
 **Examples:**
+
 - In `~/code/department-of-veterans-affairs/vets-website/` → vault = `vets-website`
 - In `~/code/department-of-veterans-affairs/vets-api/` → vault = `vets-api`
 - In `~/code/burnt-ice/` → vault = `burnt-ice`
 
 **Auto-detect (no prompting) when:**
+
 - Working directory path contains `department-of-veterans-affairs` (VA work)
 - Project name matches known vaults (burnt-ice, second-brain, etc.)
 
 **Prompt only when:**
+
 - Unknown project AND not in a recognized org
 - User might want to use an existing vault instead of creating new one
 
@@ -108,16 +111,19 @@ IF current working directory path starts with ~/notes/
 **Summary:**
 
 **Mode 1 - Direct Vaults** (launched from inside `~/notes/`):
+
 - `~/notes/second-brain/` - Personal notes vault
 - `~/notes/workday/` - General work notes vault
 - Write directly to `./` - no symlink needed
 
 **Mode 2 - Project Repos** (launched from project directories):
+
 - Vault = project folder name (e.g., `vets-website`, `vets-api`, `burnt-ice`)
 - `.notes` symlinks to `~/notes/{project-name}/`
 - Create vault and symlink automatically if missing
 
 **Rules:**
+
 - **NEVER** symlink to `~/notes/` directly - always to a specific subfolder
 - **NEVER** prompt when in a git repo - just use project folder name
 
@@ -186,6 +192,51 @@ When working directly inside a vault (e.g., `~/notes/second-brain/` or `~/notes/
 ```
 
 **Detection:** If `pwd` starts with `~/notes/`, you're already inside a vault - skip symlink logic.
+
+---
+
+## Note Reuse Protocol (BEFORE WRITING)
+
+**Always check if a note on this topic already exists.**
+
+```bash
+# Search for existing notes on the topic
+ls .notes/*{keyword}*.md 2>/dev/null
+grep -l "{topic}" .notes/*.md 2>/dev/null
+```
+
+**If a note exists:**
+
+- **UPDATE the existing note** instead of creating a new one
+- Add new information, update status, append to relevant sections
+- Preserve existing content and structure
+
+**If no note exists:**
+
+- Create a new note with a descriptive slug (no date prefix)
+
+### Filename Convention
+
+**DO:**
+
+- `vacms-20370-facility-locator.md` (ticket-based)
+- `jwt-authentication.md` (topic-based)
+- `decision-api-versioning.md` (type + topic)
+
+**DON'T:**
+
+- `2026-01-30-vacms-20370.md` (no date prefixes)
+- `idea-12.md` (not descriptive)
+- `notes.md` (too generic)
+
+**Why no dates?**
+
+- Encourages reusing and updating notes
+- Easier to find by topic
+- Dates are in frontmatter if needed
+
+---
+
 ## Write Operations
 
 ### Before Writing: Ensure Symlink Exists
@@ -352,8 +403,15 @@ refresh token rotation, and the tradeoffs between security and UX.
 
 - **CREATE** directories if they don't exist (use `mkdir -p`)
 - **USE** kebab-case for filenames
-- **INCLUDE** date prefix for permanent notes: `YYYY-MM-DD-{slug}.md`
+- **USE** descriptive slugs without date prefixes: `{topic}.md` or `{ticket}-{topic}.md`
 - **FOLLOW** athena-notes templates when applicable
+
+### Note Reuse (CRITICAL)
+
+- **CHECK** for existing notes on a topic before creating new ones
+- **UPDATE** existing notes rather than creating duplicates
+- **NO date prefixes** in filenames - use descriptive slugs
+- **Dates** go in frontmatter if needed, not filenames
 
 ### Scope
 
