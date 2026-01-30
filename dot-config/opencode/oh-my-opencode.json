@@ -4,6 +4,10 @@
     "gdscript": {
       "command": ["~/.config/opencode/scripts/gdscript-lsp-bridge.sh"],
       "extensions": [".gd"]
+    },
+    "marksman": {
+      "command": ["marksman", "server"],
+      "extensions": [".md"]
     }
   },
   "agents": {
@@ -27,6 +31,50 @@
     },
     "multimodal-looker": {
       "model": "anthropic/claude-sonnet-4-5"
+    },
+    "muse": {
+      "model": "anthropic/claude-opus-4-5",
+      "temperature": 0.6,
+      "thinking": {
+        "type": "enabled",
+        "budgetTokens": 64000
+      }
+    },
+    "archivist": {
+      "model": "anthropic/claude-haiku-4-5",
+      "temperature": 0.1
+    },
+    "scribe": {
+      "model": "anthropic/claude-sonnet-4-5",
+      "temperature": 0.2
+    },
+    "pyre": {
+      "model": "anthropic/claude-sonnet-4-5",
+      "temperature": 0.1
+    },
+    "sage": {
+      "model": "anthropic/claude-sonnet-4-5",
+      "temperature": 0.2
+    },
+    "hephaestus": {
+      "model": "anthropic/claude-opus-4-5",
+      "temperature": 0.2,
+      "thinking": {
+        "type": "enabled",
+        "budgetTokens": 32000
+      }
+    }
+  },
+  "categories": {
+    "ideation": {
+      "model": "anthropic/claude-opus-4-5",
+      "temperature": 0.7,
+      "thinking": {
+        "type": "enabled",
+        "budgetTokens": 64000
+      },
+      "skills": ["athena-notes"],
+      "prompt_append": "Focus on creative exploration, brainstorming, and structured thinking. Use extended thinking to explore ideas deeply. Capture insights using athena-notes patterns."
     }
   }
 }

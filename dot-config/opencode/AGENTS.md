@@ -19,8 +19,8 @@
 |--------|---------|
 | `Calendar 🗓️/` | Daily notes (format: `DDMonYYYY.md`) |
 | `Projects/WIP/` | Active project documentation |
-| `Claude 🤖/Working/` | In-progress collaboration state |
-| `Claude 🤖/PR Reviews/` | Preliminary code reviews |
+| `Agent 🤖/Working/` | In-progress collaboration state |
+| `Agent 🤖/PR Reviews/` | Preliminary code reviews |
 
 **Daily Note Sections:**
 - **For Claude** — Tasks user wants help with
