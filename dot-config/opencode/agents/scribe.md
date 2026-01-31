@@ -162,7 +162,54 @@ IF current working directory path starts with ~/notes/
 - The symlink points to `~/notes/{project-name}/`, using the folder name of the project
 - Direct vaults: `second-brain`, `workday` (no symlink when launched from inside)
 
-### Vault Structure (inside ~/notes/{project-name}/)
+### Existing Structure Detection (CRITICAL)
+
+**BEFORE using default folders, check if the project has an existing structure.**
+
+```bash
+# Check for existing subdirectories in .notes/
+ls -d .notes/*/ 2>/dev/null | head -5
+```
+
+**If the project has custom folders** (e.g., `design/`, `planning/`, `technical/`), **USE THOSE instead of defaults.**
+
+**Known project structures:**
+
+| Project | Structure | Folder Mapping |
+|---------|-----------|----------------|
+| `burnt-ice` | Gamedev | See "Burnt Ice Structure" below |
+| Default | Athena | `ideas/`, `explorations/`, `decisions/`, `questions/` |
+
+### Burnt Ice Structure (Gamedev)
+
+Burnt Ice uses a game development folder structure:
+
+```
+.notes/
+├── design/          # GDD.md, mechanics.md, progression.md
+├── planning/        # roadmap.md, phase-{n}-{name}.md, milestones.md
+├── technical/       # architecture.md, decisions, implementation
+├── art/             # style-guide.md, asset-list.md
+├── placeholders/    # Stub docs for future content
+└── status.md        # Current project status
+```
+
+**Folder mapping for Burnt Ice:**
+
+| Note Type | Target Folder | Pattern |
+|-----------|---------------|---------|
+| Phase planning | `planning/` | `phase-{n}-{name}.md` |
+| Design exploration | `design/` | `{topic}.md` or add to existing doc |
+| Technical decisions | `technical/` | `{topic}.md` or `phase-{n}-decisions.md` |
+| Architecture notes | `technical/` | Inline in `architecture.md` |
+| Art/style notes | `art/` | Inline in existing docs |
+| Status updates | `.` | Update `status.md` |
+
+**Detection:** If `.notes/planning/` and `.notes/design/` exist, use Burnt Ice structure.
+
+### Default Vault Structure (Athena)
+
+For projects without custom structure:
 
 ```
 ~/notes/{project-name}/
@@ -239,7 +286,7 @@ grep -l "{topic}" .notes/*.md 2>/dev/null
 
 ## Write Operations
 
-### Before Writing: Ensure Symlink Exists
+### Before Writing: Detect Project Structure
 
 Before any write operation in a project directory:
 
@@ -253,18 +300,60 @@ mkdir -p ~/notes/${vault}
 if [ ! -e ".notes" ]; then
   ln -s ~/notes/${vault} .notes
 fi
+
+# 3. CRITICAL: Check for existing folder structure
+if [ -d ".notes/planning" ] && [ -d ".notes/design" ]; then
+  echo "PROJECT_STRUCTURE=gamedev"  # Use Burnt Ice folder mapping
+elif [ -d ".notes/ideas" ] || [ -d ".notes/explorations" ]; then
+  echo "PROJECT_STRUCTURE=athena"   # Use default Athena folders
+else
+  # Check what folders exist before creating new ones
+  ls -d .notes/*/ 2>/dev/null
+fi
 ```
+
+**NEVER create `explorations/` or `decisions/` in a project that already has `planning/` and `design/`.**
+
+### Structure-Aware Folder Selection
+
+**Gamedev projects** (Burnt Ice pattern - has `planning/` + `design/`):
+
+| Note Type | Write To |
+|-----------|----------|
+| Phase planning, roadmap | `planning/phase-{n}-{name}.md` |
+| Exploration (design) | `design/{topic}.md` |
+| Exploration (technical) | `technical/{topic}.md` |
+| Decisions (design) | `design/` or inline |
+| Decisions (technical) | `technical/phase-{n}-decisions.md` |
+| Quick ideas | `ideas/` (create if needed) |
+| Status update | Update `status.md` directly |
+
+**Athena projects** (default - no custom structure):
+
+| Note Type | Write To |
+|-----------|----------|
+| Ideas | `ideas/{slug}.md` |
+| Explorations | `explorations/{slug}.md` |
+| Decisions | `decisions/{slug}.md` |
+| Questions | `questions/{slug}.md` |
 
 ### Permanent Notes
 
 Write to `.notes/{category}/{filename}.md` (resolves to `~/notes/{vault}/{category}/`)
 
-Categories:
+**Default categories (only for Athena-structure projects):**
 
 - `ideas/` - Quick captures, fleeting thoughts
 - `explorations/` - Working through a topic
 - `decisions/` - ADRs, decision records
 - `questions/` - Open questions
+
+**Gamedev categories (for projects with planning/design folders):**
+
+- `planning/` - Roadmaps, phase plans, milestones
+- `design/` - Game design, mechanics, systems
+- `technical/` - Architecture, implementation, code decisions
+- `art/` - Style guides, asset documentation
 
 ### Working State
 
@@ -399,12 +488,20 @@ refresh token rotation, and the tradeoffs between security and UX.
 - **ERROR** if `.notes` exists as a regular directory (manual fix required)
 - **REMEMBER** `~/notes/` is just a parent directory - vaults are its children
 
+### Project Structure Awareness (CRITICAL)
+
+- **ALWAYS** check for existing folder structure before writing
+- **NEVER** create `explorations/` or `decisions/` in a project with `planning/` + `design/`
+- **USE** project-specific folders when they exist (Burnt Ice = gamedev structure)
+- **ONLY** use Athena defaults (`ideas/`, `explorations/`, `decisions/`) for new/generic projects
+- **CHECK** what folders exist: `ls -d .notes/*/ 2>/dev/null`
+
 ### File Hygiene
 
 - **CREATE** directories if they don't exist (use `mkdir -p`)
 - **USE** kebab-case for filenames
 - **USE** descriptive slugs without date prefixes: `{topic}.md` or `{ticket}-{topic}.md`
-- **FOLLOW** athena-notes templates when applicable
+- **FOLLOW** athena-notes templates when applicable, but **respect project folder structure**
 
 ### Note Reuse (CRITICAL)
 

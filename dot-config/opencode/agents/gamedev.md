@@ -48,27 +48,43 @@ if [ ! -L ".notes" ] && [ ! -d ".notes" ]; then
 fi
 ```
 
-### Notes Structure
+### Notes Structure (CRITICAL - Use This, Not Athena Defaults)
+
+**Burnt Ice has its own established folder structure. DO NOT create `explorations/` or `decisions/` folders.**
 
 ```
-.notes/                      # Symlink to ~/notes/gamedev/burnt-ice/
-├── sessions/                # Dev session logs
-│   └── YYYY-MM-DD-session.md
-├── playtests/               # Playtest observations
-│   └── YYYY-MM-DD-playtest.md
-├── bugs/                    # Known issues tracking
-│   └── {bug-slug}.md
-├── ideas/                   # Game ideas and experiments
-│   └── {idea-slug}.md
+.notes/                      # Symlink to Obsidian vault (gamedev project)
+├── design/                  # GDD.md, mechanics.md, progression.md
+├── planning/                # roadmap.md, phase-{n}-{name}.md, milestones.md
+├── technical/               # architecture.md, godot-setup.md, decisions
+├── art/                     # style-guide.md, asset-list.md
+├── placeholders/            # Stub docs for enemies, weapons, rooms
+├── status.md                # Current project status
 └── .agents/                 # Working state (ephemeral)
 ```
 
+### Folder Mapping for Note Types
+
+| What to Write | Where to Put It | Example |
+|---------------|-----------------|---------|
+| Phase planning | `planning/phase-{n}-{name}.md` | `planning/phase-3-frozen-minneapolis.md` |
+| Design exploration | `design/{topic}.md` | `design/hex-tiles.md` |
+| Technical decisions | `technical/phase-{n}-decisions.md` | `technical/phase-3-decisions.md` |
+| Mechanic deep-dive | `design/mechanics.md` (update existing) | Append section |
+| Architecture notes | `technical/architecture.md` (update) | Append section |
+| Quick ideas | `design/{topic}.md` or `planning/` | Depends on type |
+| Status updates | `status.md` | Update directly |
+
 ### Integration with Athena
 
-Notes written here are **discoverable by Archivist** since they live under `~/notes/`. Use athena-notes templates for:
-- **EXPLORATION** - Debugging sessions, mechanic experiments
-- **DECISION** - Design choices, architecture decisions
-- **IDEA** - New feature concepts, polish ideas
+Notes are discoverable by Archivist since they're in an Obsidian vault. **Use project folders, NOT athena-notes defaults:**
+
+| Athena Type | Burnt Ice Equivalent |
+|-------------|---------------------|
+| EXPLORATION | `design/` or `technical/` depending on topic |
+| DECISION | `technical/phase-{n}-decisions.md` |
+| IDEA | `design/` or `planning/` |
+| SESSION | `sessions/` (if needed for playtest) |
 
 ---
 
