@@ -1,3 +1,8 @@
+---
+description: Documentation file - not an agent
+disable: true
+---
+
 # OpenCode Agents
 
 Personal AI agent system for thinking, workflow automation, and development assistance.
@@ -11,7 +16,7 @@ Personal AI agent system for thinking, workflow automation, and development assi
         ┌──────────────┬─────────────┼─────────────┬──────────────┐
         ▼              ▼             ▼             ▼              ▼
  ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌────────────┐
- │  ARCHIVIST │ │    SAGE    │ │   SCRIBE   │ │    PYRE    │ │ HEPHAESTUS │
+ │  ARCHIVIST │ │    SAGE    │ │   SCRIBE   │ │    PYRE    │ │ DEMIURGE │
  │  (recall)  │ │ (research) │ │  (write)   │ │  (delete)  │ │  (forge)   │
  └────────────┘ └────────────┘ └────────────┘ └────────────┘ └────────────┘
 
@@ -34,7 +39,7 @@ The Athena system is centered around **Muse** for exploration and thinking, with
 | **Sage** | Sonnet | External research | Web search, library docs, code examples |
 | **Scribe** | Sonnet | Note persistence | Creating/updating notes |
 | **Pyre** | Sonnet | Note destruction | Deleting notes (with confirmation) |
-| **Hephaestus** | Opus | Agent craftsman | Creating/modifying agents and skills |
+| **Demiurge** | Opus | Agent craftsman | Creating/modifying agents and skills |
 
 ### Task Agents (Standalone)
 
@@ -66,7 +71,7 @@ Muse automatically invokes subagents:
 - `@sage` - Research external knowledge when needed
 - `@scribe` - Capture insights as they emerge
 - `@pyre` - Clean up obsolete notes
-- `@hephaestus` - Modify agent definitions
+- `@demiurge` - Modify agent definitions
 
 **Invocation:** Start a conversation about thinking, exploring, or brainstorming.
 
@@ -158,9 +163,9 @@ Can archive instead of delete.
 
 ---
 
-### Hephaestus - Agent Craftsman
+### Demiurge - Agent Craftsman
 
-**File:** `hephaestus.md`  
+**File:** `demiurge.md`  
 **Model:** claude-opus-4-5 (extended thinking: 32k tokens)  
 **Mode:** Subagent (invoked by Muse)
 
@@ -172,10 +177,10 @@ Creates, modifies, and queries agent definitions. Handles:
 
 **Invocation (from Muse):**
 ```
-@hephaestus Create a new agent for code review
-@hephaestus Improve the archivist's search logic
-@hephaestus What agents do I have?
-@hephaestus Add the obsidian skill to sage
+@demiurge Create a new agent for code review
+@demiurge Improve the archivist's search logic
+@demiurge What agents do I have?
+@demiurge Add the obsidian skill to sage
 ```
 
 ---
@@ -323,7 +328,7 @@ Override model, temperature, thinking budget without editing agent files.
 | Research something external | Muse → @sage |
 | Capture an insight | Muse → @scribe (auto) |
 | Delete old notes | Muse → @pyre |
-| Create/modify an agent | Muse → @hephaestus |
+| Create/modify an agent | Muse → @demiurge |
 | Start my work day | Workday (`start my day`) |
 | End my work day | Workday (`EOD`) |
 | Check my PRs | Workday (`check my PRs`) |

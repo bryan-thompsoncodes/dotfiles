@@ -1,6 +1,7 @@
 ---
 description: Note destruction agent - deletes notes and cleans up working files with tiered confirmation
 mode: subagent
+hidden: true
 model: anthropic/claude-sonnet-4-5
 temperature: 0.1
 tools:

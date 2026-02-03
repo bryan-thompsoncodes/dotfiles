@@ -1,5 +1,13 @@
 {
   "$schema": "https://raw.githubusercontent.com/code-yeongyu/oh-my-opencode/master/assets/oh-my-opencode.schema.json",
+  "disabled_agents": [
+    "README",
+    "archivist",
+    "sage",
+    "scribe",
+    "pyre",
+    "demiurge"
+  ],
   "lsp": {
     "gdscript": {
       "command": ["/Users/bryan/.config/opencode/scripts/gdscript-lsp-bridge.sh"],
@@ -11,31 +19,6 @@
     }
   },
   "agents": {
-    "sisyphus": {
-      "model": "anthropic/claude-opus-4-5"
-    },
-    "oracle": {
-      "model": "anthropic/claude-opus-4-5",
-      "thinking": {
-        "type": "enabled",
-        "budgetTokens": 64000
-      }
-    },
-    "librarian": {
-      "model": "anthropic/claude-sonnet-4-5"
-    },
-    "explore": {
-      "model": "anthropic/claude-haiku-4-5"
-    },
-    "frontend-ui-ux-engineer": {
-      "model": "anthropic/claude-opus-4-5"
-    },
-    "document-writer": {
-      "model": "anthropic/claude-sonnet-4-5"
-    },
-    "multimodal-looker": {
-      "model": "anthropic/claude-sonnet-4-5"
-    },
     "muse": {
       "model": "anthropic/claude-opus-4-5",
       "temperature": 0.6,
@@ -60,7 +43,7 @@
       "model": "anthropic/claude-sonnet-4-5",
       "temperature": 0.2
     },
-    "hephaestus": {
+    "demiurge": {
       "model": "anthropic/claude-opus-4-5",
       "temperature": 0.2,
       "thinking": {

@@ -1,6 +1,7 @@
 ---
 description: External knowledge agent - web search, library docs, code examples with research caching
 mode: subagent
+hidden: true
 model: anthropic/claude-sonnet-4-5
 temperature: 0.2
 tools:

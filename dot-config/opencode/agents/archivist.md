@@ -1,6 +1,7 @@
 ---
 description: Note retrieval agent - searches .notes/ and .notes/.agents/ for context, returns summaries and links
 mode: subagent
+hidden: true
 model: anthropic/claude-haiku-4-5
 temperature: 0.1
 tools:
