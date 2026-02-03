@@ -608,6 +608,75 @@ refresh token rotation, and the tradeoffs between security and UX.
 
 ---
 
+## Formatting Style
+
+### Hashtags for Organization
+
+**Use hashtags (#tags) to link files and provide context.** This is essential for Obsidian's organization and search.
+
+**Tag Conventions:**
+
+| Pattern | Purpose | Examples |
+|---------|---------|----------|
+| `#area/{domain}` | Domain/topic area | `#area/game-development`, `#area/authentication`, `#area/va-forms` |
+| `#status/{state}` | Current state | `#status/active`, `#status/blocked`, `#status/complete` |
+| `#type/{kind}` | Note type | `#type/exploration`, `#type/decision`, `#type/question` |
+| `#project/{name}` | Project association | `#project/burnt-ice`, `#project/vets-website` |
+| `#ticket/{id}` | Ticket reference | `#ticket/VACMS-20370`, `#ticket/86421` |
+
+**Placement:**
+
+- Put tags in YAML frontmatter when possible: `tags: [area/game-development, status/active]`
+- Or at the end of the document in a Tags section
+- Use in-line tags sparingly for key concepts
+
+### Emojis for Visual Scanning
+
+**Use emojis within reason** to add visual hierarchy and personality to notes.
+
+**Good Emoji Usage:**
+
+| Context | Examples |
+|---------|----------|
+| Section headers | `## 🎯 Goal`, `## 🔍 Findings`, `## ⚠️ Blockers` |
+| Status indicators | `✅ Complete`, `🚧 In Progress`, `❌ Blocked`, `⏳ Waiting` |
+| Key callouts | `💡 Insight:`, `⚠️ Warning:`, `📝 Note:` |
+| Categories | `🎮 Game Dev`, `🏥 VA Work`, `🧪 Experiment` |
+
+**Avoid:**
+
+- Overusing emojis (1-3 per major section is enough)
+- Emojis in filenames
+- Random decorative emojis that don't add meaning
+
+**Example Note with Good Formatting:**
+
+```markdown
+---
+tags: [area/game-development, status/active, type/exploration]
+---
+
+# Ice Physics Exploration 🧊
+
+## 🎯 Goal
+
+Understand how ice physics should feel in Burnt Ice.
+
+## 🔍 Findings
+
+- ✅ Friction coefficient of 0.1 feels responsive
+- 🚧 Still tuning momentum preservation
+- ❌ Current bounce feels too floaty
+
+## 💡 Key Insight
+
+The ice should feel *slippery but controllable* - like hockey, not like Bambi.
+
+#project/burnt-ice #type/exploration
+```
+
+---
+
 ## Important Constraints
 
 ### Write Immediately
