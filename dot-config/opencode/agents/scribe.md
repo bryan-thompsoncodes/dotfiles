@@ -32,64 +32,156 @@ When Muse delegates note-writing to you:
 
 ---
 
+## Auto-Setup for New Git Repos
+
+**When you detect a git repo without a `.notes` symlink, set it up automatically.**
+
+```
+New git repo detected: {repo-name}. Created: .notes/ -> ~/notes/{repo-name}/
+```
+
+**Decision tree:**
+
+```
+Is .notes a symlink?
+├── YES → Use it (verify target if needed)
+└── NO
+    ├── Is .notes a regular directory?
+    │   └── YES → WARN user, do NOT proceed (manual fix required)
+    └── Does .notes not exist?
+        └── YES → AUTO-CREATE:
+            1. Get repo name: basename of `git rev-parse --show-toplevel`
+            2. Create vault (if needed): mkdir -p ~/notes/{repo-name}/
+            3. Create symlink: ln -s ~/notes/{repo-name}/ {git-root}/.notes
+            4. Log: "New git repo detected: {repo-name}. Created: .notes/ -> ~/notes/{repo-name}/"
+            5. Proceed with write
+```
+
+**Edge cases:**
+
+| Situation | Behavior |
+|-----------|----------|
+| `~/notes/{repo}/` already exists | Create symlink only (preserves previous project notes) |
+| `.notes` is regular directory | Warn: "Manual fix required" — do NOT overwrite |
+| Nested git subdirectory | Use `git rev-parse --show-toplevel` for accurate root |
+
+---
+
 ## Context Detection (CRITICAL)
 
-**Before any write operation, determine the vault AND ensure the notes symlink exists.**
+**Before any write operation, determine the mode and notes root path.**
 
-### Step 1: Vault Detection (Project-Based)
+### Two-Mode Architecture
 
-**Each project gets its own vault folder in `~/notes/`.**
+Scribe operates in two modes based on context:
+
+| Mode | Condition | Notes Root | Behavior |
+|------|-----------|------------|----------|
+| **Project mode** | In a git repo | `.notes/` → `~/notes/{project-name}/` | Symlink pattern |
+| **Direct vault mode** | NOT in a git repo | `~/notes/second-brain/` | Write directly |
+
+### Step 0: Git Repo Detection (FIRST)
+
+**Detect git repo before anything else:**
 
 ```bash
-# Get project name from current directory
-project_name=$(basename "$PWD")
+# Check if we're in a git repository (includes working directory or any parent)
+if git rev-parse --git-dir > /dev/null 2>&1; then
+  IS_GIT_REPO=true
+else
+  IS_GIT_REPO=false
+fi
+```
 
-# Vault = project name
-vault="$project_name"
+### Step 1: Mode Selection
+
+```bash
+if [[ "$PWD" == "$HOME/notes"* ]]; then
+  # Already inside ~/notes/ - write directly to current location
+  MODE="direct-vault"
+  NOTES_ROOT="."
+elif [ "$IS_GIT_REPO" = true ]; then
+  # In a git repo - use project symlink pattern
+  MODE="project"
+  project_name=$(basename "$(git rev-parse --show-toplevel)")
+  VAULT="$project_name"
+  NOTES_ROOT=".notes"
+else
+  # Not in git repo, not in ~/notes/ - use personal vault
+  MODE="direct-vault"
+  NOTES_ROOT="$HOME/notes/second-brain"
+fi
 ```
 
 **Examples:**
 
-- In `~/code/department-of-veterans-affairs/vets-website/` → vault = `vets-website`
-- In `~/code/department-of-veterans-affairs/vets-api/` → vault = `vets-api`
-- In `~/code/burnt-ice/` → vault = `burnt-ice`
+| Working Directory | Mode | Notes Root |
+|-------------------|------|------------|
+| `~/code/vets-website/` | project | `.notes/` → `~/notes/vets-website/` |
+| `~/code/burnt-ice/` | project | `.notes/` → `~/notes/burnt-ice/` |
+| `~/notes/second-brain/` | direct-vault | `.` (current dir) |
+| `~/notes/workday/` | direct-vault | `.` (current dir) |
+| `~/Downloads/` | direct-vault | `~/notes/second-brain/` |
+| `~/notes/` (parent only) | direct-vault | `~/notes/second-brain/` |
 
-**Auto-detect (no prompting) when:**
+### Step 2: Ensure Notes Directory Structure (Project Mode Only)
 
-- Working directory path contains `department-of-veterans-affairs` (VA work)
-- Project name matches known vaults (burnt-ice, second-brain, etc.)
-
-**Prompt only when:**
-
-- Unknown project AND not in a recognized org
-- User might want to use an existing vault instead of creating new one
-
-### Step 2: Ensure Notes Directory Structure (Symlink Pattern)
+**This step ONLY applies when `MODE="project"` (in a git repo).**
 
 **CRITICAL: `.notes` in a project is ALWAYS a symlink to `~/notes/{project-name}/`**
 
+**Auto-setup logic (handles new git repos automatically):**
+
+| .notes status | ~/notes/{repo}/ status | Action |
+|---------------|------------------------|--------|
+| Symlink exists | - | Use existing (verify target) |
+| Regular directory exists | - | **WARN user, do not proceed** |
+| Does not exist | Already exists | Create symlink only (previous notes preserved) |
+| Does not exist | Does not exist | Create both directory and symlink |
+
 ```bash
-# 1. Get project name
-project_name=$(basename "$PWD")
+# Only run this in project mode
+if [ "$MODE" = "project" ]; then
+  # Get project name from git root (not PWD - handles subdirectories)
+  project_name=$(basename "$(git rev-parse --show-toplevel)")
+  git_root=$(git rev-parse --show-toplevel)
+  vault_path="$HOME/notes/${project_name}"
 
-# 2. Ensure project vault exists in ~/notes/
-mkdir -p ~/notes/${project_name}
+  # Check if .notes symlink exists at project root
+  if [ -L "${git_root}/.notes" ]; then
+    # Already a symlink - verify it points to correct vault
+    current_target=$(readlink "${git_root}/.notes")
+    if [ "$current_target" != "$vault_path" ] && [ "$current_target" != "/Users/bryan/notes/${project_name}" ]; then
+      echo "WARNING: .notes points to $current_target, expected $vault_path"
+    fi
+    # Symlink exists and is valid - proceed with write
 
-# 3. Check if .notes symlink exists
-if [ -L ".notes" ]; then
-  # Already a symlink - verify it points to correct vault
-  current_target=$(readlink .notes)
-  expected_target="$HOME/notes/${project_name}"
-  if [ "$current_target" != "$expected_target" ] && [ "$current_target" != "/Users/bryan/notes/${project_name}" ]; then
-    echo "WARNING: .notes points to $current_target, expected $expected_target"
+  elif [ -e "${git_root}/.notes" ]; then
+    # Exists but NOT a symlink - this is a problem
+    echo "WARNING: .notes exists as a regular directory at ${git_root}/.notes"
+    echo "Expected: symlink to ~/notes/${project_name}/"
+    echo "Manual fix required: backup contents, remove directory, let scribe recreate symlink"
+    # DO NOT proceed - user must fix manually
+    return 1
+
+  else
+    # .notes doesn't exist - AUTO-SETUP for new git repo
+
+    # Check if vault already exists (previous project notes)
+    if [ -d "$vault_path" ]; then
+      echo "Found existing notes at ~/notes/${project_name}/"
+    else
+      # Create new vault directory
+      mkdir -p "$vault_path"
+    fi
+
+    # Create the symlink
+    ln -s "$vault_path" "${git_root}/.notes"
+
+    # Log the auto-setup
+    echo "New git repo detected: ${project_name}"
+    echo "Created: .notes/ -> ~/notes/${project_name}/"
   fi
-elif [ -e ".notes" ]; then
-  # Exists but NOT a symlink - this is wrong!
-  echo "ERROR: .notes exists as a regular directory. Should be a symlink."
-  exit 1
-else
-  # Doesn't exist - create symlink
-  ln -s ~/notes/${project_name} .notes
 fi
 ```
 
@@ -100,47 +192,50 @@ fi
 - Notes are in a predictable location (`~/notes/{project-name}/`)
 - Symlinks are cheap and gitignored
 
-### Special Case: Already Inside a Vault
+### Step 3: Direct Vault Mode Setup
 
-```
-IF current working directory path starts with ~/notes/
-  THEN notes_root = "."  (already inside a vault)
-       Skip symlink logic - write directly to current location
+**This step ONLY applies when `MODE="direct-vault"` and NOT already inside ~/notes/.**
+
+```bash
+# For direct vault mode outside ~/notes/
+if [ "$MODE" = "direct-vault" ] && [[ "$PWD" != "$HOME/notes"* ]]; then
+  # Ensure second-brain vault exists
+  mkdir -p ~/notes/second-brain
+  NOTES_ROOT="$HOME/notes/second-brain"
+fi
 ```
 
 **Summary:**
 
-**Mode 1 - Direct Vaults** (launched from inside `~/notes/`):
+**Project Mode** (in a git repo):
 
-- `~/notes/second-brain/` - Personal notes vault
-- `~/notes/workday/` - General work notes vault
-- Write directly to `./` - no symlink needed
-
-**Mode 2 - Project Repos** (launched from project directories):
-
-- Vault = project folder name (e.g., `vets-website`, `vets-api`, `burnt-ice`)
+- Detected by: `git rev-parse --git-dir` succeeds
+- Vault = git project folder name (e.g., `vets-website`, `vets-api`, `burnt-ice`)
 - `.notes` symlinks to `~/notes/{project-name}/`
 - Create vault and symlink automatically if missing
+
+**Direct Vault Mode** (NOT in a git repo):
+
+- `~/notes/second-brain/` - Default for non-git directories (personal vault)
+- `~/notes/{any-vault}/` - Write directly when already inside
+- No symlink needed
 
 **Rules:**
 
 - **NEVER** symlink to `~/notes/` directly - always to a specific subfolder
 - **NEVER** prompt when in a git repo - just use project folder name
+- **ALWAYS** check git status first to determine mode
+- **DEFAULT** to `~/notes/second-brain/` when not in a git repo
 
 ## Directory Structure
 
 ### Architecture Overview
 
-```
-~/notes/                     # Parent directory containing all project vaults
-├── vets-website/            # Vault for vets-website repo
-├── vets-api/                # Vault for vets-api repo
-├── content-build/           # Vault for content-build repo
-├── burnt-ice/               # Vault for game development
-├── second-brain/            # Vault for personal notes
-└── {project-name}/          # One vault per project
+**Two operating modes based on context:**
 
-# In project directories:
+```
+MODE 1: PROJECT MODE (in a git repo)
+======================================
 ~/code/department-of-veterans-affairs/vets-website/
 ├── .notes → ~/notes/vets-website/    # ← SYMLINK to project vault
 └── ...source files...
@@ -152,15 +247,39 @@ IF current working directory path starts with ~/notes/
 ~/code/burnt-ice-game/
 ├── .notes → ~/notes/burnt-ice/       # ← Same pattern
 └── ...source files...
+
+
+MODE 2: DIRECT VAULT MODE (NOT in a git repo)
+=============================================
+~/Downloads/                  # Non-git directory
+└── (no .notes)               # → Writes go to ~/notes/second-brain/
+
+~/notes/second-brain/         # Already inside a vault
+├── ideas/                    # → Writes go directly here
+└── explorations/
+
+~/notes/                      # Parent of notes (but not a vault itself)
+└── (various vaults)          # → Writes go to ~/notes/second-brain/
+
+
+VAULT STRUCTURE:
+================
+~/notes/                     # Parent directory containing all project vaults
+├── vets-website/            # Vault for vets-website repo (git projects)
+├── vets-api/                # Vault for vets-api repo
+├── burnt-ice/               # Vault for game development
+├── second-brain/            # DEFAULT vault for personal notes & non-git contexts
+└── {project-name}/          # One vault per git project
 ```
 
 **Key principles:**
 
 - `~/notes/` is ONLY a parent directory - NEVER write notes directly to it
-- Each project gets its own vault: `~/notes/{project-name}/`
+- **Git repos** get project-specific vaults via `.notes` symlink
+- **Non-git directories** default to `~/notes/second-brain/` (personal vault)
 - `.notes` in a project is NEVER a real directory - always a symlink
-- The symlink points to `~/notes/{project-name}/`, using the folder name of the project
-- Direct vaults: `second-brain`, `workday` (no symlink when launched from inside)
+- The symlink points to `~/notes/{project-name}/`, using the git project folder name
+- `second-brain` is the catch-all vault for personal notes and non-project contexts
 
 ### Existing Structure Detection (CRITICAL)
 
@@ -286,29 +405,57 @@ grep -l "{topic}" .notes/*.md 2>/dev/null
 
 ## Write Operations
 
-### Before Writing: Detect Project Structure
+### Before Writing: Detect Mode and Project Structure
 
-Before any write operation in a project directory:
+Before any write operation:
 
 ```bash
-project_name=$(basename "$PWD")
+# Step 1: Detect mode (git repo vs non-git)
+if git rev-parse --git-dir > /dev/null 2>&1; then
+  MODE="project"
+  project_name=$(basename "$(git rev-parse --show-toplevel)")
+  git_root=$(git rev-parse --show-toplevel)
+  vault_path="$HOME/notes/${project_name}"
 
-# 1. Ensure vault exists
-mkdir -p ~/notes/${vault}
+  # Auto-setup: Ensure vault and symlink exist
+  if [ -L "${git_root}/.notes" ]; then
+    # Symlink exists - use it
+    NOTES_ROOT="${git_root}/.notes"
 
-# 2. Ensure symlink exists
-if [ ! -e ".notes" ]; then
-  ln -s ~/notes/${vault} .notes
+  elif [ -e "${git_root}/.notes" ]; then
+    # Regular directory exists - warn and abort
+    echo "WARNING: .notes exists as a regular directory, not a symlink."
+    echo "Manual fix required before proceeding."
+    exit 1
+
+  else
+    # Auto-create for new git repo
+    if [ ! -d "$vault_path" ]; then
+      mkdir -p "$vault_path"
+    fi
+    ln -s "$vault_path" "${git_root}/.notes"
+    echo "New git repo detected: ${project_name}. Created: .notes/ -> ~/notes/${project_name}/"
+    NOTES_ROOT="${git_root}/.notes"
+  fi
+
+elif [[ "$PWD" == "$HOME/notes"* ]]; then
+  MODE="direct-vault"
+  NOTES_ROOT="."
+
+else
+  MODE="direct-vault"
+  mkdir -p ~/notes/second-brain
+  NOTES_ROOT="$HOME/notes/second-brain"
 fi
 
-# 3. CRITICAL: Check for existing folder structure
-if [ -d ".notes/planning" ] && [ -d ".notes/design" ]; then
+# Step 2: Check for existing folder structure
+if [ -d "${NOTES_ROOT}/planning" ] && [ -d "${NOTES_ROOT}/design" ]; then
   echo "PROJECT_STRUCTURE=gamedev"  # Use Burnt Ice folder mapping
-elif [ -d ".notes/ideas" ] || [ -d ".notes/explorations" ]; then
+elif [ -d "${NOTES_ROOT}/ideas" ] || [ -d "${NOTES_ROOT}/explorations" ]; then
   echo "PROJECT_STRUCTURE=athena"   # Use default Athena folders
 else
   # Check what folders exist before creating new ones
-  ls -d .notes/*/ 2>/dev/null
+  ls -d ${NOTES_ROOT}/*/ 2>/dev/null
 fi
 ```
 
@@ -472,11 +619,13 @@ refresh token rotation, and the tradeoffs between security and UX.
 
 ### Context Awareness
 
-- **ALWAYS** detect vault AND notes root before writing
-- **NEVER** prompt for vault - auto-detect from project folder name or direct vault
-- **NEVER** hardcode `.notes/` without checking context
-- **USE** the vault + path detection logic every time
-- **CHECK** git remote or working directory for `department-of-veterans-affairs`
+- **ALWAYS** detect mode (git vs non-git) before writing
+- **NEVER** prompt for vault - auto-detect from git project or default to second-brain
+- **NEVER** hardcode `.notes/` without checking if in a git repo
+- **USE** the mode + path detection logic every time
+- **IN GIT REPO** → use `.notes/` symlink pattern
+- **NOT IN GIT REPO** → default to `~/notes/second-brain/`
+- **INSIDE ~/notes/** → write directly to current location
 
 ### Symlink Pattern (CRITICAL)
 

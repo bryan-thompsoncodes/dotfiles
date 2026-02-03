@@ -30,3 +30,6 @@
 
 [init]
 	defaultBranch = main
+[credential "https://git.snowboardtechie.com"]
+	helper =
+	helper = !tea login helper
