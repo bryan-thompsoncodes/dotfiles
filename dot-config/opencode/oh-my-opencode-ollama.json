@@ -1,0 +1,57 @@
+{
+  "$schema": "https://raw.githubusercontent.com/code-yeongyu/oh-my-opencode/master/assets/oh-my-opencode.schema.json",
+  "disabled_agents": [],
+  "lsp": {
+    "gdscript": {
+      "command": ["/Users/bryan/.config/opencode/scripts/gdscript-lsp-bridge.sh"],
+      "extensions": [".gd"]
+    },
+    "marksman": {
+      "command": ["marksman", "server"],
+      "extensions": [".md"]
+    }
+  },
+  "agents": {
+    "muse": {
+      "model": "ollama/deepseek-r1:70b",
+      "temperature": 0.6,
+      "thinking": {
+        "type": "enabled"
+      }
+    },
+    "demiurge": {
+      "model": "ollama/deepseek-r1:32b",
+      "temperature": 0.2,
+      "thinking": {
+        "type": "enabled"
+      }
+    },
+    "sage": {
+      "model": "ollama/qwen3-coder:30b",
+      "temperature": 0.2
+    },
+    "scribe": {
+      "model": "ollama/devstral:24b",
+      "temperature": 0.2
+    },
+    "pyre": {
+      "model": "ollama/qwen2.5-coder:7b",
+      "temperature": 0.1
+    },
+    "archivist": {
+      "model": "ollama/qwen2.5-coder:7b",
+      "temperature": 0.1
+    }
+  },
+  "categories": {
+    "ideation": {
+      "model": "ollama/deepseek-r1:70b",
+      "temperature": 0.7,
+      "thinking": {
+        "type": "enabled"
+      },
+      "skills": ["athena-notes"],
+      "prompt_append": "Focus on creative exploration, brainstorming, and structured thinking. Use extended thinking to explore ideas deeply. Capture insights using athena-notes patterns."
+    }
+  }
+}
