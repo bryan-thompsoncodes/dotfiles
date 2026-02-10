@@ -55,7 +55,7 @@
     "edit": "ask",
     "bash": "ask"
   },
-  "model": "anthropic/claude-sonnet-4-5",
+  "model": "anthropic/claude-opus-4-6",
   "plugin": [
     "oh-my-opencode"
   ],
