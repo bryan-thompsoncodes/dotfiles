@@ -7,6 +7,32 @@ description: Note type system for Muse - templates, linking patterns, capture tr
 
 Standardized note types and patterns for the Muse thinking system. This skill defines HOW thoughts are captured, organized, and connected.
 
+## CRITICAL: Notes Location
+
+> **ALWAYS use `.notes/` relative to the working directory when in a project repo.**
+> 
+> NEVER use Obsidian iCloud paths (`~/Library/Mobile Documents/...`) in project contexts.
+> The `.notes/` symlink handles the mapping automatically.
+
+### Two Modes
+
+| Mode | Detect By | Notes Path |
+|------|-----------|------------|
+| **Project Repo** | Working dir is a code repo (has `.git/`, `package.json`, etc.) | `.notes/` |
+| **Direct Vault** | Working dir IS `~/notes/{vault}` | `./` (current dir) |
+
+**Examples:**
+```bash
+# In vets-website project:
+.notes/my-note.md  ✅ CORRECT
+~/Library/Mobile Documents/.../my-note.md  ❌ NEVER
+
+# In ~/notes/second-brain directly:
+./my-note.md  ✅ CORRECT
+```
+
+---
+
 ## Core Philosophy
 
 1. **Notes are memory** - Every note should be findable, linkable, useful later
@@ -302,6 +328,58 @@ status: active | complete | abandoned
 
 ---
 
+### 6. TASK - Work Tracking
+
+For tracking tickets, PRs, ongoing work items with status and blockers.
+
+**When to use:**
+- Tracking a ticket/issue
+- PR chain status
+- Work that spans multiple sessions
+
+**Filename:** `{ticket-id}-{slug}.md` or `YYYY-MM-DD-task-{slug}.md`
+
+```markdown
+---
+type: task
+date: YYYY-MM-DD
+updated: YYYY-MM-DD
+tags:
+  - task
+  - {project}
+status: in-progress | blocked | complete
+ticket: {TICKET-ID}
+---
+
+# Task: {Title}
+
+## Overview
+
+**Ticket:** {ID} - {Title}
+{Links to GH issues, PRs, etc.}
+
+## Current Status
+
+> [!info] Status Update
+> {Current state, what's done, what's next}
+
+## Blocker (if any)
+
+> [!warning] Blocked
+> {What's blocking and who/what needs to act}
+
+## Timeline
+
+- **{date}:** {event}
+- **{date}:** {event}
+
+## Related
+
+- [[{related notes}]]
+```
+
+---
+
 ## Capture Triggers
 
 ### When Muse Should Auto-Capture
@@ -313,6 +391,7 @@ status: active | complete | abandoned
 | "I've decided" or choice made | DECISION | @scribe decision record |
 | Session ending, was valuable | SESSION | @scribe session summary |
 | Same topic 3+ times | THREAD | @scribe thread note |
+| Checking ticket/PR status | TASK | @scribe update/create task note |
 
 ### Capture Prompts
 
@@ -333,6 +412,9 @@ SESSION CAPTURE:
 
 THREAD DETECTION:
 "This topic has come up multiple times. I should create a thread to connect the dots."
+
+TASK UPDATE:
+"Checking work status. I'll update the task note with current state."
 ```
 
 ---
@@ -370,6 +452,7 @@ When creating a new note that relates to existing notes:
 #decision      → choices made
 #session       → conversation records
 #thread        → connected ideas
+#task          → work tracking
 #muse          → captured by muse system
 
 #project/{name} → project-specific
@@ -380,30 +463,32 @@ When creating a new note that relates to existing notes:
 
 ## Vault Structure
 
-### Recommended Folders
+### Default: Flat structure in `.notes/`
 
 ```
 .notes/
-├── ideas/          → IDEA notes
-├── explorations/   → EXPLORATION notes
-├── decisions/      → DECISION notes
-├── sessions/       → SESSION notes
-├── threads/        → THREAD notes
-└── inbox/          → Unsorted captures (optional)
+├── 2026-02-10-idea-something.md
+├── 2026-02-10-exploration-topic.md
+├── 2026-02-10-decision-choice.md
+├── vacms-20370-facility-locator.md  (task)
+└── ...
 ```
 
-### Flat vs. Folders
+This is simplest and works everywhere. Type is in frontmatter and filename.
 
-Both work. If using folders:
-- Scribe should place notes in appropriate folder by type
-- Cross-folder links still work: `[[decisions/2026-01-20-jwt]]`
+### Optional: Folders by type
 
-If flat:
-- All notes in `.notes/`
-- Type is in frontmatter and filename prefix
-- Easier to browse chronologically
+```
+.notes/
+├── ideas/
+├── explorations/
+├── decisions/
+├── sessions/
+├── threads/
+└── tasks/
+```
 
-**Default: Flat structure** (simpler, works everywhere)
+If using folders, scribe places notes in appropriate folder by type.
 
 ---
 
@@ -417,18 +502,7 @@ Agents that capture notes should load this skill:
 # In agent frontmatter
 skills:
   - athena-notes
-  - obsidian
 ```
-
-### With Obsidian Skill
-
-This skill builds on `obsidian` skill for:
-- Wikilink syntax
-- Vault paths
-- Frontmatter patterns
-- Callout syntax
-
-Load both: `skills: [obsidian, athena-notes]`
 
 ### Scribe Integration
 

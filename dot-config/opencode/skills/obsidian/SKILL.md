@@ -5,11 +5,32 @@ description: Obsidian vault patterns - wikilinks, iCloud paths, cross-referencin
 
 # Obsidian Skill
 
-Shared patterns for working with Bryan's Obsidian vaults via iCloud.
+Shared patterns for working with Obsidian vaults.
 
-## Vault Locations
+## CRITICAL: When to Use This Skill
 
-Bryan's vaults are stored in iCloud Mobile Documents:
+> **This skill is for DIRECT vault work only.**
+> 
+> If you're in a **project repo** (vets-website, burnt-ice, etc.), use `.notes/` instead.
+> The `.notes/` symlink automatically maps to the correct vault.
+
+### Decision Tree
+
+```
+Working directory is a code repo (has .git, package.json, etc.)?
+  YES → Use `.notes/` - DO NOT use Obsidian paths
+  NO  → Working dir is ~/notes/{vault}?
+    YES → Use `./` (current directory)
+    NO  → Something's wrong, ask user
+```
+
+**NEVER use iCloud paths when in a project context.**
+
+---
+
+## Vault Locations (Direct Access Only)
+
+These paths are ONLY for when you're working directly in the vault, not from a project repo.
 
 ```
 BASE_PATH="/Users/bryan/Library/Mobile Documents/iCloud~md~obsidian/Documents"
@@ -63,32 +84,12 @@ See [GDD](design/GDD.md)...           (markdown link)
 
 ---
 
-## Vault Structure Conventions
-
-### Standard Folders (adapt per vault)
-
-| Folder | Purpose |
-|--------|---------|
-| `design/` | Design documents, specifications |
-| `technical/` | Architecture, code patterns |
-| `planning/` | Roadmaps, timelines |
-| `Calendar/` or `Calendar 🗓️/` | Daily notes |
-| `templates/` | Note templates |
-
-### Daily Note Naming
+## Daily Note Naming
 
 ```
 # Format: DDMonYYYY.md
 27Jan2026.md
 03Feb2026.md
-```
-
-Locate with:
-```bash
-DAY=$(date +%d)
-MONTH=$(date +%b)
-YEAR=$(date +%Y)
-FILENAME="${DAY}${MONTH}${YEAR}.md"
 ```
 
 ---
@@ -99,32 +100,13 @@ FILENAME="${DAY}${MONTH}${YEAR}.md"
 
 iCloud vaults may be unavailable due to sync issues or path problems.
 
-```bash
-# Check if vault exists
-VAULT_PATH="/Users/bryan/Library/Mobile Documents/iCloud~md~obsidian/Documents/💙 Agile6"
-if [[ ! -d "$VAULT_PATH" ]]; then
-  echo "Vault not accessible"
-fi
-```
-
 **When vault is inaccessible:**
 
 1. Report the specific error to user
 2. Check for path escaping issues (spaces, emoji)
-3. Try alternate path format:
-   ```bash
-   # Escaped version
-   ~/Library/Mobile\ Documents/iCloud~md~obsidian/Documents/💙\ Agile6
-   ```
+3. Try alternate path format with escaping
 4. If still failing, output content to chat instead of file
 5. Suggest user check iCloud sync status
-
-### File Write Failures
-
-1. Verify parent directory exists before writing
-2. Create directory structure if needed: `mkdir -p "$(dirname "$FILE_PATH")"`
-3. Check file permissions
-4. Report specific error, don't silently fail
 
 ### Path with Emoji/Spaces
 
@@ -151,16 +133,7 @@ If referencing content from another vault:
 
 ---
 
-## Templates
-
-When creating notes, check if the vault has templates:
-
-1. Look in `templates/` folder
-2. Check for daily note template
-3. Use existing template structure if available
-4. Preserve YAML frontmatter if present
-
-### Frontmatter Pattern
+## Frontmatter Pattern
 
 ```markdown
 ---
@@ -172,24 +145,4 @@ related: [[Note1]], [[Note2]]
 # Note Title
 
 Content...
-```
-
----
-
-## Integration Notes
-
-This skill provides **shared patterns**. Domain-specific skills should:
-
-1. Load this skill first for Obsidian fundamentals
-2. Define their own vault path and link targets
-3. Add domain-specific workflows
-4. Reference wikilink patterns from this skill
-
-Example in domain skill:
-```markdown
-## Prerequisites
-Load the `obsidian` skill for wikilink patterns and vault handling.
-
-## Vault Configuration
-VAULT_PATH="${BASE_PATH}/🧊 Burnt Ice"
 ```
