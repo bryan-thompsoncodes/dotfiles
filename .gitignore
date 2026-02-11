@@ -3,11 +3,7 @@ configstore
 dot-gitconfig.github
 dot-gitconfig.snowboardtechie
 
-# Goose - ignore everything except specific config files
-dot-config/goose/*
-!dot-config/goose/config.yaml
-!dot-config/goose/permission.yaml
-!dot-config/goose/goosehints
+dot-config/exercism/*
 
 # Opencode - track config and lock files, ignore local artifacts
 dot-config/opencode/*
