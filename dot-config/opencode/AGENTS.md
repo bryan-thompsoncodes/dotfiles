@@ -42,6 +42,21 @@
 
 ---
 
+## Git Workflow
+
+**Branch Policy:** Never commit directly to `main` or `master`. All work must be done on a feature branch.
+
+1. **Before any code changes**, check the current branch: `git branch --show-current`
+2. If on `main` or `master`, create and switch to a feature branch before making any commits
+3. Branch naming: `<type>/<short-description>` (e.g., `feat/add-search`, `fix/header-alignment`, `chore/update-deps`)
+4. If the user doesn't specify a branch name, propose one based on the task and confirm before creating
+5. **Commit often** — make small, atomic commits as you complete each logical unit of work
+6. **Only commit verified work** — confirm changes work as expected (builds pass, tests pass, no regressions) before committing. Never commit just to save progress or "checkpoint"
+7. **Never** force push to `main` or `master`
+8. **Never** merge into `main` or `master` without explicit user instruction
+
+---
+
 ## Repositories & Tech Stack
 
 | Repo | Purpose | Tech |
@@ -92,6 +107,7 @@
 - Skip fluff, get to actionable info
 - Use existing codebase patterns
 - Functional components with hooks
+- When referencing files, be explicit about their location — never conflate files loaded as system context with files in the current working repository
 
 ---
 
