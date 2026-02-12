@@ -34,18 +34,11 @@ return {
       vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Diagnostic float' })
       vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Diagnostics list' })
 
-      vim.opt.completeopt = { 'menuone', 'noselect', 'popup' }
-
       vim.api.nvim_create_autocmd('LspAttach', {
         group = vim.api.nvim_create_augroup('UserLspConfig', {}),
         callback = function(args)
-          local client = vim.lsp.get_client_by_id(args.data.client_id)
           local buf = args.buf
           local opts = { buffer = buf }
-
-          if client:supports_method('textDocument/completion') then
-            vim.lsp.completion.enable(true, client.id, buf, { autotrigger = true })
-          end
 
           vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
           vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, opts)

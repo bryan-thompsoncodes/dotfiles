@@ -1,5 +1,6 @@
 return {
   require("bryan.plugins.autopairs"),
+  require("bryan.plugins.blink"),
   require("bryan.plugins.bufferline"),
   require("bryan.plugins.colorscheme"),
   require("bryan.plugins.comment"),
