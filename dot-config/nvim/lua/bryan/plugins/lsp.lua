@@ -6,6 +6,14 @@ return {
       { 'j-hui/fidget.nvim', opts = {} },
     },
     config = function()
+      -- Register OpenAPI filetypes for vacuum LSP (not detected automatically)
+      vim.filetype.add({
+        pattern = {
+          ['openapi.*%.ya?ml'] = 'yaml.openapi',
+          ['openapi.*%.json'] = 'json.openapi',
+        },
+      })
+
       vim.lsp.config('*', {
         capabilities = vim.lsp.protocol.make_client_capabilities(),
         root_markers = { '.git' },
@@ -27,7 +35,17 @@ return {
         },
       })
 
-      vim.lsp.enable({ 'pyright', 'ts_ls', 'lua_ls', 'nixd', 'solargraph' })
+      vim.lsp.enable({
+        'pyright',
+        'ts_ls',
+        'lua_ls',
+        'nixd',
+        'solargraph',
+        'yamlls',
+        'tsp_server',
+        'vacuum',
+        'graphql',
+      })
 
       vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Previous diagnostic' })
       vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Next diagnostic' })

@@ -83,7 +83,8 @@
       "realpath *": "allow",
       "stat *": "allow",
       "brew search *": "allow",
-      "nix search *": "allow"
+      "nix search *": "allow",
+      "npm test*": "allow"
     },
     "edit": "ask"
   },
