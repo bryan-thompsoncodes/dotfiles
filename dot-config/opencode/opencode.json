@@ -81,7 +81,9 @@
       "gh api *": "allow",
       "jq *": "allow",
       "realpath *": "allow",
-      "stat *": "allow"
+      "stat *": "allow",
+      "brew search *": "allow",
+      "nix search *": "allow"
     },
     "edit": "ask"
   },
