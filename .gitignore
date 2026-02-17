@@ -1,4 +1,4 @@
-.DS_STORE
+.DS_Store
 configstore
 dot-gitconfig.github
 dot-gitconfig.snowboardtechie
@@ -18,3 +18,4 @@ dot-config/opencode/*
 dot-tmux/plugins/
 dot-config/alacritty/alacritty.toml
 dot-config/gh/
+dot-config/sol/

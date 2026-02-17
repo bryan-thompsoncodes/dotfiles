@@ -159,10 +159,6 @@ dotfiles/
 ├── dot-config/          # XDG config directory (~/.config/)
 │   ├── alacritty/       # Terminal emulator
 │   ├── direnv/          # Direnv configuration with nix-direnv
-│   ├── goose/           # Goose AI agent configuration
-│   │   ├── config.yaml      # Extension and model settings
-│   │   ├── permission.yaml  # Tool permissions
-│   │   └── goosehints       # Project-specific AI guidance
 │   ├── nvim/            # Neovim configuration (Lazy.nvim)
 │   ├── opencode/        # OpenCode AI assistant
 │   │   ├── AGENTS.md            # Global agent instructions
