@@ -3,5 +3,5 @@
 import = ["alacritty-base.toml"]
 
 [window]
-decorations = "Buttonless"  # Provides title bar for window management on GNOME
+decorations = "None"  # No title bar, clean look (use Super+drag to move)
 

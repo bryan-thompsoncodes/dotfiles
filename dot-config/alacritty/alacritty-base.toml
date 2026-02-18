@@ -11,6 +11,11 @@
 background = "#011627"  # NIGHTFLY_BG - Main background
 foreground = "#c3ccdc"  # NIGHTFLY_FG - Main foreground
 
+[[keyboard.bindings]]
+key = "N"
+mods = "Control|Shift"
+action = "SpawnNewInstance"
+
 [font.normal]
 family = "MesloLGS Nerd Font"
 style = "Regular"
