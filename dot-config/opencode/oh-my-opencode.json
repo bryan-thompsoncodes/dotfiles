@@ -41,15 +41,15 @@
       "temperature": 0.1
     },
     "scribe": {
-      "model": "anthropic/claude-sonnet-4-5",
+      "model": "anthropic/claude-sonnet-4-6",
       "temperature": 0.2
     },
     "pyre": {
-      "model": "anthropic/claude-sonnet-4-5",
+      "model": "anthropic/claude-sonnet-4-6",
       "temperature": 0.1
     },
     "sage": {
-      "model": "anthropic/claude-sonnet-4-5",
+      "model": "anthropic/claude-sonnet-4-6",
       "temperature": 0.2
     },
     "demiurge": {
@@ -77,7 +77,8 @@
   },
   "_migrations": [
     "model-version:anthropic/claude-opus-4-5->anthropic/claude-opus-4-6",
-    "model-version:anthropic/claude-opus-4-5->anthropic/claude-opus-4-6",
-    "model-version:anthropic/claude-opus-4-5->anthropic/claude-opus-4-6"
+    "model-version:anthropic/claude-sonnet-4-5->anthropic/claude-sonnet-4-6",
+    "model-version:anthropic/claude-sonnet-4-5->anthropic/claude-sonnet-4-6",
+    "model-version:anthropic/claude-sonnet-4-5->anthropic/claude-sonnet-4-6"
   ]
 }
