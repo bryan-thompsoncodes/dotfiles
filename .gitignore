@@ -18,4 +18,5 @@ dot-config/opencode/*
 dot-tmux/plugins/
 dot-config/alacritty/alacritty.toml
 dot-config/gh/
+dot-config/containers/
 dot-config/sol/
