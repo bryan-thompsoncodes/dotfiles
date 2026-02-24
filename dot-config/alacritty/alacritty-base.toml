@@ -7,6 +7,7 @@
 # - tmux: dot-tmux.conf (NIGHTFLY_* variables)
 # ==============================================================================
 
+
 [colors.primary]
 background = "#011627"  # NIGHTFLY_BG - Main background
 foreground = "#c3ccdc"  # NIGHTFLY_FG - Main foreground
@@ -14,7 +15,7 @@ foreground = "#c3ccdc"  # NIGHTFLY_FG - Main foreground
 [[keyboard.bindings]]
 key = "N"
 mods = "Control|Shift"
-action = "SpawnNewInstance"
+command = { program = "alacritty" }
 
 [font.normal]
 family = "MesloLGS Nerd Font"
@@ -25,4 +26,5 @@ TERM = "xterm-256color"
 
 [window]
 opacity = 0.95
+
 

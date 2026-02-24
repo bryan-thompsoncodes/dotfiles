@@ -1,6 +1,7 @@
 # Linux-specific Alacritty configuration
 [general]
 import = ["alacritty-base.toml"]
+working_directory = "/home/bryan"
 
 [window]
 decorations = "None"  # No title bar, clean look (use Super+drag to move)

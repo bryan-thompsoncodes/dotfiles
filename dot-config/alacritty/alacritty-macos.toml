@@ -1,6 +1,12 @@
 # macOS-specific Alacritty configuration
 [general]
 import = ["alacritty-base.toml"]
+working_directory = "/Users/bryan"
+
+[[keyboard.bindings]]
+key = "N"
+mods = "Command"
+command = { program = "/usr/bin/open", args = ["-na", "Alacritty"] }
 
 [window]
 decorations = "None"  # No traffic lights, clean look
