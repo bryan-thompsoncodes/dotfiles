@@ -33,13 +33,12 @@ Working directory is a code repo (has .git, package.json, etc.)?
 These paths are ONLY for when you're working directly in the vault, not from a project repo.
 
 ```
-BASE_PATH="/Users/bryan/Library/Mobile Documents/iCloud~md~obsidian/Documents"
+BASE_PATH="~/notes"
 ```
-
 | Vault | Path | Purpose |
 |-------|------|---------|
-| Agile6 | `${BASE_PATH}/💙 Agile6` | Work - VA.gov development |
-| Burnt Ice | `${BASE_PATH}/🧊 Burnt Ice` | Personal - Game development |
+| Workday | `${BASE_PATH}/workday` | Work - VA.gov development |
+| Burnt Ice | `${BASE_PATH}/burnt-ice` | Personal - Game development |
 
 ---
 
@@ -97,27 +96,20 @@ See [GDD](design/GDD.md)...           (markdown link)
 ## Error Handling
 
 ### Vault Inaccessible
-
-iCloud vaults may be unavailable due to sync issues or path problems.
+Vaults may be unavailable due to sync issues or path problems.
 
 **When vault is inaccessible:**
-
 1. Report the specific error to user
-2. Check for path escaping issues (spaces, emoji)
-3. Try alternate path format with escaping
-4. If still failing, output content to chat instead of file
-5. Suggest user check iCloud sync status
-
+2. Check for path issues (emoji in folder names)
+3. If still failing, output content to chat instead of file
+4. Suggest user check syncthing/sync status
 ### Path with Emoji/Spaces
 
 Always quote paths containing emoji or spaces:
-
 ```bash
 # Good
-cat "/Users/bryan/Library/Mobile Documents/iCloud~md~obsidian/Documents/💙 Agile6/note.md"
-
-# Bad - will fail
-cat /Users/bryan/Library/Mobile Documents/iCloud~md~obsidian/Documents/💙 Agile6/note.md
+cat ~/notes/workday/daily/06Mar2026.md
+cat "~/notes/workday/Agent 🤖/PR Reviews/note.md"
 ```
 
 ---

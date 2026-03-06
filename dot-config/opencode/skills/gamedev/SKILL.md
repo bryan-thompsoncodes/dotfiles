@@ -14,7 +14,7 @@ Workflows for Burnt Ice game development with Obsidian vault integration.
 ## Configuration
 
 ```
-VAULT_PATH="/Users/bryan/Library/Mobile Documents/iCloud~md~obsidian/Documents/🧊 Burnt Ice"
+VAULT_PATH="~/notes/burnt-ice"
 PROJECT_PATH="~/code/games/burnt-ice"
 ```
 

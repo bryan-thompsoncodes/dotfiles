@@ -518,10 +518,10 @@ Types:
 
 For daily notes and PR reviews, write directly to Obsidian paths:
 
-- Daily notes: `{obsidian_root}/Calendar 🗓️/{DDMonYYYY}.md`
+- Daily notes: `{obsidian_root}/daily/{DDMonYYYY}.md`
 - PR reviews: `{obsidian_root}/Agent 🤖/PR Reviews/{pr-slug}.md`
 
-Where `obsidian_root = /Users/bryan/Library/Mobile Documents/iCloud~md~obsidian/Documents/💙 Agile6`
+Where `obsidian_root = ~/notes/workday`
 
 ### Task Context
 

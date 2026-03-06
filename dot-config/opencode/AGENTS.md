@@ -13,18 +13,18 @@
 
 ## Obsidian Vault Integration
 
-**Vault Path:** `/Users/bryan/Library/Mobile Documents/iCloud~md~obsidian/Documents/💙 Agile6`
+**Vault Path:** `~/notes/workday`
 
 | Folder | Purpose |
 |--------|---------|
-| `Calendar 🗓️/` | Daily notes (format: `DDMonYYYY.md`) |
+| `daily/` | Daily notes (format: `DDMonYYYY.md`) |
 | `Projects/WIP/` | Active project documentation |
 | `Agent 🤖/Working/` | In-progress collaboration state |
 | `Agent 🤖/PR Reviews/` | Preliminary code reviews |
 
 **Daily Note Sections:**
 - **For Agent** — Tasks user wants help with
-- **Agent's Updates** — Agent logs completed work here
+- **Agent Updates** — Agent logs completed work here
 - **End of Day** — EOD summary section
 
 **Linking:** Use Obsidian wikilinks `[[Project Name|display text]]`

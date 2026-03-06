@@ -46,7 +46,7 @@ SPRINT_BOARD_NUMBER=1865
 
 ```
 ~/notes/workday/
-├── Calendar 🗓️/           ← Daily notes (DDMonYYYY.md)
+├── daily/                  ← Daily notes (DDMonYYYY.md)
 ├── Projects/WIP/          ← Active project docs
 ├── Agent 🤖/Working/     ← In-progress collaboration
 └── Agent 🤖/PR Reviews/  ← Preliminary code reviews
