@@ -23,8 +23,8 @@
 | `Agent 🤖/PR Reviews/` | Preliminary code reviews |
 
 **Daily Note Sections:**
-- **For Claude** — Tasks user wants help with
-- **Claude's Updates** — Agent logs completed work here
+- **For Agent** — Tasks user wants help with
+- **Agent's Updates** — Agent logs completed work here
 - **End of Day** — EOD summary section
 
 **Linking:** Use Obsidian wikilinks `[[Project Name|display text]]`

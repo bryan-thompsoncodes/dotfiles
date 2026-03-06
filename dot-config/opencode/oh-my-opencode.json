@@ -59,6 +59,14 @@
         "type": "enabled",
         "budgetTokens": 32000
       }
+    },
+    "forge": {
+      "model": "anthropic/claude-sonnet-4-6",
+      "temperature": 0.2
+    },
+    "kindle": {
+      "model": "anthropic/claude-sonnet-4-6",
+      "temperature": 0.4
     }
   },
   "categories": {
