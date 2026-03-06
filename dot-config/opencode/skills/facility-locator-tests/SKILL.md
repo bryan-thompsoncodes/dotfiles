@@ -7,6 +7,10 @@ description: Run all Cypress E2E and unit tests for facility-locator app - verif
 
 Run all tests for the facility-locator application in vets-website.
 
+## Default Behavior
+
+**When this skill is loaded with no specific prompt or an empty request, the default action is to run the full test suite (unit + E2E).** Follow the execution workflow below — check prerequisites, run unit tests, then run E2E tests, and report results.
+
 ## Critical Configuration
 
 ```
@@ -14,7 +18,7 @@ APP_FOLDER="facility-locator"
 ENTRY_NAME="facilities"  # NOT "facility-locator"!
 TEST_FILES_E2E=20
 TEST_FILES_UNIT=53
-UNIT_TEST_COUNT=420
+UNIT_TEST_COUNT=442
 ```
 
 **⚠️ CRITICAL:** The webpack entry name is `facilities`, NOT `facility-locator`. This is defined in `manifest.json` and cannot be changed easily (hardcoded in content-build repo).
@@ -62,10 +66,9 @@ yarn cy:run --spec "src/applications/facility-locator/tests/e2e/**/*.cypress.spe
 ```bash
 # Check if dev server is running (for E2E tests)
 lsof -i :3001 | grep LISTEN || echo "Port 3001 available"
-
-# Check vets-api is NOT running (APIs should be mocked)
-lsof -i :3000 | grep LISTEN && echo "⚠️ Stop vets-api - tests mock APIs" || echo "✅ vets-api not running"
 ```
+
+**Note:** vets-api can be running during E2E tests. Some vets-website functionality relies on the API, and Cypress `cy.intercept` calls take precedence over real network requests, so mocked endpoints are unaffected.
 
 ### Phase 2: Run Unit Tests First
 
@@ -77,8 +80,8 @@ yarn test:unit --app-folder facility-locator
 
 **Expected output:**
 
-- 420 passing tests
-- ~15 seconds runtime
+- 442 passing tests
+- ~8 seconds runtime
 - No errors
 
 **Verification:**
@@ -216,39 +219,55 @@ yarn watch --env entry=facilities
 
 ### Issue: "Cypress failed to verify that your server is running"
 
-**Cause:** Dev server not running on port 3001  
-**Solution:** Start dev server first
+**Cause:** Dev server not running on port 3001, OR test-server bound to IPv6 only  
+**Solution:** Start dev server first. If using test-server, add `--host=0.0.0.0` (macOS binds IPv6 by default, Cypress checks IPv4 `127.0.0.1`).
 
 ```bash
 # Check if running
 lsof -i :3001 | grep LISTEN
 
-# If not, start it
+# Option A: Dev server (has webpack overlay issues, see below)
 yarn watch --env entry=facilities
+
+# Option B: Production build (recommended for reliable E2E)
+yarn build --buildtype=localhost --entry=facilities
+node src/platform/testing/e2e/test-server.js --buildtype=localhost --port=3001 --host=0.0.0.0
+```
+
+---
+
+### Issue: Webpack dev server overlay blocks Cypress
+
+**Cause:** The overlay (`#webpack-dev-server-client-overlay`) activates on ANY uncaught JS error in dev mode. Empty-body tile mocks trigger Mapbox GL parse errors.  
+**Solution:** Use production builds for E2E instead of `yarn watch`:
+
+```bash
+yarn build --buildtype=localhost --entry=facilities
+node src/platform/testing/e2e/test-server.js --buildtype=localhost --port=3001 --host=0.0.0.0
+yarn cy:run --spec "src/applications/facility-locator/tests/e2e/**/*.cypress.spec.js"
+```
+
+---
+
+### Issue: `cy.intercept` image mock returns broken image (naturalWidth === 0)
+
+**Cause:** `cy.intercept` body accepts `string | object | ArrayBuffer`. `Uint8Array` is NOT `ArrayBuffer`.  
+**Solution:** Use `.buffer` to unwrap, and verify base64 PNG has complete IEND chunk:
+
+```js
+// Wrong
+body: Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+
+// Correct
+body: Uint8Array.from(atob(base64), c => c.charCodeAt(0)).buffer;
 ```
 
 ---
 
 ### Issue: Mapbox API errors in Cypress tests
 
-**Cause:** Should NOT happen - Mapbox is auto-mocked  
-**Solution:** Check global mock in `src/platform/testing/e2e/cypress/support/index.js`
-
-Mapbox API calls are automatically intercepted globally. Tests should never add their own Mapbox intercepts.
-
----
-
-### Issue: vets-api running during E2E tests
-
-**Cause:** Local API might interfere with mocked responses  
-**Solution:** Stop vets-api before running E2E tests
-
-```bash
-# Check if running
-lsof -i :3000 | grep LISTEN
-
-# Stop if running (Ctrl+C in terminal or pkill)
-```
+**Cause:** Non-data Mapbox endpoints (tiles, fonts, sprites, static images, telemetry) are globally mocked in `src/platform/testing/e2e/cypress/support/index.js`.  
+**Important:** Geocoding is **NOT** globally mocked. Each test that needs geocoding must provide its own `cy.intercept('GET', '/geocoding/**/*', mockData)` with city-specific data. A global geocoding mock returning a hardcoded city will break any test searching for a different city.
 
 ---
 
@@ -257,8 +276,8 @@ lsof -i :3000 | grep LISTEN
 ### Unit Tests Success
 
 ```
-420 passing (15.32s)
-Done in 15.32s.
+442 passing (2s)
+Done in 7.58s.
 ```
 
 ### E2E Tests Success
@@ -279,7 +298,7 @@ Done in 15.32s.
 
 ## Test File Inventory
 
-**Unit Tests:** 53 files, 420 tests
+**Unit Tests:** 53 files, 442 tests
 
 - Components: 38 files
 - Utils: 6 files
@@ -315,32 +334,37 @@ Also documented in project AGENTS.md:
 
 ## Verification Status
 
-✅ **Last verified:** 2026-02-09
+✅ **Last verified:** 2026-03-03
 
 **Unit tests:**
 
 - Command: `yarn test:unit --app-folder facility-locator`
-- Result: 420 passing (15.32s)
+- Result: 442 passing (2s)
 - Exit code: 0
 
 **E2E tests:**
 
-- Command syntax verified via Cypress
-- 20 test files confirmed in directory
-- Requires localhost:3001 (verified by Cypress connection check)
+- Command: `yarn cy:run --spec "src/applications/facility-locator/tests/e2e/**/*.cypress.spec.js"`
+- Result: 19/20 specs passed, 117/118 tests passing
+- 1 known flaky: `addressAutosuggest.cypress.spec.js` — "Search results in 5 results" (assertion timeout on `usa-input-error` class)
+- Duration: ~4 minutes
+- Requires localhost:3001
 
 ---
 
 ## Agent Usage Pattern
 
+**When loaded with no prompt or empty request → run full test suite automatically.**
+
 When this skill is loaded, agents should:
 
-1. **Check prerequisites** before running tests
-2. **Run unit tests first** (fast, no server needed)
-3. **Start dev server** if running E2E tests
-4. **Verify server is ready** before launching Cypress
-5. **Report test results** with pass/fail counts
-6. **Provide actionable feedback** if tests fail
+1. **If no specific prompt is given**: Run all tests (unit + E2E) as the default action
+2. **Check prerequisites** before running tests
+3. **Run unit tests first** (fast, no server needed)
+4. **Start dev server** if running E2E tests (check port 3001 first — may already be running)
+5. **Verify server is ready** before launching Cypress
+6. **Report test results** with pass/fail counts
+7. **Provide actionable feedback** if tests fail
 
 **Example delegation:**
 
