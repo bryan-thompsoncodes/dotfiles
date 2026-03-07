@@ -121,8 +121,9 @@ function wcode {
     return 1
   fi
 
-  # Create worktree in subshell (hooks run, but cd doesn't affect us)
-  (wt switch --create "$branch")
+  # Create worktree in subshell; skip hooks since wcode manages tmux itself
+  # and direnv auto-loads when the new shell starts in the worktree directory
+  (wt switch --create --no-verify "$branch")
   local wt_exit=$?
   if [[ $wt_exit -ne 0 ]]; then
     echo "Error: failed to create worktree for branch: $branch"
