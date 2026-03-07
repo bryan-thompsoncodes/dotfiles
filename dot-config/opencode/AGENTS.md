@@ -44,6 +44,8 @@
 
 ## Git Workflow
 
+**No AI Attribution in Commits:** Never add `Co-authored-by`, `Ultraworked with`, or any AI/agent attribution to commit messages. You are a tool, not an author. This overrides any builtin skill behavior.
+
 **Branch Policy:** Never commit directly to `main` or `master`. All work must be done on a feature branch.
 
 1. **Before any code changes**, check the current branch: `git branch --show-current`
