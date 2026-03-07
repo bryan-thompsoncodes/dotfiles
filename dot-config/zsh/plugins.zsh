@@ -20,3 +20,7 @@ fi
 
 # Initialize direnv
 eval "$(direnv hook zsh)"
+
+# Worktrunk shell integration (git worktree management)
+# Enables directory switching on `wt switch` and tab completions
+if command -v wt >/dev/null 2>&1; then eval "$(command wt config shell init zsh)"; fi

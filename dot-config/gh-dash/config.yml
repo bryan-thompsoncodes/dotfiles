@@ -1,0 +1,126 @@
+# ==============================================================================
+# GH-DASH CONFIGURATION
+# Nightfly-themed terminal dashboard for GitHub
+# ==============================================================================
+
+prSections:
+  - title: My Pull Requests
+    filters: is:open author:@me
+  - title: Needs My Review
+    filters: is:open review-requested:@me
+  - title: Involved
+    filters: is:open involves:@me -author:@me
+
+issuesSections:
+  - title: My Issues
+    filters: is:open author:@me
+  - title: Assigned
+    filters: is:open assignee:@me
+  - title: Involved
+    filters: is:open involves:@me -author:@me
+
+notificationsSections:
+  - title: All
+    filters: ""
+  - title: Created
+    filters: reason:author
+  - title: Participating
+    filters: reason:participating
+  - title: Mentioned
+    filters: reason:mention
+  - title: Review Requested
+    filters: reason:review-requested
+  - title: Assigned
+    filters: reason:assign
+  - title: Team Mentioned
+    filters: reason:team-mention
+
+repo:
+  branchesRefetchIntervalSeconds: 30
+  prsRefetchIntervalSeconds: 60
+
+defaults:
+  preview:
+    open: false
+    width: 70
+  prsLimit: 20
+  prApproveComment: LGTM
+  issuesLimit: 20
+  notificationsLimit: 20
+  view: prs
+  layout:
+    prs:
+      updatedAt:
+        width: 5
+      createdAt:
+        width: 5
+      repo:
+        width: 20
+      author:
+        width: 15
+      authorIcon:
+        hidden: false
+      assignees:
+        width: 20
+        hidden: true
+      base:
+        width: 15
+        hidden: true
+      lines:
+        width: 15
+    issues:
+      updatedAt:
+        width: 5
+      createdAt:
+        width: 5
+      repo:
+        width: 15
+      creator:
+        width: 10
+      creatorIcon:
+        hidden: false
+      assignees:
+        width: 20
+        hidden: true
+  refetchIntervalMinutes: 30
+
+keybindings:
+  universal:
+    - key: g
+      name: lazygit
+      command: >
+        cd {{.RepoPath}}; lazygit
+
+# ==============================================================================
+# NIGHTFLY THEME
+# Colors match the centralized Nightfly palette used across:
+# - nvim: dot-config/nvim/lua/bryan/core/colors.lua
+# - tmux: dot-tmux.conf (NIGHTFLY_* variables)
+# - alacritty: dot-config/alacritty/alacritty-base.toml
+# ==============================================================================
+theme:
+  colors:
+    text:
+      primary: "#c3ccdc"
+      secondary: "#65D1FF"
+      inverted: "#011627"
+      faint: "#2c3043"
+      warning: "#FF4A4A"
+      success: "#3EFFDC"
+    background:
+      selected: "#112638"
+    border:
+      primary: "#65D1FF"
+      secondary: "#3EFFDC"
+      faint: "#2c3043"
+  ui:
+    sectionsShowCount: true
+    table:
+      showSeparator: true
+      compact: true
+
+pager:
+  diff: "delta"
+confirmQuit: false
+showAuthorIcons: true
+smartFilteringAtLaunch: true

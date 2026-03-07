@@ -53,6 +53,12 @@ alias upgrade-gnarbox="nix-flake-update && update-gnarbox"
 alias dotfiles="cd ~/code/dotfiles"
 alias nix-configs="cd ~/code/nix-configs"
 
+# Worktrunk aliases (git worktree management)
+alias wls="wt list"
+alias wsw="wt switch"
+alias wrm="wt remove"
+alias wmg="wt merge"
+
 # Use macOS system SSH for UseKeyChain support (macOS only)
 if [[ "$OSTYPE" == "darwin"* ]]; then
   alias ssh='/usr/bin/ssh'

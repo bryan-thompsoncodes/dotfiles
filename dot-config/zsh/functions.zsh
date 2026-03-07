@@ -96,6 +96,66 @@ function grb {
   fi
 }
 
+# Worktrunk: create worktree and add agent tmux window to current session
+# Usage: wcode <branch-name> [prompt for opencode]
+# Creates a worktree via wt switch -c, then adds a new tmux window
+# to the current session running opencode in that worktree directory.
+function wcode {
+  local branch="$1"
+  if [[ -z "$branch" ]]; then
+    echo "Usage: wcode <branch-name> [prompt]"
+    return 1
+  fi
+  shift
+  local prompt="$*"
+
+  # Must be inside a git repo
+  if ! git rev-parse --show-toplevel >/dev/null 2>&1; then
+    echo "Error: not in a git repository"
+    return 1
+  fi
+
+  # Must be inside tmux
+  if [[ -z "$TMUX" ]]; then
+    echo "Error: wcode requires an active tmux session"
+    return 1
+  fi
+
+  # Create worktree in subshell (hooks run, but cd doesn't affect us)
+  (wt switch --create "$branch")
+  local wt_exit=$?
+  if [[ $wt_exit -ne 0 ]]; then
+    echo "Error: failed to create worktree for branch: $branch"
+    return 1
+  fi
+
+  # Get the worktree path from wt list
+  local worktree_path
+  worktree_path=$(wt list --format=json | jq -r ".[] | select(.branch == \"$branch\") | .path")
+
+  if [[ -z "$worktree_path" || "$worktree_path" == "null" ]]; then
+    echo "Error: could not find worktree path for branch: $branch"
+    return 1
+  fi
+
+  # Add a new tmux window to the current session at the worktree path
+  local sanitized_branch="${branch//\//-}"
+  tmux new-window -n "$sanitized_branch" -c "$worktree_path"
+
+  # Launch opencode in the new window
+  if [[ -n "$prompt" ]]; then
+    tmux send-keys -t ":$sanitized_branch" "opencode" C-m
+    # Brief pause to let opencode initialize, then send the prompt
+    sleep 2
+    tmux send-keys -t ":$sanitized_branch" "$prompt" C-m
+  else
+    tmux send-keys -t ":$sanitized_branch" "opencode" C-m
+  fi
+
+  echo "Worktree '$branch' created at $worktree_path"
+  echo "Tmux window '$sanitized_branch' added with opencode"
+}
+
 # Code function: opens editor in specified project directory or current directory
 function code {
   local target_dir
