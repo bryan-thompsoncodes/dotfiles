@@ -169,6 +169,8 @@ When operating inside a worktree:
 
 ## Wrapping Up
 
+**Trigger phrases:** "wrap up", "open a PR", "ship it", "I'm done", "create a pull request"
+
 When work is complete and committed, follow this flow to open a PR and clean up.
 
 ### Step 1: Detect Forge
