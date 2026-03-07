@@ -19,7 +19,7 @@ summary = true     # LLM branch summaries in wt list --full
 direnv = "[ -f .envrc ] && direnv allow"
 
 [post-switch]
-tmux = "[ -n \"$TMUX\" ] && tmux rename-window {{ branch | sanitize }}"
+tmux = "[ -n \"$WT_SKIP_TMUX_RENAME\" ] && exit 0; [ -n \"$TMUX\" ] && tmux rename-window {{ branch | sanitize }}"
 
 # vets-website project overrides (hooks append to global hooks)
 [projects."github.com/department-of-veterans-affairs/vets-website"]
