@@ -44,7 +44,7 @@ yarn test:unit --app-folder facility-locator
 
 ```bash
 yarn test:unit --app-folder facility-locator
-# Result: 420 passing tests in ~15s
+# Result: 442 passing tests in ~15s
 ```
 
 **Run E2E tests only (requires dev server):**
