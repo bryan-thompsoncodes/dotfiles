@@ -57,8 +57,8 @@ HEADERS=$(curl -s \
     "https://api.anthropic.com/v1/messages" 2>/dev/null)
 
 # ── Parse headers ─────────────────────────────────────────────────────────────
-UTILIZATION=$(printf '%s' "$HEADERS" | grep -i 'anthropic-ratelimit-unified-5h-utilization' | grep -oE '[0-9]+\.?[0-9]*' | head -1)
-RESET_EPOCH=$(printf '%s' "$HEADERS" | grep -i 'anthropic-ratelimit-unified-5h-reset' | grep -oE '[0-9]+' | head -1)
+UTILIZATION=$(printf '%s' "$HEADERS" | grep -i 'anthropic-ratelimit-unified-5h-utilization' | sed 's/.*: *//' | grep -oE '[0-9]+\.?[0-9]*' | head -1)
+RESET_EPOCH=$(printf '%s' "$HEADERS" | grep -i 'anthropic-ratelimit-unified-5h-reset' | sed 's/.*: *//' | grep -oE '[0-9]+' | head -1)
 
 # If headers missing (API error, non-OAuth response), serve stale cache or exit
 if [[ -z "$UTILIZATION" || -z "$RESET_EPOCH" ]]; then
