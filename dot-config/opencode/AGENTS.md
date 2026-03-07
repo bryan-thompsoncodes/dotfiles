@@ -75,6 +75,8 @@
 
 **Commit messages:** Worktrunk can generate LLM commit messages via the `commit-msg` agent. Use `wt step commit` to trigger this flow.
 
+**Wrapping up:** When work is complete, push the branch and open a pull request. Load the `worktrunk` skill for the full wrap-up flow: forge detection, PR creation (GitHub via `gh`, Forgejo via `tea`), description filling via `update-pr-description`, and post-merge `wt remove` cleanup.
+
 ---
 
 ## Repositories & Tech Stack

@@ -54,7 +54,7 @@ The pattern is `{repo}.{branch}` as a sibling directory. All worktrees share the
 | Full list with summaries | `wt list --full` | Includes LLM-generated branch summaries |
 | Remove worktree | `wt remove` | Removes current worktree and its branch |
 | Remove specific | `wt remove <branch>` | Removes named worktree |
-| Merge to target | `wt merge <target>` | Squash, rebase, merge, clean up |
+| Merge to target | `wt merge <target>` | Local repos only — for remotes, see "Wrapping Up" |
 | Commit with LLM msg | `wt step commit` | Uses configured LLM for commit message |
 | Copy build caches | `wt step copy-ignored` | Copies node_modules, target/, etc. from trunk |
 
@@ -144,7 +144,7 @@ Trigger with `wt step commit` or `wt merge` (which commits automatically).
 - Use `wt switch` instead of `git checkout` or `git switch`
 - Use `wt list` to see what other worktrees/branches exist
 - Use `wt step commit` for committing (gets LLM-generated message)
-- Use `wt merge <target>` for the full squash-rebase-merge-cleanup flow
+- Use `wt merge <target>` for local-only repos without a remote — for repos with a remote, push and open a PR instead (see "Wrapping Up")
 - Check `wt list` before creating a new worktree to avoid duplicates
 - Remember that `git stash` and `git log` are shared across all worktrees
 
@@ -164,6 +164,83 @@ When operating inside a worktree:
 2. **Other agents may be working in sibling worktrees** — don't modify shared resources (main branch, tags)
 3. **Build caches may be shared** — `node_modules/`, `target/`, `.next/` may have been copied from trunk
 4. **The trunk worktree has the main branch** — it lives at the unsuffixed directory path
+
+---
+
+## Wrapping Up
+
+**Trigger phrases:** "wrap up", "open a PR", "ship it", "I'm done", "create a pull request"
+
+When work is complete and committed, follow this flow to open a PR and clean up.
+
+### Step 1: Detect Forge
+
+```bash
+remote_url=$(git remote get-url origin 2>/dev/null)
+if [[ "$remote_url" == *"github.com"* ]]; then
+  forge="github"   # use gh CLI
+elif [[ "$remote_url" == *"forgejo"* || "$remote_url" == *"gitea"* || "$remote_url" == *"snowboardtechie"* ]]; then
+  forge="forgejo"  # use tea CLI
+else
+  forge="none"     # no remote or unknown — fall back to wt merge
+fi
+```
+
+### Step 2: Pre-flight Checks
+
+Before offering to open a PR:
+
+- Not on trunk: `git branch --show-current` must not be `main` or `master`
+- Remote exists: `git remote -v` returns output
+- Forge CLI authenticated: `gh auth status` (GitHub) or `tea login list` (Forgejo) — if not, bail early with setup instructions
+- No existing PR: `gh pr list --head <branch>` (GitHub) or `tea pr list --state open | grep <branch>` (Forgejo) returns empty
+
+### Step 3: Ask User
+
+Ask conversationally: "Should I open a PR for this work?" — do not use a shell prompt.
+Also ask: draft or ready-for-review?
+
+### Step 4: Push Branch
+
+```bash
+git push -u origin <branch>
+```
+
+Note: `git push` triggers an opencode permission prompt (not in allow-list by design).
+
+### Step 5: Create PR
+
+| Forge | Ready | Draft |
+|-------|-------|-------|
+| GitHub | `gh pr create --fill` | `gh pr create --fill --draft` |
+| Forgejo | `tea pr create --head <branch> --base main` | `tea pr create --head <branch> --base main --draft` |
+
+### Step 6: Fill PR Description
+
+Invoke `/update-pr-description` (or load the `update-pr-description` skill) to fill the PR template from the diff. It auto-detects the PR from the current branch.
+
+### Step 7: Report
+
+Show the PR URL to the user.
+
+### Step 8: Post-Merge Cleanup
+
+After the PR is merged (may be a separate session), clean up:
+
+```bash
+wt remove  # removes current worktree and branch
+```
+
+---
+
+### Edge Cases
+
+| Situation | Action |
+|-----------|--------|
+| No remote | Fall back to `wt merge` |
+| Not authenticated | Bail: "Run `gh auth login` or `tea login`" |
+| PR already exists | Show URL via `gh pr view --web` or `tea pr view`, skip creation |
+| On trunk branch | Warn user, do not create PR |
 
 ---
 
