@@ -190,7 +190,7 @@ Before offering to open a PR:
 
 - Not on trunk: `git branch --show-current` must not be `main` or `master`
 - Remote exists: `git remote -v` returns output
-- No existing PR: `gh pr list --head <branch>` (GitHub) or `tea pr list` (Forgejo) returns empty
+- No existing PR: `gh pr list --head <branch>` (GitHub) or `tea pr list --state open | grep <branch>` (Forgejo) returns empty
 
 ### Step 3: Ask User
 
@@ -207,14 +207,14 @@ Note: `git push` triggers an opencode permission prompt (not in allow-list by de
 
 ### Step 5: Create PR
 
-| Forge | Command |
-|-------|---------|
-| GitHub | `gh pr create --fill` |
-| Forgejo | `tea pr create --head <branch> --base main` |
+| Forge | Ready | Draft |
+|-------|-------|-------|
+| GitHub | `gh pr create --fill` | `gh pr create --fill --draft` |
+| Forgejo | `tea pr create --head <branch> --base main` | `tea pr create --head <branch> --base main --draft` |
 
 ### Step 6: Fill PR Description
 
-Load the `update-pr-description` skill and run it to fill the PR template from the diff.
+Invoke `/update-pr-description` (or load the `update-pr-description` skill) to fill the PR template from the diff. It auto-detects the PR from the current branch.
 
 ### Step 7: Report
 
@@ -236,7 +236,7 @@ wt remove  # removes current worktree and branch
 |-----------|--------|
 | No remote | Fall back to `wt merge` |
 | Not authenticated | Bail: "Run `gh auth login` or `tea login`" |
-| PR already exists | Show existing PR URL, skip creation |
+| PR already exists | Show URL via `gh pr view --web` or `tea pr view`, skip creation |
 | On trunk branch | Warn user, do not create PR |
 
 ---
