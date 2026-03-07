@@ -190,6 +190,7 @@ Before offering to open a PR:
 
 - Not on trunk: `git branch --show-current` must not be `main` or `master`
 - Remote exists: `git remote -v` returns output
+- Forge CLI authenticated: `gh auth status` (GitHub) or `tea login list` (Forgejo) — if not, bail early with setup instructions
 - No existing PR: `gh pr list --head <branch>` (GitHub) or `tea pr list --state open | grep <branch>` (Forgejo) returns empty
 
 ### Step 3: Ask User
