@@ -59,6 +59,24 @@
 
 ---
 
+## Worktrunk / Git Worktrees
+
+**You may be operating inside a git worktree** managed by worktrunk (`wt`).
+
+**How to tell:** If `.git` is a file (not a directory), you're in a worktree. The file contains a `gitdir:` pointer to the main repo's `.git/worktrees/` directory.
+
+**Key rules:**
+- **Never** use `git checkout` or `git switch` to change branches — use `wt switch` instead
+- **Never** delete or modify the `.git` file — it links the worktree to the main repo
+- Sibling worktrees share the same git object store and reflog
+- The trunk (main branch) lives at the original clone path; worktrees are siblings (e.g., `repo.feat-auth`)
+
+**Available commands:** `wt switch`, `wt list`, `wt merge`, `wt remove`, `wt step commit`
+
+**Commit messages:** Worktrunk can generate LLM commit messages via the `commit-msg` agent. Use `wt step commit` to trigger this flow.
+
+---
+
 ## Repositories & Tech Stack
 
 | Repo | Purpose | Tech |
