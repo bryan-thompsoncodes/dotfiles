@@ -17,6 +17,7 @@ dot-config/opencode/*
 !dot-config/opencode/skills/
 dot-tmux/plugins/
 dot-config/alacritty/alacritty.toml
+dot-config/fj-dash/
 dot-config/gh/
 dot-config/containers/
 dot-config/sol/

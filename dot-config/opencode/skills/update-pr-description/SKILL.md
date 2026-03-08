@@ -1,12 +1,12 @@
 ---
 name: update-pr-description
-description: Update GitHub PR description following template instructions and including diff summary
+description: Update PR description following template instructions and including diff summary
 argument-hint: <pr-number-or-url>
 ---
 
 # Update PR Description
 
-Update a GitHub pull request description by following whatever template instructions exist in the PR body and including a summary of changes from the diff.
+Update a pull request description by following whatever template instructions exist in the PR body and including a summary of changes from the diff. Supports both GitHub and Forgejo forges.
 
 ---
 
@@ -16,7 +16,43 @@ Accepts either:
 
 - PR number: `update-pr-description 42170`
 - PR URL: `update-pr-description https://github.com/org/repo/pull/42170`
+- PR URL (Forgejo): `update-pr-description https://git.example.com/owner/repo/pulls/1`
 - Nothing (will detect PR from current branch)
+
+---
+
+## Step 0: Detect Forge
+
+Determine which forge hosts this repo:
+
+```bash
+remote_url=$(git remote get-url origin 2>/dev/null)
+if [[ "$remote_url" == *"github.com"* ]]; then
+  forge="github"
+elif [[ "$remote_url" == *"forgejo"* || "$remote_url" == *"gitea"* || "$remote_url" == *"snowboardtechie"* ]]; then
+  forge="forgejo"
+else
+  forge="unknown"
+fi
+```
+
+### Forgejo: Parse Remote URL
+
+Extract the instance URL, owner, and repo from the remote:
+
+```bash
+# From HTTPS: https://git.snowboardtechie.com/bryan/fj-dash.git
+# From SSH:   git@git.snowboardtechie.com:bryan/fj-dash.git
+instance="https://git.snowboardtechie.com"  # scheme + host from remote
+owner="bryan"
+repo="fj-dash"   # strip .git suffix
+```
+
+Or from a Forgejo PR URL like `https://git.example.com/owner/repo/pulls/1`:
+- instance = `https://git.example.com`
+- owner = path segment 1
+- repo = path segment 2
+- PR index = path segment 4
 
 ---
 
@@ -28,25 +64,45 @@ Parse the input to extract the PR number and repo (if URL provided).
 
 ### If no argument provided:
 
-```bash
-# Get current branch
-BRANCH=$(git branch --show-current)
+**GitHub:**
 
-# Find PR for this branch
+```bash
+BRANCH=$(git branch --show-current)
 gh pr list --head "$BRANCH" --json number,title,url,body --limit 1
+```
+
+**Forgejo:**
+
+```bash
+BRANCH=$(git branch --show-current)
+tea api "/repos/${owner}/${repo}/pulls?state=open" \
+  | jq -c --arg branch "$BRANCH" '.[] | select(.head.ref == $branch) | {number: .number, title: .title, url: .html_url, body: .body}' \
+  | head -1
 ```
 
 ---
 
 ## Step 2: Fetch PR Details and Diff
 
+**GitHub:**
+
 ```bash
-# Get PR metadata including current description
 gh pr view {number} \
   --repo {org}/{repo} \
   --json number,title,url,body,baseRefName
 
-# Get the diff
+git diff {baseRefName}...HEAD --stat
+git diff {baseRefName}...HEAD
+```
+
+**Forgejo:**
+
+```bash
+# Get PR metadata including current description
+tea api "/repos/${owner}/${repo}/pulls/{index}" \
+  | jq '{number: .number, title: .title, url: .html_url, body: .body, baseRefName: .base.ref}'
+
+# Get the diff (same git commands for both forges)
 git diff {baseRefName}...HEAD --stat
 git diff {baseRefName}...HEAD
 ```
@@ -80,11 +136,35 @@ Using the diff to understand what changed:
 
 ## Step 5: Update the PR
 
+**GitHub:**
+
 ```bash
 gh pr edit {number} --body "$(cat <<'EOF'
 {generated description}
 EOF
 )"
+```
+
+**Forgejo:**
+
+```bash
+# Build JSON payload with the description
+body_json=$(jq -n --arg body "{generated description}" '{body: $body}')
+
+tea api --method PATCH "/repos/${owner}/${repo}/pulls/{index}" \
+  --body "$body_json"
+```
+
+If `tea api` is unavailable, fall back to `curl`:
+
+```bash
+# Get token from tea config
+TOKEN=$(grep -A5 "snowboardtechie" ~/.config/tea/config.yml | grep "token:" | awk '{print $2}')
+
+curl -X PATCH "${instance}/api/v1/repos/${owner}/${repo}/pulls/{index}" \
+  -H "Authorization: token $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d "$body_json"
 ```
 
 ---
@@ -94,7 +174,7 @@ EOF
 Report:
 
 ```
-✅ Updated PR #{number}: {title}
+Updated PR #{number}: {title}
    {url}
 ```
 
@@ -105,13 +185,27 @@ Report:
 ### PR not found
 
 ```
-❌ Could not find PR #{number}
+Could not find PR #{number}
    Verify the PR exists and you have access.
 ```
 
 ### Cannot determine current PR
 
 ```
-❌ No PR found for current branch: {branch}
+No PR found for current branch: {branch}
    Please provide a PR number: update-pr-description <number>
+```
+
+### Forge not detected
+
+```
+Could not detect forge from remote URL: {remote_url}
+   Supported forges: GitHub (github.com), Forgejo/Gitea (forgejo/gitea/snowboardtechie in URL)
+```
+
+### tea not authenticated (Forgejo)
+
+```
+tea CLI not authenticated. Run: tea login add
+   Or set FORGEJO_TOKEN environment variable.
 ```

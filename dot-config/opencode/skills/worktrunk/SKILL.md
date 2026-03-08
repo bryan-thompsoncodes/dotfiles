@@ -219,6 +219,8 @@ Note: `git push` triggers an opencode permission prompt (not in allow-list by de
 
 Invoke `/update-pr-description` (or load the `update-pr-description` skill) to fill the PR template from the diff. It auto-detects the PR from the current branch.
 
+The skill is **forge-aware** — it detects GitHub vs Forgejo from the remote URL and uses the appropriate API (`gh` for GitHub, `tea api` / Forgejo REST API for Forgejo).
+
 ### Step 7: Report
 
 Show the PR URL to the user.
