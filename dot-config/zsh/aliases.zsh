@@ -16,6 +16,7 @@ alias vi="nvim"
 alias clr="clear"
 alias fman="compgen -c | fzf | xargs man"
 alias va-tmux="~/.tmux/va-server-stack.sh"
+alias 2nd-brain="~/.tmux/second-brain.sh"
 
 # Git aliases
 alias ga="git add"
