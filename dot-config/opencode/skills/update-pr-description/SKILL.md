@@ -158,8 +158,23 @@ tea api --method PATCH "/repos/${owner}/${repo}/pulls/{index}" \
 If `tea api` is unavailable, fall back to `curl`:
 
 ```bash
-# Get token from tea config
-TOKEN=$(grep -A5 "snowboardtechie" ~/.config/tea/config.yml | grep "token:" | awk '{print $2}')
+# Get token from tea config — check platform-specific paths
+TEA_CONFIG=""
+for candidate in \
+  "${XDG_CONFIG_HOME:-$HOME/.config}/tea/config.yml" \
+  "$HOME/Library/Application Support/tea/config.yml" \
+  "$HOME/.tea/tea.yml"; do
+  [ -f "$candidate" ] && TEA_CONFIG="$candidate" && break
+done
+
+TOKEN=$(python3 -c "
+import yaml, sys
+with open('$TEA_CONFIG') as f:
+    c = yaml.safe_load(f)
+for l in c.get('logins', []):
+    if '${instance}' in l.get('url', ''):
+        print(l['token']); sys.exit()
+")
 
 curl -X PATCH "${instance}/api/v1/repos/${owner}/${repo}/pulls/{index}" \
   -H "Authorization: token $TOKEN" \

@@ -48,21 +48,80 @@ If any check fails, report what's wrong and stop.
 
 Ask: "Should I open a PR for this work? Draft or ready-for-review?"
 
-### 4. Push + Create PR
+### 4. Push
 
 ```bash
 git push -u origin <branch>
 ```
 
-| Forge | Ready | Draft |
-|-------|-------|-------|
-| GitHub | `gh pr create --fill` | `gh pr create --fill --draft` |
-| Forgejo | `tea pr create --head <branch> --base main` | `tea pr create --head <branch> --base main --draft` |
+### 5. Create PR
 
-### 5. Fill Description
+#### GitHub
 
-Invoke `/update-pr-description` to fill the PR template from the diff.
+| Ready | Draft |
+|-------|-------|
+| `gh pr create --fill` | `gh pr create --fill --draft` |
 
-### 6. Report
+#### Forgejo
+
+**`tea pr create` DOES NOT WORK in non-interactive environments.** It requires
+TTY confirmation and will fail with: `could not open a new TTY: open /dev/tty: device not configured`
+
+Use the Forgejo API directly instead:
+
+```bash
+# 1. Extract token from tea config
+TEA_CONFIG=""
+for candidate in \
+  "${XDG_CONFIG_HOME:-$HOME/.config}/tea/config.yml" \
+  "$HOME/Library/Application Support/tea/config.yml" \
+  "$HOME/.tea/tea.yml"; do
+  [ -f "$candidate" ] && TEA_CONFIG="$candidate" && break
+done
+
+# 2. Parse token (requires PyYAML or grep)
+TOKEN=$(grep 'token:' "$TEA_CONFIG" | head -1 | awk '{print $2}')
+
+# 3. Parse owner/repo from remote
+remote_url=$(git remote get-url origin)
+# SSH: ssh://forgejo@git.example.com/owner/repo.git → owner/repo
+# HTTPS: https://git.example.com/owner/repo.git → owner/repo
+owner_repo=$(echo "$remote_url" | sed -E 's|.*[:/]([^/]+/[^/]+?)(\.git)?$|\1|')
+instance=$(echo "$remote_url" | sed -E 's|.*(@\|//)([^:/]+).*|https://\2|')
+
+# 4. Create PR via API
+curl -s -X POST "${instance}/api/v1/repos/${owner_repo}/pulls" \
+  -H "Authorization: token $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d "{\"title\":\"<PR title>\",\"head\":\"<branch>\",\"base\":\"main\",\"body\":\"<description>\"}"
+```
+
+Extract the PR number and URL from the JSON response:
+```bash
+| python3 -c "import sys,json; d=json.load(sys.stdin); print(f'PR #{d[\"number\"]}: {d[\"html_url\"]}')"
+```
+
+### 6. Fill Description
+
+Write a comprehensive PR description covering:
+- Summary of changes (what and why)
+- Key features/files added or modified
+- Testing (test counts, what was verified)
+- Commit list
+
+Then update via the API:
+```bash
+# GitHub
+gh pr edit {number} --body "$BODY"
+
+# Forgejo (tea has no `pr edit` — use API)
+body_json=$(python3 -c "import json,sys; print(json.dumps({'body': sys.stdin.read()}))" <<< "$BODY")
+curl -s -X PATCH "${instance}/api/v1/repos/${owner_repo}/pulls/{number}" \
+  -H "Authorization: token $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d "$body_json"
+```
+
+### 7. Report
 
 Show the PR URL to the user.
