@@ -313,6 +313,67 @@ Or keep in git if you want working state versioned.
 
 ---
 
+## Worktree-Aware Resolution (CRITICAL)
+
+**You may be operating inside a git worktree.** Worktrees share the same git object store but have separate working directories. The `.notes` symlink lives in the **trunk** (main worktree), not in each worktree.
+
+### Why This Matters
+
+`git rev-parse --show-toplevel` returns the **worktree** path, not the trunk path. Without worktree detection, agents would:
+- Create separate `.notes` per worktree (e.g., `~/notes/vets-website.feat-auth/`)
+- Lose access to shared project notes
+- Fragment the notes system
+
+### Detection
+
+```bash
+# Check if we're in a worktree (not the trunk)
+if [ -f "$(git rev-parse --show-toplevel)/.git" ]; then
+  IS_WORKTREE=true
+else
+  IS_WORKTREE=false
+fi
+```
+
+**How it works:** In a worktree, `.git` is a **file** (contains `gitdir:` pointer). In the trunk, `.git` is a **directory**.
+
+### Resolving the Trunk Root
+
+```bash
+# Get the trunk (main worktree) root - ALWAYS use this instead of git rev-parse --show-toplevel
+resolve_trunk_root() {
+  local toplevel
+  toplevel=$(git rev-parse --show-toplevel)
+
+  if [ -f "${toplevel}/.git" ]; then
+    # We're in a worktree - resolve trunk from git common dir
+    # git rev-parse --git-common-dir returns the shared .git/ directory in the trunk
+    local common_dir
+    common_dir=$(git rev-parse --git-common-dir)
+    # common_dir is like /path/to/trunk/.git — parent is the trunk root
+    dirname "$common_dir"
+  else
+    # We're in the trunk
+    echo "$toplevel"
+  fi
+}
+
+TRUNK_ROOT=$(resolve_trunk_root)
+PROJECT_NAME=$(basename "$TRUNK_ROOT")
+```
+
+### Rules
+
+| Scenario | `git rev-parse --show-toplevel` | `resolve_trunk_root` | `.notes` location |
+|----------|-------------------------------|---------------------|-------------------|
+| In trunk `vets-website/` | `~/code/va/vets-website` | `~/code/va/vets-website` | `~/code/va/vets-website/.notes` |
+| In worktree `vets-website.feat-auth/` | `~/code/va/vets-website.feat-auth` | `~/code/va/vets-website` | `~/code/va/vets-website/.notes` |
+| In worktree `vets-website.fix-header/` | `~/code/va/vets-website.fix-header` | `~/code/va/vets-website` | `~/code/va/vets-website/.notes` |
+
+**Key principle:** `.notes` is ONLY created in the trunk. All worktrees access the trunk's `.notes` by resolving `TRUNK_ROOT`.
+
+---
+
 ## Project-Local Notes Pattern
 
 For **task-oriented agents** (workday, gamedev) that operate within specific repositories, use a project-local `.notes/` directory that symlinks to a centralized location.
@@ -321,24 +382,31 @@ For **task-oriented agents** (workday, gamedev) that operate within specific rep
 
 | Goal | Solution |
 |------|----------|
-| Notes stay with project context | `.notes/` in project root |
+| Notes stay with project context | `.notes/` in project root (trunk only) |
 | Notes don't pollute git | `.notes` in `.gitignore` |
 | Notes discoverable by Archivist | Symlink to `~/notes/{context}/` |
 | Multiple projects stay organized | Subfolders by project name |
+| Worktrees share notes | `.notes` lives in trunk, worktrees resolve to it |
 
 ### Directory Structure
 
 ```
-# Project repository
+# Trunk repository
 ~/code/va/vets-website/
-├── .notes -> ~/notes/workday/vets-website/  # Symlink
+├── .notes -> ~/notes/workday/vets-website/  # Symlink (lives here ONLY)
 ├── .gitignore                                # Contains ".notes"
 └── ...
+
+# Worktree (sibling) - NO .notes here
+~/code/va/vets-website.feat-auth/
+├── .git                                      # File (not directory) - worktree marker
+└── ...source files...
+# Agents resolve TRUNK_ROOT → use ~/code/va/vets-website/.notes
 
 # Centralized notes (searchable by Archivist)
 ~/notes/
 ├── workday/
-│   ├── vets-website/        # Project-specific workday notes
+│   ├── vets-website/        # Project-specific workday notes (shared across all worktrees)
 │   ├── vets-api/
 │   └── content-build/
 ├── gamedev/
@@ -350,30 +418,40 @@ For **task-oriented agents** (workday, gamedev) that operate within specific rep
 
 When launching in a new project, agents should:
 
-1. **Check for existing `.notes/` symlink**
+1. **Resolve the trunk root** (handles worktrees automatically)
    ```bash
-   ls -la .notes 2>/dev/null || echo "MISSING"
+   TRUNK_ROOT=$(resolve_trunk_root)
+   PROJECT_NAME=$(basename "$TRUNK_ROOT")
    ```
 
-2. **If missing, create symlink and target**
+2. **Check for existing `.notes/` symlink in the trunk**
+   ```bash
+   ls -la "${TRUNK_ROOT}/.notes" 2>/dev/null || echo "MISSING"
+   ```
+
+3. **If missing, create symlink and target in the trunk**
    ```bash
    # Determine context and project name
    CONTEXT="workday"  # or "gamedev"
-   PROJECT=$(basename "$PWD")
    
    # Create target directory
-   mkdir -p ~/notes/${CONTEXT}/${PROJECT}
+   mkdir -p ~/notes/${CONTEXT}/${PROJECT_NAME}
    
-   # Create symlink
-   ln -s ~/notes/${CONTEXT}/${PROJECT} .notes
+   # Create symlink IN THE TRUNK (not the worktree)
+   ln -s ~/notes/${CONTEXT}/${PROJECT_NAME} "${TRUNK_ROOT}/.notes"
    
-   # Add to .gitignore if not present
-   grep -q '^\.notes$' .gitignore 2>/dev/null || echo ".notes" >> .gitignore
+   # Add to .gitignore if not present (in trunk)
+   grep -q '^\.notes$' "${TRUNK_ROOT}/.gitignore" 2>/dev/null || echo ".notes" >> "${TRUNK_ROOT}/.gitignore"
    ```
 
-3. **Confirm setup**
+4. **Confirm setup**
    ```
-   Notes directory ready: .notes -> ~/notes/{context}/{project}/
+   Notes directory ready: {TRUNK_ROOT}/.notes -> ~/notes/{context}/{project}/
+   ```
+
+5. **Use the trunk's .notes for all reads/writes**
+   ```bash
+   NOTES_ROOT="${TRUNK_ROOT}/.notes"
    ```
 
 ### Agent Usage

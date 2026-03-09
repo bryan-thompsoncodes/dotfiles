@@ -37,6 +37,8 @@ When Muse delegates note-writing to you:
 
 **When you detect a git repo without a `.notes` symlink, set it up automatically.**
 
+**IMPORTANT: Worktree awareness.** You may be in a git worktree (`.git` is a file, not a directory). Always resolve the **trunk root** before checking for or creating `.notes`. The `.notes` symlink lives in the trunk only — worktrees access it via the resolved trunk path. See the `agent-workspace` skill for the full `resolve_trunk_root` helper.
+
 ```
 New git repo detected: {repo-name}. Created: .notes/ -> ~/notes/{repo-name}/
 ```
@@ -44,27 +46,35 @@ New git repo detected: {repo-name}. Created: .notes/ -> ~/notes/{repo-name}/
 **Decision tree:**
 
 ```
-Is .notes a symlink?
-├── YES → Use it (verify target if needed)
-└── NO
-    ├── Is .notes a regular directory?
-    │   └── YES → WARN user, do NOT proceed (manual fix required)
-    └── Does .notes not exist?
-        └── YES → AUTO-CREATE:
-            1. Get repo name: basename of `git rev-parse --show-toplevel`
-            2. Create vault (if needed): mkdir -p ~/notes/{repo-name}/
-            3. Create symlink: ln -s ~/notes/{repo-name}/ {git-root}/.notes
-            4. Log: "New git repo detected: {repo-name}. Created: .notes/ -> ~/notes/{repo-name}/"
-            5. Proceed with write
+1. Resolve trunk root (handles worktrees):
+   - If .git is a FILE → worktree: resolve trunk via git rev-parse --git-common-dir
+   - If .git is a DIRECTORY → trunk: use git rev-parse --show-toplevel
+   - TRUNK_ROOT = resolved path
+   - PROJECT_NAME = basename of TRUNK_ROOT
+
+2. Check TRUNK_ROOT/.notes:
+   Is .notes a symlink?
+   ├── YES → Use it (verify target if needed)
+   └── NO
+       ├── Is .notes a regular directory?
+       │   └── YES → WARN user, do NOT proceed (manual fix required)
+       └── Does .notes not exist?
+           └── YES → AUTO-CREATE:
+               1. Get project name: basename of TRUNK_ROOT
+               2. Create vault (if needed): mkdir -p ~/notes/{project-name}/
+               3. Create symlink: ln -s ~/notes/{project-name}/ {TRUNK_ROOT}/.notes
+               4. Log: "New git repo detected: {project-name}. Created: .notes/ -> ~/notes/{project-name}/"
+               5. Proceed with write
 ```
 
 **Edge cases:**
 
 | Situation | Behavior |
 |-----------|----------|
-| `~/notes/{repo}/` already exists | Create symlink only (preserves previous project notes) |
+| `~/notes/{project}/` already exists | Create symlink only (preserves previous project notes) |
 | `.notes` is regular directory | Warn: "Manual fix required" — do NOT overwrite |
-| Nested git subdirectory | Use `git rev-parse --show-toplevel` for accurate root |
+| Nested git subdirectory | Resolve trunk root for accurate project root |
+| In a worktree | Resolve to trunk — `.notes` lives there, not in worktree |
 
 ---
 
@@ -81,14 +91,25 @@ Scribe operates in two modes based on context:
 | **Project mode** | In a git repo | `.notes/` → `~/notes/{project-name}/` | Symlink pattern |
 | **Direct vault mode** | NOT in a git repo | `~/notes/second-brain/` | Write directly |
 
-### Step 0: Git Repo Detection (FIRST)
+### Step 0: Git Repo Detection + Worktree Resolution (FIRST)
 
-**Detect git repo before anything else:**
+**Detect git repo and resolve trunk root before anything else:**
 
 ```bash
 # Check if we're in a git repository (includes working directory or any parent)
 if git rev-parse --git-dir > /dev/null 2>&1; then
   IS_GIT_REPO=true
+
+  # Resolve trunk root (handles worktrees)
+  local toplevel
+  toplevel=$(git rev-parse --show-toplevel)
+  if [ -f "${toplevel}/.git" ]; then
+    # Worktree: .git is a file → resolve trunk via common dir
+    TRUNK_ROOT=$(dirname "$(git rev-parse --git-common-dir)")
+  else
+    # Trunk: .git is a directory
+    TRUNK_ROOT="$toplevel"
+  fi
 else
   IS_GIT_REPO=false
 fi
@@ -102,11 +123,12 @@ if [[ "$PWD" == "$HOME/notes"* ]]; then
   MODE="direct-vault"
   NOTES_ROOT="."
 elif [ "$IS_GIT_REPO" = true ]; then
-  # In a git repo - use project symlink pattern
+  # In a git repo (or worktree) - use project symlink pattern
+  # TRUNK_ROOT resolved in Step 0 — .notes lives in the trunk
   MODE="project"
-  project_name=$(basename "$(git rev-parse --show-toplevel)")
+  project_name=$(basename "$TRUNK_ROOT")
   VAULT="$project_name"
-  NOTES_ROOT=".notes"
+  NOTES_ROOT="${TRUNK_ROOT}/.notes"
 else
   # Not in git repo, not in ~/notes/ - use personal vault
   MODE="direct-vault"
@@ -118,8 +140,9 @@ fi
 
 | Working Directory | Mode | Notes Root |
 |-------------------|------|------------|
-| `~/code/vets-website/` | project | `.notes/` → `~/notes/vets-website/` |
-| `~/code/burnt-ice/` | project | `.notes/` → `~/notes/burnt-ice/` |
+| `~/code/vets-website/` | project | `~/code/vets-website/.notes/` → `~/notes/vets-website/` |
+| `~/code/vets-website.feat-auth/` (worktree) | project | `~/code/vets-website/.notes/` → `~/notes/vets-website/` |
+| `~/code/burnt-ice/` | project | `~/code/burnt-ice/.notes/` → `~/notes/burnt-ice/` |
 | `~/notes/second-brain/` | direct-vault | `.` (current dir) |
 | `~/notes/workday/` | direct-vault | `.` (current dir) |
 | `~/Downloads/` | direct-vault | `~/notes/second-brain/` |
@@ -127,14 +150,14 @@ fi
 
 ### Step 2: Ensure Notes Directory Structure (Project Mode Only)
 
-**This step ONLY applies when `MODE="project"` (in a git repo).**
+**This step ONLY applies when `MODE="project"` (in a git repo or worktree).**
 
-**CRITICAL: `.notes` in a project is ALWAYS a symlink to `~/notes/{project-name}/`**
+**CRITICAL: `.notes` in a project is ALWAYS a symlink to `~/notes/{project-name}/`, and it ALWAYS lives in the trunk root (not in worktrees).**
 
-**Auto-setup logic (handles new git repos automatically):**
+**Auto-setup logic (handles new git repos and worktrees automatically):**
 
-| .notes status | ~/notes/{repo}/ status | Action |
-|---------------|------------------------|--------|
+| .notes status (in TRUNK) | ~/notes/{project}/ status | Action |
+|---------------------------|---------------------------|--------|
 | Symlink exists | - | Use existing (verify target) |
 | Regular directory exists | - | **WARN user, do not proceed** |
 | Does not exist | Already exists | Create symlink only (previous notes preserved) |
@@ -143,30 +166,28 @@ fi
 ```bash
 # Only run this in project mode
 if [ "$MODE" = "project" ]; then
-  # Get project name from git root (not PWD - handles subdirectories)
-  project_name=$(basename "$(git rev-parse --show-toplevel)")
-  git_root=$(git rev-parse --show-toplevel)
+  # TRUNK_ROOT and project_name already resolved in Step 0 (worktree-aware)
   vault_path="$HOME/notes/${project_name}"
 
-  # Check if .notes symlink exists at project root
-  if [ -L "${git_root}/.notes" ]; then
+  # Check if .notes symlink exists at TRUNK root (NOT worktree root)
+  if [ -L "${TRUNK_ROOT}/.notes" ]; then
     # Already a symlink - verify it points to correct vault
-    current_target=$(readlink "${git_root}/.notes")
+    current_target=$(readlink "${TRUNK_ROOT}/.notes")
     if [ "$current_target" != "$vault_path" ] && [ "$current_target" != "/Users/bryan/notes/${project_name}" ]; then
       echo "WARNING: .notes points to $current_target, expected $vault_path"
     fi
     # Symlink exists and is valid - proceed with write
 
-  elif [ -e "${git_root}/.notes" ]; then
+  elif [ -e "${TRUNK_ROOT}/.notes" ]; then
     # Exists but NOT a symlink - this is a problem
-    echo "WARNING: .notes exists as a regular directory at ${git_root}/.notes"
+    echo "WARNING: .notes exists as a regular directory at ${TRUNK_ROOT}/.notes"
     echo "Expected: symlink to ~/notes/${project_name}/"
     echo "Manual fix required: backup contents, remove directory, let scribe recreate symlink"
     # DO NOT proceed - user must fix manually
     return 1
 
   else
-    # .notes doesn't exist - AUTO-SETUP for new git repo
+    # .notes doesn't exist in trunk - AUTO-SETUP for new git repo
 
     # Check if vault already exists (previous project notes)
     if [ -d "$vault_path" ]; then
@@ -176,12 +197,12 @@ if [ "$MODE" = "project" ]; then
       mkdir -p "$vault_path"
     fi
 
-    # Create the symlink
-    ln -s "$vault_path" "${git_root}/.notes"
+    # Create the symlink IN THE TRUNK (not the worktree)
+    ln -s "$vault_path" "${TRUNK_ROOT}/.notes"
 
     # Log the auto-setup
     echo "New git repo detected: ${project_name}"
-    echo "Created: .notes/ -> ~/notes/${project_name}/"
+    echo "Created: ${TRUNK_ROOT}/.notes/ -> ~/notes/${project_name}/"
   fi
 fi
 ```
@@ -208,11 +229,13 @@ fi
 
 **Summary:**
 
-**Project Mode** (in a git repo):
+**Project Mode** (in a git repo or worktree):
 
 - Detected by: `git rev-parse --git-dir` succeeds
-- Vault = git project folder name (e.g., `vets-website`, `vets-api`, `burnt-ice`)
-- `.notes` symlinks to `~/notes/{project-name}/`
+- Resolve trunk root first (worktree-aware — see Step 0)
+- Vault = trunk project folder name (e.g., `vets-website`, `vets-api`, `burnt-ice`)
+- `.notes` symlinks to `~/notes/{project-name}/` and lives in the **trunk only**
+- Worktrees access the trunk's `.notes` via resolved `TRUNK_ROOT`
 - Create vault and symlink automatically if missing
 
 **Direct Vault Mode** (NOT in a git repo):
@@ -225,7 +248,9 @@ fi
 
 - **NEVER** symlink to `~/notes/` directly - always to a specific subfolder
 - **NEVER** prompt when in a git repo - just use project folder name
+- **ALWAYS** resolve trunk root before checking for `.notes` (handles worktrees)
 - **ALWAYS** check git status first to determine mode
+- **NEVER** create `.notes` in a worktree — it belongs in the trunk
 - **DEFAULT** to `~/notes/second-brain/` when not in a git repo
 
 ## Directory Structure
@@ -235,11 +260,19 @@ fi
 **Two operating modes based on context:**
 
 ```
-MODE 1: PROJECT MODE (in a git repo)
-======================================
+MODE 1: PROJECT MODE (in a git repo or worktree)
+=================================================
+# Trunk (main worktree) — .notes lives HERE
 ~/code/department-of-veterans-affairs/vets-website/
+├── .git/                             # ← Directory = this is the trunk
 ├── .notes → ~/notes/vets-website/    # ← SYMLINK to project vault
 └── ...source files...
+
+# Worktrees — NO .notes here, resolve to trunk
+~/code/department-of-veterans-affairs/vets-website.feat-auth/
+├── .git                              # ← File = this is a worktree
+└── ...source files...
+# → Agents resolve TRUNK_ROOT → use vets-website/.notes
 
 ~/code/department-of-veterans-affairs/vets-api/
 ├── .notes → ~/notes/vets-api/        # ← Each project gets own vault
@@ -411,32 +444,41 @@ grep -l "{topic}" .notes/*.md 2>/dev/null
 Before any write operation:
 
 ```bash
-# Step 1: Detect mode (git repo vs non-git)
+# Step 1: Detect mode (git repo vs non-git) with worktree awareness
 if git rev-parse --git-dir > /dev/null 2>&1; then
   MODE="project"
-  project_name=$(basename "$(git rev-parse --show-toplevel)")
-  git_root=$(git rev-parse --show-toplevel)
+
+  # Resolve trunk root (handles worktrees — .notes lives in trunk only)
+  local toplevel
+  toplevel=$(git rev-parse --show-toplevel)
+  if [ -f "${toplevel}/.git" ]; then
+    TRUNK_ROOT=$(dirname "$(git rev-parse --git-common-dir)")
+  else
+    TRUNK_ROOT="$toplevel"
+  fi
+
+  project_name=$(basename "$TRUNK_ROOT")
   vault_path="$HOME/notes/${project_name}"
 
-  # Auto-setup: Ensure vault and symlink exist
-  if [ -L "${git_root}/.notes" ]; then
+  # Auto-setup: Ensure vault and symlink exist IN THE TRUNK
+  if [ -L "${TRUNK_ROOT}/.notes" ]; then
     # Symlink exists - use it
-    NOTES_ROOT="${git_root}/.notes"
+    NOTES_ROOT="${TRUNK_ROOT}/.notes"
 
-  elif [ -e "${git_root}/.notes" ]; then
+  elif [ -e "${TRUNK_ROOT}/.notes" ]; then
     # Regular directory exists - warn and abort
     echo "WARNING: .notes exists as a regular directory, not a symlink."
     echo "Manual fix required before proceeding."
     exit 1
 
   else
-    # Auto-create for new git repo
+    # Auto-create for new git repo (symlink in trunk, not worktree)
     if [ ! -d "$vault_path" ]; then
       mkdir -p "$vault_path"
     fi
-    ln -s "$vault_path" "${git_root}/.notes"
-    echo "New git repo detected: ${project_name}. Created: .notes/ -> ~/notes/${project_name}/"
-    NOTES_ROOT="${git_root}/.notes"
+    ln -s "$vault_path" "${TRUNK_ROOT}/.notes"
+    echo "New git repo detected: ${project_name}. Created: ${TRUNK_ROOT}/.notes/ -> ~/notes/${project_name}/"
+    NOTES_ROOT="${TRUNK_ROOT}/.notes"
   fi
 
 elif [[ "$PWD" == "$HOME/notes"* ]]; then

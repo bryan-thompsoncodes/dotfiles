@@ -70,17 +70,34 @@ When invoked:
 
 Workday uses a **project-local `.notes/`** directory that symlinks to `~/notes/workday/{project}/`.
 
+**Worktree awareness:** `.notes` lives in the **trunk** (main worktree), not in each worktree. Always resolve the trunk root first. See the `agent-workspace` skill for full details.
+
 ### Setup Protocol (run on first use)
 
 ```bash
-# Check if .notes exists
-if [ ! -L ".notes" ] && [ ! -d ".notes" ]; then
-  PROJECT=$(basename "$PWD")
-  mkdir -p ~/notes/workday/${PROJECT}
-  ln -s ~/notes/workday/${PROJECT} .notes
-  grep -q '^\.notes$' .gitignore 2>/dev/null || echo ".notes" >> .gitignore
-  echo "Created: .notes -> ~/notes/workday/${PROJECT}/"
+# Resolve trunk root (handles worktrees — .notes lives in trunk only)
+if git rev-parse --git-dir > /dev/null 2>&1; then
+  toplevel=$(git rev-parse --show-toplevel)
+  if [ -f "${toplevel}/.git" ]; then
+    TRUNK_ROOT=$(dirname "$(git rev-parse --git-common-dir)")
+  else
+    TRUNK_ROOT="$toplevel"
+  fi
+else
+  TRUNK_ROOT="$PWD"
 fi
+
+PROJECT=$(basename "$TRUNK_ROOT")
+
+# Check if .notes exists IN THE TRUNK
+if [ ! -L "${TRUNK_ROOT}/.notes" ] && [ ! -d "${TRUNK_ROOT}/.notes" ]; then
+  mkdir -p ~/notes/workday/${PROJECT}
+  ln -s ~/notes/workday/${PROJECT} "${TRUNK_ROOT}/.notes"
+  grep -q '^\.notes$' "${TRUNK_ROOT}/.gitignore" 2>/dev/null || echo ".notes" >> "${TRUNK_ROOT}/.gitignore"
+  echo "Created: ${TRUNK_ROOT}/.notes -> ~/notes/workday/${PROJECT}/"
+fi
+
+NOTES_ROOT="${TRUNK_ROOT}/.notes"
 ```
 
 ### Notes Structure

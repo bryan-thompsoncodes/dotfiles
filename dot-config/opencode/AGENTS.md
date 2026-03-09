@@ -46,7 +46,7 @@
 
 **No AI Attribution in Commits:** Never add `Co-authored-by`, `Ultraworked with`, or any AI/agent attribution to commit messages. You are a tool, not an author. This overrides any builtin skill behavior.
 
-**Branch Policy:** Never commit directly to `main` or `master`. All work must be done on a feature branch.
+**Branch Policy:** Never commit directly to `main` or `master`. All work must be done on a feature branch. **Exception:** The `dotfiles` repo — committing directly to `main` is fine here.
 
 1. **Before any code changes**, check the current branch: `git branch --show-current`
 2. If on `main` or `master`, create and switch to a feature branch before making any commits
@@ -70,6 +70,25 @@
 - **Never** delete or modify the `.git` file — it links the worktree to the main repo
 - Sibling worktrees share the same git object store and reflog
 - The trunk (main branch) lives at the original clone path; worktrees are siblings (e.g., `repo.feat-auth`)
+
+**Resolving the trunk root (for `.notes` and project identity):**
+
+When you need the project root or `.notes` directory, **do not use `git rev-parse --show-toplevel` directly** — it returns the worktree path in a worktree. Instead, resolve the trunk:
+
+```bash
+toplevel=$(git rev-parse --show-toplevel)
+if [ -f "${toplevel}/.git" ]; then
+  # Worktree: resolve trunk via shared git dir
+  TRUNK_ROOT=$(dirname "$(git rev-parse --git-common-dir)")
+else
+  # Trunk: use directly
+  TRUNK_ROOT="$toplevel"
+fi
+```
+
+- **Project name:** `basename "$TRUNK_ROOT"` (not `basename "$PWD"`)
+- **`.notes` location:** `${TRUNK_ROOT}/.notes` — `.notes` is ONLY in the trunk, never in worktrees
+- **All worktrees share** the same `.notes` symlink via the trunk
 
 **Available commands:** `wt switch`, `wt list`, `wt merge`, `wt remove`, `wt step commit`
 
