@@ -246,6 +246,79 @@ Notes live in `~/notes/{project-or-vault}/` and are accessed via `.notes/` in th
 
 ---
 
+## Cross-Vault Synchronization
+
+**Notes live in multiple places. Keep them in sync when there's meaningful overlap.**
+
+### Notes Topology
+
+| Vault | Path | Purpose |
+|-------|------|---------|
+| **second-brain** | `~/notes/second-brain/` | Personal thinking, cross-project explorations, high-level ideas |
+| **workday** | `~/notes/workday/` | Work-specific daily notes, meeting notes, sprint tracking |
+| **project-specific** | `~/notes/{project-name}/` | Project-specific notes (vets-website, fj-dash, snowboardtechie-nix, etc.) |
+
+### When in second-brain
+
+**If discussing a project that has its own notes directory:**
+
+1. **Identify the project** — "We're talking about fj-dash"
+2. **Check for project notes** — Does `~/notes/fj-dash/` exist?
+3. **Read relevant project notes** via @archivist scanning that directory
+4. **Capture project-specific insights there** — If the conversation produces insights that belong to that project, invoke @scribe to update the project's notes, not second-brain
+
+```
+@archivist Search ~/notes/fj-dash/ for notes about {topic}
+# If insight is project-specific:
+@scribe Write to ~/notes/fj-dash/ — [EXPLORATION] {insight about fj-dash}
+```
+
+**Proactive check:** At the start of any project discussion from second-brain, verify:
+- Does `~/notes/{project}/` exist?
+- Are existing notes there current and accurate?
+- Should new insights go there instead of here?
+
+### When in a project repo
+
+**If the conversation produces cross-cutting or personal insights:**
+
+1. **Detect cross-cutting insight** — "This authentication pattern applies to all my projects"
+2. **Consider second-brain** — Does this belong in personal/cross-project notes?
+3. **Capture in second-brain** — Invoke @scribe targeting `~/notes/second-brain/`
+
+```
+@scribe Write to ~/notes/second-brain/ — [IDEA] Cross-project insight about {topic}
+```
+
+### The Principle
+
+| Note Type | Location |
+|-----------|----------|
+| Project-specific technical decisions | `~/notes/{project}/` |
+| Project-specific explorations | `~/notes/{project}/` |
+| Cross-project patterns | `~/notes/second-brain/` |
+| Personal development / learning | `~/notes/second-brain/` |
+| High-level thinking | `~/notes/second-brain/` |
+| Daily work tracking | `~/notes/workday/` |
+
+### Sync Triggers
+
+| Situation | Action |
+|-----------|--------|
+| Discussing project X from second-brain | Check `~/notes/X/` for existing context |
+| Project insight emerges in second-brain | Capture in `~/notes/X/`, not second-brain |
+| Cross-cutting insight in project repo | Capture in `~/notes/second-brain/` |
+| Outdated info discovered anywhere | Update the note where it lives |
+
+### Don't Over-Sync
+
+- **Not every mention needs sync** — Only meaningful insights
+- **Prefer the canonical location** — Project details → project notes
+- **second-brain is for thinking** — Not project documentation
+- **When in doubt, ask** — "Should this go in project notes or second-brain?"
+
+---
+
 ## Specialized Agents
 
 Beyond the core Athena system, there are domain-specific agents you can invoke:
