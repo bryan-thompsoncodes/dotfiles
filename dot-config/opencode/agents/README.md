@@ -10,20 +10,20 @@ Personal AI agent system for thinking, workflow automation, and development assi
 ## Architecture
 
 ```
-                              ┌─────────────┐
-                              │    MUSE     │  ← Primary thinking partner
-                              └──────┬──────┘
-        ┌──────────────┬─────────────┼─────────────┬──────────────┐
-        ▼              ▼             ▼             ▼              ▼
- ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌────────────┐
- │  ARCHIVIST │ │    SAGE    │ │   SCRIBE   │ │    PYRE    │ │ DEMIURGE │
- │  (recall)  │ │ (research) │ │  (write)   │ │  (delete)  │ │  (forge)   │
- └────────────┘ └────────────┘ └────────────┘ └────────────┘ └────────────┘
+                                 ┌─────────────┐
+                                 │    MUSE     │  ← Primary thinking partner
+                                 └──────┬──────┘
+   ┌──────────┬──────────┬──────────┬───┴───┬──────────┬──────────┐
+   ▼          ▼          ▼          ▼       ▼          ▼
+┌──────────┐┌──────────┐┌──────────┐┌──────────┐┌──────────┐┌──────────┐
+│ ARCHIVIST││   SAGE   ││  SCRIBE  ││   PYRE   ││ DEMIURGE ││ CALLIOPE │
+│ (recall) ││(research)││ (write)  ││ (delete) ││ (forge)  ││(content) │
+└──────────┘└──────────┘└──────────┘└──────────┘└──────────┘└──────────┘
 
- ┌────────────┐ ┌────────────┐
- │  WORKDAY   │ │  GAMEDEV   │  ← Standalone task agents
- │  (VA.gov)  │ │(Burnt Ice) │
- └────────────┘ └────────────┘
+┌────────────┐ ┌────────────┐
+│  WORKDAY   │ │  GAMEDEV   │  ← Standalone task agents
+│  (VA.gov)  │ │(Burnt Ice) │
+└────────────┘ └────────────┘
 ```
 
 ## Agent Reference
@@ -40,6 +40,7 @@ The Athena system is centered around **Muse** for exploration and thinking, with
 | **Scribe** | Sonnet | Note persistence | Creating/updating notes |
 | **Pyre** | Sonnet | Note destruction | Deleting notes (with confirmation) |
 | **Demiurge** | Opus | Agent craftsman | Creating/modifying agents and skills |
+| **Calliope** | Sonnet | Content writing, voice preservation | Writing blog posts, newsletters, content creation |
 
 ### Task Agents (Standalone)
 
@@ -72,6 +73,7 @@ Muse automatically invokes subagents:
 - `@scribe` - Capture insights as they emerge
 - `@pyre` - Clean up obsolete notes
 - `@demiurge` - Modify agent definitions
+- `@calliope` - Write and polish content
 
 **Invocation:** Start a conversation about thinking, exploring, or brainstorming.
 
@@ -185,6 +187,32 @@ Creates, modifies, and queries agent definitions. Handles:
 
 ---
 
+### Calliope - Voice Keeper & Content Writer
+
+**File:** `calliope.md`
+**Model:** claude-sonnet-4-5
+**Mode:** Subagent (invoked by Muse)
+
+Writing agent for SnowboardTechie content. Breaks analysis paralysis, preserves Bryan's voice, ships content. Handles:
+- Ideation → committing to one angle (anti-paralysis)
+- Raw thoughts/rambles → structured drafts
+- Draft polishing with anti-AI-slop audit
+- Finding content seeds from existing notes
+
+Supports platforms: Substack, Ghost blog, YouTube scripts, Fediverse, Skool.
+
+Can delegate to `@archivist` (find content seeds), `@sage` (research), and `@scribe` (save drafts).
+
+**Invocation (from Muse):**
+```
+@calliope I want to write about my terminal-native AI workflow but I keep getting stuck.
+@calliope Here's a voice ramble about second brains: [transcript]. Turn it into a Substack post.
+@calliope Polish this draft. Make sure it still sounds like me.
+@calliope I don't know what to write about this week. Help me find something.
+```
+
+---
+
 ### Workday - VA.gov Workflows
 
 **File:** `workday.md`  
@@ -278,7 +306,7 @@ Skills inject domain knowledge into agents.
 |-------|---------|---------|
 | `athena-notes` | Note templates and patterns | Muse, Scribe, Workday, Gamedev |
 | `agent-workspace` | Working directory conventions | All agents |
-| `obsidian` | Vault paths, wikilinks, formatting | Muse, Scribe, Workday, Gamedev |
+| `obsidian` | Vault paths, wikilinks, formatting | Muse, Scribe, Calliope, Workday, Gamedev |
 | `workday-*` | Specific workday workflows | Workday |
 | `gamedev` | Burnt Ice project context | Gamedev |
 
@@ -329,6 +357,8 @@ Override model, temperature, thinking budget without editing agent files.
 | Capture an insight | Muse → @scribe (auto) |
 | Delete old notes | Muse → @pyre |
 | Create/modify an agent | Muse → @demiurge |
+| Write a blog post/newsletter | Muse → @calliope |
+| Break writing paralysis | Muse → @calliope |
 | Start my work day | Workday (`start my day`) |
 | End my work day | Workday (`EOD`) |
 | Check my PRs | Workday (`check my PRs`) |

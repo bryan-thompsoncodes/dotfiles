@@ -152,6 +152,12 @@ fi
 
 ---
 
+## PR Review Comments
+
+When posting review comments to a forge (GitHub, Gitea, Forgejo), **always post as inline comments on specific files and lines** — never as a single bulk review body. Each finding should be its own comment anchored to the relevant code so the author sees it in context. The review body itself should be a short summary only.
+
+---
+
 ## LSP Setup Protocol
 
 When I encounter a missing or unavailable LSP:
