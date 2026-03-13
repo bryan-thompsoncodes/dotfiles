@@ -39,8 +39,8 @@ fi
 
 - `git branch --show-current` must not be `main` or `master`
 - `git remote -v` returns output
-- Forge CLI authenticated: `gh auth status` (GitHub) or `tea login list` (Forgejo)
-- No existing PR: `gh pr list --head <branch>` (GitHub) or `tea pr list --state open | grep <branch>` (Forgejo)
+- Forge CLI authenticated: `gh auth status` (GitHub) or tea config file exists with token (Forgejo)
+- No existing PR: `gh pr list --head <branch>` (GitHub) or Forgejo API `GET /repos/{owner}/{repo}/pulls?state=open` (Forgejo)
 
 If any check fails, report what's wrong and stop.
 
@@ -64,10 +64,7 @@ git push -u origin <branch>
 
 #### Forgejo
 
-**`tea pr create` DOES NOT WORK in non-interactive environments.** It requires
-TTY confirmation and will fail with: `could not open a new TTY: open /dev/tty: device not configured`
-
-Use the Forgejo API directly instead:
+**Never use `tea pr` commands.** They require TTY interaction and will fail in agent environments. Always use the Forgejo API directly:
 
 ```bash
 # 1. Extract token from tea config
@@ -114,7 +111,7 @@ Then update via the API:
 # GitHub
 gh pr edit {number} --body "$BODY"
 
-# Forgejo (tea has no `pr edit` — use API)
+# Forgejo (always use API)
 body_json=$(python3 -c "import json,sys; print(json.dumps({'body': sys.stdin.read()}))" <<< "$BODY")
 curl -s -X PATCH "${instance}/api/v1/repos/${owner_repo}/pulls/{number}" \
   -H "Authorization: token $TOKEN" \

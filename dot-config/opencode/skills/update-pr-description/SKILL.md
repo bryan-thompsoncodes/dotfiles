@@ -29,30 +29,21 @@ Determine which forge hosts this repo:
 remote_url=$(git remote get-url origin 2>/dev/null)
 if [[ "$remote_url" == *"github.com"* ]]; then
   forge="github"
-elif [[ "$remote_url" == *"forgejo"* || "$remote_url" == *"gitea"* || "$remote_url" == *"snowboardtechie"* ]]; then
+elif [[ "$remote_url" == *"forgejo"* || "$remote_url" == *"gitea"* || "$remote_url" == *"codeberg"* || "$remote_url" == *"snowboardtechie"* ]]; then
   forge="forgejo"
 else
   forge="unknown"
 fi
 ```
 
-### Forgejo: Parse Remote URL
+### Forgejo: URL Parsing
 
-Extract the instance URL, owner, and repo from the remote:
+`tea api` auto-resolves `{owner}` and `{repo}` placeholders from the local
+git remote, so manual URL parsing is rarely needed. Just ensure `tea` is
+logged in (`tea login list`).
 
-```bash
-# From HTTPS: https://git.snowboardtechie.com/bryan/fj-dash.git
-# From SSH:   git@git.snowboardtechie.com:bryan/fj-dash.git
-instance="https://git.snowboardtechie.com"  # scheme + host from remote
-owner="bryan"
-repo="fj-dash"   # strip .git suffix
-```
-
-Or from a Forgejo PR URL like `https://git.example.com/owner/repo/pulls/1`:
-- instance = `https://git.example.com`
-- owner = path segment 1
-- repo = path segment 2
-- PR index = path segment 4
+If a PR URL is provided (e.g. `https://codeberg.org/owner/repo/pulls/1`),
+extract the PR index from path segment 4.
 
 ---
 
@@ -75,7 +66,7 @@ gh pr list --head "$BRANCH" --json number,title,url,body --limit 1
 
 ```bash
 BRANCH=$(git branch --show-current)
-tea api "/repos/${owner}/${repo}/pulls?state=open" \
+tea api "/repos/{owner}/{repo}/pulls?state=open" \
   | jq -c --arg branch "$BRANCH" '.[] | select(.head.ref == $branch) | {number: .number, title: .title, url: .html_url, body: .body}' \
   | head -1
 ```
@@ -99,7 +90,8 @@ git diff {baseRefName}...HEAD
 
 ```bash
 # Get PR metadata including current description
-tea api "/repos/${owner}/${repo}/pulls/{index}" \
+# {owner} and {repo} are auto-resolved by tea; replace {index} with the PR number
+tea api "/repos/{owner}/{repo}/pulls/{index}" \
   | jq '{number: .number, title: .title, url: .html_url, body: .body, baseRefName: .base.ref}'
 
 # Get the diff (same git commands for both forges)
@@ -147,40 +139,24 @@ EOF
 
 **Forgejo:**
 
-```bash
-# Build JSON payload with the description
-body_json=$(jq -n --arg body "{generated description}" '{body: $body}')
-
-tea api --method PATCH "/repos/${owner}/${repo}/pulls/{index}" \
-  --body "$body_json"
-```
-
-If `tea api` is unavailable, fall back to `curl`:
+Use `tea api` with `-X PATCH` and `-f` for string fields.
+`{owner}` and `{repo}` are auto-resolved from the local repo context.
+Replace `{index}` with the actual PR number.
 
 ```bash
-# Get token from tea config — check platform-specific paths
-TEA_CONFIG=""
-for candidate in \
-  "${XDG_CONFIG_HOME:-$HOME/.config}/tea/config.yml" \
-  "$HOME/Library/Application Support/tea/config.yml" \
-  "$HOME/.tea/tea.yml"; do
-  [ -f "$candidate" ] && TEA_CONFIG="$candidate" && break
-done
+# Update body only
+tea api -X PATCH "/repos/{owner}/{repo}/pulls/{index}" \
+  -f "body={generated description}"
 
-TOKEN=$(python3 -c "
-import yaml, sys
-with open('$TEA_CONFIG') as f:
-    c = yaml.safe_load(f)
-for l in c.get('logins', []):
-    if '${instance}' in l.get('url', ''):
-        print(l['token']); sys.exit()
-")
-
-curl -X PATCH "${instance}/api/v1/repos/${owner}/${repo}/pulls/{index}" \
-  -H "Authorization: token $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d "$body_json"
+# Update both title and body
+tea api -X PATCH "/repos/{owner}/{repo}/pulls/{index}" \
+  -f "title={new title}" \
+  -f "body={generated description}"
 ```
+
+**IMPORTANT**: `tea` does NOT have a `pr edit` subcommand. `tea api` is
+the correct way to update PR title/body on Forgejo. Do NOT attempt
+`tea pr edit` — it does not exist.
 
 ---
 
@@ -215,7 +191,7 @@ No PR found for current branch: {branch}
 
 ```
 Could not detect forge from remote URL: {remote_url}
-   Supported forges: GitHub (github.com), Forgejo/Gitea (forgejo/gitea/snowboardtechie in URL)
+   Supported forges: GitHub (github.com), Forgejo/Gitea/Codeberg (forgejo/gitea/codeberg/snowboardtechie in URL)
 ```
 
 ### tea not authenticated (Forgejo)

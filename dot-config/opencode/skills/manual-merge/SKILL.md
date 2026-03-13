@@ -63,35 +63,19 @@ fi
 
 #### Forgejo
 
-`tea` output is limited, so use the Forgejo API directly:
+Use `tea api` — `{owner}` and `{repo}` are auto-resolved from the local
+git remote context.
 
 ```bash
-# Extract credentials from tea config
-TEA_CONFIG=""
-for candidate in \
-  "${XDG_CONFIG_HOME:-$HOME/.config}/tea/config.yml" \
-  "$HOME/Library/Application Support/tea/config.yml" \
-  "$HOME/.tea/tea.yml"; do
-  [ -f "$candidate" ] && TEA_CONFIG="$candidate" && break
-done
-
-TOKEN=$(grep 'token:' "$TEA_CONFIG" | head -1 | awk '{print $2}')
-remote_url=$(git remote get-url origin)
-owner_repo=$(echo "$remote_url" | sed -E 's|.*[:/]([^/]+/[^/]+?)(\.git)?$|\1|')
-instance=$(echo "$remote_url" | sed -E 's|.*(@|//)([^:/]+).*|https://\2|')
-
 # Search open PRs first, then closed
-pr_json=$(curl -s "${instance}/api/v1/repos/${owner_repo}/pulls?state=open&head=${branch}" \
-  -H "Authorization: token $TOKEN")
-
-# If empty array, try closed
-if [ "$pr_json" = "[]" ]; then
-  pr_json=$(curl -s "${instance}/api/v1/repos/${owner_repo}/pulls?state=closed&head=${branch}" \
-    -H "Authorization: token $TOKEN")
-fi
+tea api "/repos/{owner}/{repo}/pulls?state=open" \
+  | jq -c --arg branch "$branch" '.[] | select(.head.ref == $branch) | {number: .number, title: .title, body: .body, url: .html_url}' \
+  | head -1
 ```
 
-Parse the first result to extract `title` and `body`.
+If empty, try closed PRs with the same pattern.
+
+Parse the result to extract `number`, `title`, `body`, and `url`.
 
 ### 4. Handle Missing PR
 
@@ -185,19 +169,61 @@ git commit -m "<PR title> (#<PR number>)" -m "<PR body>"
 **Note:** If the PR body is very long, it's fine to include it all — git
 handles long commit messages gracefully.
 
-### 9. Report
+### 9. Push, Mark Merged, and Clean Up
+
+**Order matters.** The remote branch must still exist when marking the PR
+as merged, otherwise Forgejo returns 404/409.
+
+```bash
+# 1. Push the squash commit to main
+git push origin main
+
+# 2. Mark the PR as manually-merged on the forge (BEFORE deleting branch)
+```
+
+#### GitHub
+
+```bash
+# gh recognizes squash-merged PRs automatically when main is pushed.
+# No extra step needed — GitHub auto-closes the PR as merged.
+```
+
+#### Forgejo
+
+```bash
+# Get the full SHA of the squash-merge commit
+MERGE_SHA=$(git rev-parse HEAD)
+
+# Mark as manually-merged — branch must still exist on remote
+# {owner} and {repo} are auto-resolved by tea; replace {index} with the PR number
+tea api -X POST "/repos/{owner}/{repo}/pulls/{index}/merge" \
+  -f "Do=manually-merged" \
+  -f "merge_commit_id=$MERGE_SHA"
+
+# Verify it took
+# {owner} and {repo} are auto-resolved by tea; replace {index} with the PR number
+tea api "/repos/{owner}/{repo}/pulls/{index}" | jq '{state, merged}'
+# Expected: {"state": "closed", "merged": true}
+```
+
+**IMPORTANT**: `tea` does NOT have a `pr merge` subcommand that supports
+`manually-merged`. Use `tea api` as shown above.
+
+```bash
+# 3. NOW delete the branch (after PR is marked merged)
+git branch -D "$branch"
+git push origin --delete "$branch"
+
+# 4. Prune stale remote tracking refs
+git fetch --prune origin
+```
+
+Report:
 
 ```
-Squash-merged "$branch" into main as commit <short-sha>.
-
-Next steps:
-- Review: git log -1
-- Push: git push origin main
-- Force push (if rewriting): git push --force-with-lease origin main
-- Clean up branch: git branch -D $branch && git push origin --delete $branch
+Squash-merged "$branch" into main as <short-sha>.
+PR #<number> marked as merged. Pushed main, deleted branch.
 ```
-
-**DO NOT push automatically.** Let the user decide when and how to push.
 
 ---
 
@@ -207,7 +233,8 @@ Next steps:
 |------|-----------|
 | ALWAYS `--squash` | Clean linear history on main |
 | NEVER regular merge into main | No merge commits cluttering history |
-| NEVER push automatically | User controls what goes to remote |
+| ALWAYS push + mark merged + clean up | Complete the workflow end-to-end |
+| Mark PR merged BEFORE deleting branch | Forgejo needs the branch to exist for manually-merged |
 | ALWAYS look for PR first | PR descriptions are the source of truth |
 | ABORT on conflicts | Don't try to resolve automatically |
 | ABORT on dirty worktree | Prevent accidental data loss |
@@ -222,5 +249,5 @@ Next steps:
 | Branch doesn't exist | Error: "Branch '$branch' not found" |
 | No remote | Skip PR lookup, ask for manual commit message |
 | Multiple PRs for branch | Use the most recent one |
-| PR is still open | Proceed anyway (local merge doesn't close remote PR) |
+| PR is still open | Proceed — step 9 will mark it merged on the forge |
 | Branch has no commits ahead of main | Warn: "Nothing to merge — branch is up to date with main" |

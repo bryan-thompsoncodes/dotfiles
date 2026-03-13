@@ -14,353 +14,47 @@ Personal AI agent system for thinking, workflow automation, and development assi
                                  │    MUSE     │  ← Primary thinking partner
                                  └──────┬──────┘
    ┌──────────┬──────────┬──────────┬───┴───┬──────────┬──────────┐
-   ▼          ▼          ▼          ▼       ▼          ▼
-┌──────────┐┌──────────┐┌──────────┐┌──────────┐┌──────────┐┌──────────┐
-│ ARCHIVIST││   SAGE   ││  SCRIBE  ││   PYRE   ││ DEMIURGE ││ CALLIOPE │
-│ (recall) ││(research)││ (write)  ││ (delete) ││ (forge)  ││(content) │
-└──────────┘└──────────┘└──────────┘└──────────┘└──────────┘└──────────┘
+   ▼          ▼          ▼          ▼       ▼          ▼          ▼
+┌──────────┐┌──────────┐┌──────────┐┌──────────┐┌──────────┐┌──────────┐┌──────────┐
+│ ARCHIVIST││   SAGE   ││  SCRIBE  ││   PYRE   ││ DEMIURGE ││ CALLIOPE ││  PRISM   │
+│ (recall) ││(research)││ (write)  ││ (delete) ││ (forge)  ││(content) ││(reflect) │
+└──────────┘└──────────┘└──────────┘└──────────┘└──────────┘└──────────┘└──────────┘
 
-┌────────────┐ ┌────────────┐
-│  WORKDAY   │ │  GAMEDEV   │  ← Standalone task agents
-│  (VA.gov)  │ │(Burnt Ice) │
-└────────────┘ └────────────┘
+┌────────────┐ ┌────────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐
+│  WORKDAY   │ │  GAMEDEV   │ │  FORGE   │ │  KINDLE  │ │   ARIA   │
+│  (VA.gov)  │ │(Burnt Ice) │ │(deepwork)│ │ (flow)   │ │ (voice)  │
+└────────────┘ └────────────┘ └──────────┘ └──────────┘ └──────────┘
 ```
-
-## Agent Reference
-
-### Athena System (Thinking + Notes)
-
-The Athena system is centered around **Muse** for exploration and thinking, with specialized subagents for different operations.
-
-| Agent | Model | Purpose | When to Use |
-|-------|-------|---------|-------------|
-| **Muse** | Opus | Thinking partner, orchestration | Brainstorming, exploring ideas, deep thinking |
-| **Archivist** | Haiku | Note retrieval (read-only) | Finding past notes, context recall |
-| **Sage** | Sonnet | External research | Web search, library docs, code examples |
-| **Scribe** | Sonnet | Note persistence | Creating/updating notes |
-| **Pyre** | Sonnet | Note destruction | Deleting notes (with confirmation) |
-| **Demiurge** | Opus | Agent craftsman | Creating/modifying agents and skills |
-| **Calliope** | Sonnet | Content writing, voice preservation | Writing blog posts, newsletters, content creation |
-
-### Task Agents (Standalone)
-
-These agents operate independently for specific workflows.
-
-| Agent | Model | Purpose | When to Use |
-|-------|-------|---------|-------------|
-| **Workday** | Sonnet | VA.gov daily workflows | Morning sync, EOD, PR reviews, sprint status |
-| **Gamedev** | Sonnet | Burnt Ice development | Dev sessions, playtest notes, phase tracking |
-
----
-
-## Detailed Agent Descriptions
-
-### Muse - Thinking Partner
-
-**File:** `muse.md`  
-**Model:** claude-opus-4-5 (extended thinking: 64k tokens)  
-**Mode:** Primary
-
-The central thinking agent. Use Muse when you want to:
-- Explore ideas and possibilities
-- Work through complex problems
-- Brainstorm approaches
-- Have a Socratic dialogue
-
-Muse automatically invokes subagents:
-- `@archivist` - Recall past notes at session start
-- `@sage` - Research external knowledge when needed
-- `@scribe` - Capture insights as they emerge
-- `@pyre` - Clean up obsolete notes
-- `@demiurge` - Modify agent definitions
-- `@calliope` - Write and polish content
-
-**Invocation:** Start a conversation about thinking, exploring, or brainstorming.
-
----
-
-### Archivist - Context Retrieval
-
-**File:** `archivist.md`  
-**Model:** claude-haiku-4-5  
-**Mode:** Subagent (invoked by Muse)
-
-Fast, read-only search of notes and working files. Finds:
-- Permanent notes in `.notes/`
-- Working files in `.notes/.agents/`
-- Project-local notes via symlinks
-
-**Invocation (from Muse):**
-```
-@archivist Find past notes about authentication
-@archivist What have I written about API design?
-```
-
----
-
-### Sage - External Knowledge
-
-**File:** `sage.md`  
-**Model:** claude-sonnet-4-5  
-**Mode:** Subagent (invoked by Muse)
-
-Researches external sources:
-- **Web search** - Current articles, opinions, comparisons
-- **Library docs** - Official API documentation (via Context7)
-- **Code examples** - Real production patterns (via grep.app)
-
-Caches research in `.notes/.agents/sage/` for reuse.
-
-**Invocation (from Muse):**
-```
-@sage What are current best practices for JWT refresh tokens?
-@sage How does React 19 handle Suspense?
-```
-
----
-
-### Scribe - Note Persistence
-
-**File:** `scribe.md`  
-**Model:** claude-sonnet-4-5  
-**Mode:** Subagent (invoked by Muse)
-
-Writes notes using athena-notes templates:
-- **IDEA** - Quick captures
-- **EXPLORATION** - Deep dives
-- **DECISION** - Choices with rationale
-- **SESSION** - Conversation summaries
-- **THREAD** - Connected ideas
-
-Also manages working files in `.notes/.agents/`.
-
-**Invocation (from Muse):**
-```
-@scribe [IDEA] Quick capture about caching strategy
-@scribe [DECISION] Record that we chose JWT over sessions
-@scribe [EXPLORATION] Document our API design discussion
-```
-
----
-
-### Pyre - Note Destruction
-
-**File:** `pyre.md`  
-**Model:** claude-sonnet-4-5  
-**Mode:** Subagent (invoked by Muse)
-
-Deletes notes with tiered confirmation:
-- **Permanent notes** - Full confirmation required
-- **Drafts** - Normal confirmation
-- **Working files** - Relaxed confirmation
-
-Can archive instead of delete.
-
-**Invocation (from Muse):**
-```
-@pyre Delete '.notes/old-auth-approach.md' - superseded
-@pyre Clean up task "api-design" - task complete
-@pyre Archive task "research-project" instead of deleting
-```
-
----
-
-### Demiurge - Agent Craftsman
-
-**File:** `demiurge.md`  
-**Model:** claude-opus-4-5 (extended thinking: 32k tokens)  
-**Mode:** Subagent (invoked by Muse)
-
-Creates, modifies, and queries agent definitions. Handles:
-- Creating new agents
-- Improving existing agent instructions
-- Creating/modifying skills
-- Explaining the agent system
-
-**Invocation (from Muse):**
-```
-@demiurge Create a new agent for code review
-@demiurge Improve the archivist's search logic
-@demiurge What agents do I have?
-@demiurge Add the obsidian skill to sage
-```
-
----
-
-### Calliope - Voice Keeper & Content Writer
-
-**File:** `calliope.md`
-**Model:** claude-sonnet-4-5
-**Mode:** Subagent (invoked by Muse)
-
-Writing agent for SnowboardTechie content. Breaks analysis paralysis, preserves Bryan's voice, ships content. Handles:
-- Ideation → committing to one angle (anti-paralysis)
-- Raw thoughts/rambles → structured drafts
-- Draft polishing with anti-AI-slop audit
-- Finding content seeds from existing notes
-
-Supports platforms: Substack, Ghost blog, YouTube scripts, Fediverse, Skool.
-
-Can delegate to `@archivist` (find content seeds), `@sage` (research), and `@scribe` (save drafts).
-
-**Invocation (from Muse):**
-```
-@calliope I want to write about my terminal-native AI workflow but I keep getting stuck.
-@calliope Here's a voice ramble about second brains: [transcript]. Turn it into a Substack post.
-@calliope Polish this draft. Make sure it still sounds like me.
-@calliope I don't know what to write about this week. Help me find something.
-```
-
----
-
-### Workday - VA.gov Workflows
-
-**File:** `workday.md`  
-**Model:** claude-sonnet-4-20250514  
-**Mode:** Standalone
-
-Daily workflow automation for VA.gov development:
-- Morning sync (PRs, sprint, priorities)
-- End of day summaries
-- PR status checks
-- Review queue management
-- Sprint board snapshots
-- PR review note creation
-
-Uses project-local `.notes/` symlinked to `~/notes/workday/{project}/`.
-
-**Triggers:**
-```
-start my day / morning sync / good morning
-end of day / EOD / wrap up
-check my PRs / my PRs
-review queue / PRs to review
-sprint status / sprint board
-pr review <number> / review PR <number>
-```
-
----
-
-### Gamedev - Burnt Ice Development
-
-**File:** `gamedev.md`  
-**Model:** claude-sonnet-4-20250514  
-**Mode:** Standalone
-
-Game development assistant for Burnt Ice (Godot 4.5 roguelike):
-- Dev session management
-- Phase status tracking
-- Playtest note capture
-- Design doc reference
-- Git workflow (no AI attribution)
-
-Uses project-local `.notes/` symlinked to `~/notes/gamedev/burnt-ice/`.
-
-**Triggers:**
-```
-dev session / start session / gamedev
-phase status / where am I
-known issues / bugs
-playtest notes
-design check <topic>
-commit <message>
-```
-
----
-
-## Notes Architecture
-
-### Permanent Notes
-```
-~/notes/
-├── {athena notes}           # Muse explorations, decisions, ideas
-├── workday/
-│   └── {project}/           # Workday agent notes
-└── gamedev/
-    └── {project}/           # Gamedev agent notes
-```
-
-### Project-Local Pattern
-```
-~/code/some-project/
-├── .notes -> ~/notes/{context}/{project}/   # Symlink (gitignored)
-└── ...
-```
-
-### Working Files
-```
-.notes/.agents/
-├── muse/{task}/             # Task context
-├── sage/{topic}/            # Research cache
-├── drafts/                  # Notes not ready for promotion
-└── _archive/                # Archived task context
-```
-
----
-
-## Skills
-
-Skills inject domain knowledge into agents.
-
-| Skill | Purpose | Used By |
-|-------|---------|---------|
-| `athena-notes` | Note templates and patterns | Muse, Scribe, Workday, Gamedev |
-| `agent-workspace` | Working directory conventions | All agents |
-| `obsidian` | Vault paths, wikilinks, formatting | Muse, Scribe, Calliope, Workday, Gamedev |
-| `workday-*` | Specific workday workflows | Workday |
-| `gamedev` | Burnt Ice project context | Gamedev |
-
----
-
-## Configuration
-
-### Agent Files
-`~/.config/opencode/agents/{name}.md`
-
-YAML frontmatter + prose instructions:
-```yaml
----
-description: One-line description
-mode: subagent | primary
-model: anthropic/claude-opus-4-5
-temperature: 0.2
-thinking:
-  type: enabled
-  budgetTokens: 32000
-tools:
-  read: true
-  write: true
-  # ...
-skills:
-  - skill-name
----
-
-# Agent Name - Role
-
-[Instructions...]
-```
-
-### Model Overrides
-`~/.config/opencode/oh-my-opencode.json`
-
-Override model, temperature, thinking budget without editing agent files.
-
----
 
 ## Quick Reference
 
 | I want to... | Use |
 |--------------|-----|
-| Think through a problem | Muse |
-| Find past notes | Muse → @archivist |
-| Research something external | Muse → @sage |
-| Capture an insight | Muse → @scribe (auto) |
-| Delete old notes | Muse → @pyre |
-| Create/modify an agent | Muse → @demiurge |
-| Write a blog post/newsletter | Muse → @calliope |
-| Break writing paralysis | Muse → @calliope |
-| Start my work day | Workday (`start my day`) |
-| End my work day | Workday (`EOD`) |
-| Check my PRs | Workday (`check my PRs`) |
-| Start a game dev session | Gamedev (`dev session`) |
-| Capture playtest notes | Gamedev (`playtest notes`) |
+| Think through a problem | `@muse` |
+| Find past notes | `@muse` → `@archivist` |
+| Research something external | `@muse` → `@sage` |
+| Capture an insight | `@muse` → `@scribe` (auto) |
+| Delete old notes | `@muse` → `@pyre` |
+| Create/modify an agent | `@muse` → `@demiurge` |
+| Write a blog post/newsletter | `@muse` → `@calliope` |
+| Reflect on a conversation | `@muse` → `@prism` |
+| Plan deep work sessions | `@forge` |
+| Get unstuck / find flow | `@kindle` |
+| Start/end work day | `@workday` (`start my day` / `EOD`) |
+| Check PRs / sprint status | `@workday` (`check my PRs` / `sprint status`) |
+| Audit code for accessibility | `@aria` |
+| Game dev session | `@gamedev` (`dev session`) |
+
+## Agent Files
+
+Each agent is defined in `~/.config/opencode/agents/{name}.md` with YAML frontmatter (model, tools, skills) and prose instructions. Model overrides go in `oh-my-opencode.json`.
+
+## Skills
+
+| Skill | Purpose |
+|-------|---------|
+| `agent-workspace` | Working directory conventions, worktree resolution, `.notes` setup |
+| `athena-notes` | Note templates and patterns |
+| `obsidian` | Vault paths, wikilinks, formatting |
+| `workday-*` | Specific workday workflows (morning, eod, prs, reviews, sprint, pr-review) |
+| `gamedev` | Burnt Ice project context |

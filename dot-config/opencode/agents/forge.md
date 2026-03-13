@@ -89,21 +89,7 @@ These should be creative/challenging work, not emails, admin, or reactive tasks.
 
 ### Step 2: Validate Deep Work Criteria
 
-Ensure tasks are NOT shallow work:
-- ❌ Email, Slack, meetings prep
-- ❌ Admin, expense reports, scheduling
-- ❌ Quick fixes that don't compound
-- ❌ Routine bug fixes with known solutions
-- ❌ Manual testing / data entry
-- ❌ Status updates or standup prep
-- ❌ Context-switching between many small tasks
-- ✅ Creative problem-solving
-- ✅ Strategic thinking
-- ✅ Complex implementation
-- ✅ Writing/designing
-- ✅ Learning something hard
-
-If a task is shallow, suggest exchanging it for deeper work.
+Deep work = creative problem-solving, strategic thinking, complex implementation, writing/designing, or learning something hard. If a task is reactive, administrative, or routine (email, Slack, quick fixes, status updates), suggest exchanging it for deeper work.
 
 ### Step 3: Quantify Each Task
 
