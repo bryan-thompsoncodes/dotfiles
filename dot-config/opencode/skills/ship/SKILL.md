@@ -46,7 +46,7 @@ If any check fails, report what's wrong and stop.
 
 ### 3. Confirm
 
-Ask: "Should I open a PR for this work? Draft or ready-for-review?"
+Ask: "Ready to push and open a draft PR?"
 
 ### 4. Push
 
@@ -58,9 +58,11 @@ git push -u origin <branch>
 
 #### GitHub
 
-| Ready | Draft |
-|-------|-------|
-| `gh pr create --fill` | `gh pr create --fill --draft` |
+```bash
+gh pr create --fill --draft
+```
+
+**Always open as draft.** Never use `--fill` without `--draft`.
 
 #### Forgejo
 
@@ -90,7 +92,7 @@ instance=$(echo "$remote_url" | sed -E 's|.*(@\|//)([^:/]+).*|https://\2|')
 curl -s -X POST "${instance}/api/v1/repos/${owner_repo}/pulls" \
   -H "Authorization: token $TOKEN" \
   -H "Content-Type: application/json" \
-  -d "{\"title\":\"<PR title>\",\"head\":\"<branch>\",\"base\":\"main\",\"body\":\"<description>\"}"
+  -d "{\"title\":\"<PR title>\",\"head\":\"<branch>\",\"base\":\"main\",\"body\":\"<description>\",\"draft\":true}"
 ```
 
 Extract the PR number and URL from the JSON response:
