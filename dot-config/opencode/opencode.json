@@ -14,35 +14,59 @@
       "models": {
         "llama3.3:70b": {
           "name": "Llama 3.3 70B",
-          "limit": { "context": 8192, "output": 2048 }
+          "limit": {
+            "context": 8192,
+            "output": 2048
+          }
         },
         "deepseek-r1:70b": {
           "name": "DeepSeek R1 70B",
-          "limit": { "context": 8192, "output": 2048 }
+          "limit": {
+            "context": 8192,
+            "output": 2048
+          }
         },
         "qwen3-coder:30b": {
           "name": "Qwen3 Coder 30B",
-          "limit": { "context": 8192, "output": 2048 }
+          "limit": {
+            "context": 8192,
+            "output": 2048
+          }
         },
         "gpt-oss:120b": {
           "name": "gpt-oss 120B",
-          "limit": { "context": 8192, "output": 2048 }
+          "limit": {
+            "context": 8192,
+            "output": 2048
+          }
         },
         "qwen3:32b": {
           "name": "Qwen3 32B",
-          "limit": { "context": 32768, "output": 4096 }
+          "limit": {
+            "context": 32768,
+            "output": 4096
+          }
         },
         "gemma3:27b": {
           "name": "Gemma 3 27B",
-          "limit": { "context": 16384, "output": 2048 }
+          "limit": {
+            "context": 16384,
+            "output": 2048
+          }
         },
         "deepseek-coder-v2:16b": {
           "name": "DeepSeek Coder v2 16B",
-          "limit": { "context": 16384, "output": 2048 }
+          "limit": {
+            "context": 16384,
+            "output": 2048
+          }
         },
         "llama3.2-vision:90b": {
           "name": "Llama 3.2 Vision 90B",
-          "limit": { "context": 131072, "output": 4096 }
+          "limit": {
+            "context": 131072,
+            "output": 4096
+          }
         }
       }
     }
@@ -160,7 +184,8 @@
   },
   "model": "anthropic/claude-opus-4-6",
   "plugin": [
-    "oh-my-opencode@latest"
+    "oh-my-opencode@latest",
+    "opencode-claude-auth"
   ],
   "mcp": {
     "vads": {
