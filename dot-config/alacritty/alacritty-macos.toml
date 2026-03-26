@@ -6,7 +6,7 @@ working_directory = "/Users/bryan"
 [[keyboard.bindings]]
 key = "N"
 mods = "Command"
-command = { program = "/usr/bin/open", args = ["-na", "Alacritty"] }
+action = "CreateNewWindow"
 
 [window]
 decorations = "None"  # No traffic lights, clean look

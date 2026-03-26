@@ -15,7 +15,7 @@ foreground = "#c3ccdc"  # NIGHTFLY_FG - Main foreground
 [[keyboard.bindings]]
 key = "N"
 mods = "Control|Shift"
-command = { program = "alacritty" }
+action = "CreateNewWindow"
 
 [font.normal]
 family = "MesloLGS Nerd Font"
