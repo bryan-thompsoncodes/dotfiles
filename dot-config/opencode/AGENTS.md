@@ -9,6 +9,10 @@
 **Working Hours:** 7:30am - 4pm PT
 **Timezone:** Pacific
 
+**Current Projects:**
+- **VA Facilities** (winding down) — vets-website facility-locator app
+- **Simpler Grants Protocol** (ramping up) — SDK, API, and CLI tools for grants.gov
+
 ---
 
 ## Obsidian Vault Integration
@@ -33,12 +37,23 @@
 
 ## GitHub Configuration
 
+### VA Facilities (winding down)
+
 | Key | Value |
 |-----|-------|
 | User | `bryan-thompsoncodes` |
 | Org | `department-of-veterans-affairs` |
 | Primary Repo | `vets-website` |
 | Sprint Board | https://github.com/orgs/department-of-veterans-affairs/projects/1865/views/8 |
+
+### Simpler Grants Protocol (primary)
+
+| Key | Value |
+|-----|-------|
+| User | `bryan-thompsoncodes` |
+| Org | `HHS` |
+| Primary Repo | `simpler-grants-protocol` |
+| Sprint Board | https://github.com/orgs/HHS/projects/17/views/1?sliceBy%5Bvalue%5D=bryan-thompsoncodes |
 
 ---
 
@@ -100,6 +115,8 @@ fi
 
 ## Repositories & Tech Stack
 
+### VA Facilities
+
 | Repo | Purpose | Tech |
 |------|---------|------|
 | vets-website | React frontend for VA.gov | React, Redux, SCSS |
@@ -110,6 +127,19 @@ fi
 **Testing:** Cypress (E2E), Jest/RTL (unit)
 **Feature Flags:** Flipper
 **Design System:** VADS (VA Design System)
+
+### Simpler Grants Protocol
+
+| Repo | Purpose | Tech |
+|------|---------|------|
+| simpler-grants-protocol | SDK, API, CLI for grants.gov | TypeScript, Python, FastAPI |
+
+**Target audience:** Developers building grants.gov integrations
+
+**Team:**
+- Laura Belinfante — Product Owner (Agile Six)
+- Billy Daly — Technical Product Strategist (Agile Six)
+- Jeff Crichlake — Software Engineer (Intuitial Six)
 
 ---
 
