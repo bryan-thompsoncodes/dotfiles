@@ -29,7 +29,7 @@
   },
   "agents": {
     "muse": {
-      "model": "anthropic/claude-opus-4-6",
+      "model": "anthropic/claude-opus-4-5",
       "temperature": 0.6,
       "thinking": {
         "type": "enabled",
@@ -53,7 +53,7 @@
       "temperature": 0.2
     },
     "demiurge": {
-      "model": "anthropic/claude-opus-4-6",
+      "model": "anthropic/claude-opus-4-5",
       "temperature": 0.2,
       "thinking": {
         "type": "enabled",
@@ -71,7 +71,7 @@
   },
   "categories": {
     "ideation": {
-      "model": "anthropic/claude-opus-4-6",
+      "model": "anthropic/claude-opus-4-5",
       "temperature": 0.7,
       "thinking": {
         "type": "enabled",
@@ -84,7 +84,6 @@
     }
   },
   "_migrations": [
-    "model-version:anthropic/claude-opus-4-5->anthropic/claude-opus-4-6",
     "model-version:anthropic/claude-sonnet-4-5->anthropic/claude-sonnet-4-6",
     "model-version:anthropic/claude-sonnet-4-5->anthropic/claude-sonnet-4-6",
     "model-version:anthropic/claude-sonnet-4-5->anthropic/claude-sonnet-4-6"
