@@ -81,6 +81,21 @@
         "athena-notes"
       ],
       "prompt_append": "Focus on creative exploration, brainstorming, and structured thinking. Use extended thinking to explore ideas deeply. Capture insights using athena-notes patterns."
+    },
+    "codex": {
+      "model": "openai/gpt-5.2-codex",
+      "variant": "high",
+      "description": "Code-focused tasks using GPT Codex - optimized for code generation, refactoring, and implementation"
+    },
+    "ultrabrain": {
+      "model": "openai/gpt-5.2",
+      "variant": "xhigh",
+      "description": "Deep reasoning tasks requiring maximum intelligence - architecture decisions, complex debugging"
+    },
+    "quick-gpt": {
+      "model": "openai/gpt-5.2",
+      "variant": "low",
+      "description": "Fast OpenAI tasks - simple fixes, quick questions, low-effort work"
     }
   },
   "_migrations": [

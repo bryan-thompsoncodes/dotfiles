@@ -63,9 +63,11 @@
 
 **Branch Policy:** Never commit directly to `main` or `master`. All work must be done on a feature branch. **Exception:** The `dotfiles` repo — committing directly to `main` is fine here.
 
+**AGENTS.md files are globally gitignored.** They exist locally in repos for agent context but are NEVER committed. Do not propose committing them, do not include them in PRs, and do not suggest updating them as part of a PR diff.
+
 1. **Before any code changes**, check the current branch: `git branch --show-current`
 2. If on `main` or `master`, create and switch to a feature branch before making any commits
-3. Branch naming: `<type>/<short-description>` (e.g., `feat/add-search`, `fix/header-alignment`, `chore/update-deps`)
+3. Branch naming: always prefix with the related issue/ticket number, e.g. `612-ci-workspace-scripts`, `642-upgrade-deps`. The ticket number comes first.
 4. If the user doesn't specify a branch name, propose one based on the task and confirm before creating
 5. **Commit often** — make small, atomic commits as you complete each logical unit of work
 6. **Only commit verified work** — confirm changes work as expected (builds pass, tests pass, no regressions) before committing. Never commit just to save progress or "checkpoint"
