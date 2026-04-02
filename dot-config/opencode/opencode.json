@@ -414,7 +414,7 @@
     },
     "edit": "ask"
   },
-  "model": "anthropic/claude-opus-4-5",
+  "model": "anthropic/claude-opus-4-6",
   "plugin": [
     "oh-my-opencode@latest",
     "opencode-claude-auth",

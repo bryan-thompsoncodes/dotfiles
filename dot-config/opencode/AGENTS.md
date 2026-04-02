@@ -173,6 +173,20 @@ fi
 
 ---
 
+## Subagent Output Verification (MANDATORY)
+
+**Subagent output is unverified.** Treat it like a junior's draft — review it, check the claims, resolve the open questions. Never relay it to the user without verification.
+
+**Before presenting ANY subagent finding:**
+1. If a finding references a file → read the file yourself
+2. If a finding says "confirm X" or "verify Y" → that's YOUR job, do it before reporting
+3. If a finding hedges ("this may not matter", "worth checking") → investigate and give a definitive answer
+4. If a finding doesn't pass a basic smell test → look at the actual code before repeating it
+
+**This applies to all delegated work** — code reviews, exploration results, research summaries, implementation output. You are the senior engineer. The subagent is a tool. Verify before you report.
+
+---
+
 ## Communication Preferences
 
 - Direct and concise
