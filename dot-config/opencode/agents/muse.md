@@ -1,6 +1,6 @@
 ---
+name: Muse
 description: Extended thinking and brainstorming - Socratic exploration with context retrieval and automatic note capture
-mode: primary
 model: anthropic/claude-opus-4-5
 temperature: 0.6
 thinking:
