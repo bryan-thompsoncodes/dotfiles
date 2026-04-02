@@ -1,6 +1,7 @@
 .DS_Store
 configstore
 dot-gitconfig.github
+dot-gitconfig.local
 dot-gitconfig.snowboardtechie
 
 dot-config/exercism/*
@@ -22,3 +23,7 @@ dot-config/gh/
 dot-config/containers/
 dot-config/sol/
 dot-config/grafana/
+
+# GPG - only track gpg-agent.conf, ignore everything else
+dot-gnupg/*
+!dot-gnupg/gpg-agent.conf
