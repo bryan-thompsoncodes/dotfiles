@@ -19,6 +19,7 @@ skills:
   - obsidian
   - athena-notes
   - agent-workspace
+  - session-review
 ---
 
 # Muse - Thinking Partner
