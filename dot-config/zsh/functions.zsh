@@ -1,42 +1,5 @@
 # Custom shell functions
 
-# VA Server Scripts
-
-function cl-storybook {
-  local base_dir="$VA_CODE_DIR/component-library/packages"
-
-  # Check if component-library exists
-  if [ ! -d "$VA_CODE_DIR/component-library" ]; then
-    echo "Error: component-library repository not found at $VA_CODE_DIR/component-library"
-    return 1
-  fi
-
-  # Build web-components
-  cd "$base_dir/web-components/" || return 1
-  echo "Building web-components..."
-  yarn install || return 1
-  yarn build || return 1
-  yarn build-bindings || return 1
-
-  # Build react-components
-  cd ../react-components/ || return 1
-  echo "Building react-components..."
-  yarn install || return 1
-  yarn build || return 1
-
-  # Build core
-  cd ../core/ || return 1
-  echo "Building core..."
-  yarn install || return 1
-  yarn build || return 1
-
-  # Start storybook
-  cd ../storybook/ || return 1
-  echo "Starting storybook..."
-  yarn install || return 1
-  yarn storybook
-}
-
 function vets-api-server {
   # Check if vets-api exists
   if [ ! -d "$VA_CODE_DIR/vets-api" ]; then
@@ -53,29 +16,6 @@ function vets-api-server {
 
   # Start foreman
   foreman start -m all=1,clamd=0,freshclam=0
-}
-
-function vets-website-server {
-  local env=${1:-static-pages,facilities}
-
-  # Check if vets-website exists
-  if [ ! -d "$VA_CODE_DIR/vets-website" ]; then
-    echo "Error: vets-website repository not found at $VA_CODE_DIR/vets-website"
-    return 1
-  fi
-
-  cd "$VA_CODE_DIR/vets-website" || return 1
-  yarn watch --env="$env" --watch-options-aggregate-timeout 600
-}
-
-function ddev-smart-start {
-  # Check if ddev containers are actually running, start only if needed
-  # Check docker ps directly for running ddev web containers (most reliable method)
-  if docker ps --format '{{.Names}}' 2>/dev/null | grep -qE '^ddev-.*-web$'; then
-    ddev status
-  else
-    ddev start && ddev status
-  fi
 }
 
 # Git rebase function
@@ -164,13 +104,16 @@ function code {
   if [[ -n $1 && $1 != "." ]]; then
     local dir="$HOME/code/$1"
     local va_dir="$HOME/code/department-of-veterans-affairs/$1"
+    local hhs_dir="$HOME/code/HHS/$1"
 
     if [[ -d $dir ]]; then
       target_dir="$dir"
+    elif [[ -d $hhs_dir ]]; then
+      target_dir="$hhs_dir"
     elif [[ -d $va_dir ]]; then
       target_dir="$va_dir"
     else
-      echo "Directory $1 not found in ~/code or ~/code/department-of-veterans-affairs"
+      echo "Directory $1 not found in ~/code, ~/code/HHS or ~/code/department-of-veterans-affairs"
       return 1
     fi
   else
