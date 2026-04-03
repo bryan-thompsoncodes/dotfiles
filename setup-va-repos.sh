@@ -37,6 +37,36 @@ declare -A REPOS=(
     ["va.gov-cms"]="git@github.com:${GITHUB_ORG}/va.gov-cms.git"
 )
 
+NIX_CONFIGS_DIR="${NIX_CONFIGS_DIR:-$HOME/code/nix-configs}"
+declare -A DEV_SHELLS=(
+    ["vets-website"]="vets-website"
+    ["next-build"]="next-build"
+    ["vets-api"]="vets-api"
+    ["component-library"]="component-library"
+)
+
+create_envrc() {
+    local repo="$1"
+    local repo_dir="$BASE_DIR/$repo"
+    local shell_name="${DEV_SHELLS[$repo]:-}"
+
+    if [ -z "$shell_name" ]; then
+        return 1
+    fi
+
+    cat > "$repo_dir/.envrc" << EOF
+use flake ${NIX_CONFIGS_DIR}#${shell_name}
+
+# Fetch latest remote refs in the background on directory entry
+git fetch --quiet &
+EOF
+
+    if command -v direnv &> /dev/null; then
+        direnv allow "$repo_dir"
+    fi
+    return 0
+}
+
 # Arrays to track what needs to be cloned
 declare -a EXISTING_REPOS=()
 declare -a MISSING_REPOS=()
@@ -69,10 +99,28 @@ done
 
 echo ""
 
-# If all repos exist, exit
+# Create .envrc for existing repos that are missing one
+declare -a ENVRC_CREATED=()
+for repo in "${EXISTING_REPOS[@]}"; do
+    if [ -n "${DEV_SHELLS[$repo]:-}" ] && [ ! -f "$BASE_DIR/$repo/.envrc" ]; then
+        if create_envrc "$repo"; then
+            echo -e "  ${GREEN}✓ Created .envrc for ${repo} (dev shell: ${DEV_SHELLS[$repo]})${NC}"
+            ENVRC_CREATED+=("$repo")
+        fi
+    fi
+done
+
+if [ ${#ENVRC_CREATED[@]} -gt 0 ]; then
+    echo ""
+fi
+
 if [ ${#MISSING_REPOS[@]} -eq 0 ]; then
     echo -e "${GREEN}All repositories are already cloned!${NC}"
-    echo -e "${GREEN}Nothing to do.${NC}"
+    if [ ${#ENVRC_CREATED[@]} -gt 0 ]; then
+        echo -e "${GREEN}Created ${#ENVRC_CREATED[@]} missing .envrc file(s).${NC}"
+    else
+        echo -e "${GREEN}Nothing to do.${NC}"
+    fi
     exit 0
 fi
 
@@ -118,6 +166,9 @@ for repo in "${MISSING_REPOS[@]}"; do
 
     if git clone "${REPOS[$repo]}" "$BASE_DIR/$repo"; then
         echo -e "${GREEN}✓ Successfully cloned ${repo}${NC}"
+        if create_envrc "$repo"; then
+            echo -e "${GREEN}  ✓ Created .envrc (dev shell: ${DEV_SHELLS[$repo]})${NC}"
+        fi
         CLONED_COUNT=$((CLONED_COUNT + 1))
     else
         echo -e "${RED}✗ Failed to clone ${repo}${NC}"
