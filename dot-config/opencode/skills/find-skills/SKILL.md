@@ -1,11 +1,11 @@
 ---
 name: find-skills
-description: Search skills.sh for community agent skills. Use when the user wants to find, browse, or add skills from the open skills ecosystem. Fetches skill content from GitHub for manual review and copy/paste into OhMyOpenCode format.
+description: Search skills.sh for community agent skills. Use when the user wants to find, browse, or add skills from the open skills ecosystem. Fetches skill content from GitHub for manual review and copy/paste into OhMyOpenAgent format.
 ---
 
 # Find Skills
 
-Search the [skills.sh](https://skills.sh) open skills ecosystem and fetch skill content for manual review and adaptation into OhMyOpenCode skills.
+Search the [skills.sh](https://skills.sh) open skills ecosystem and fetch skill content for manual review and adaptation into OhMyOpenAgent skills.
 
 ## When to Use This Skill
 
@@ -16,14 +16,14 @@ Search the [skills.sh](https://skills.sh) open skills ecosystem and fetch skill 
 
 ## Important Context
 
-**We do NOT use `npx skills add`.** That CLI installs skills into agent-specific directories (`.claude/`, `.cursor/rules/`, etc.) which conflicts with our OhMyOpenCode skill system.
+**We do NOT use `npx skills add`.** That CLI installs skills into agent-specific directories (`.claude/`, `.cursor/rules/`, etc.) which conflicts with our OhMyOpenAgent skill system.
 
 Instead, we:
 
 1. **Search** skills.sh via their API
 2. **Fetch** the raw `SKILL.md` from GitHub
 3. **Present** the content for the user to review
-4. **Adapt** it into OhMyOpenCode format if the user wants to add it
+4. **Adapt** it into OhMyOpenAgent format if the user wants to add it
 
 Our skills live at: `~/.config/opencode/skills/{skill-name}/SKILL.md`
 
@@ -102,7 +102,7 @@ Present the full SKILL.md content to the user for review.
 
 ---
 
-## Step 3: Adapt to OhMyOpenCode Format
+## Step 3: Adapt to OhMyOpenAgent Format
 
 If the user wants to add the skill, adapt it:
 
@@ -125,7 +125,7 @@ allowed-tools: Bash(git:*) Read
 Instructions...
 ```
 
-### OhMyOpenCode format (output):
+### OhMyOpenAgent format (output):
 
 ```markdown
 ---
@@ -140,7 +140,7 @@ Instructions adapted for our workflow...
 
 **Key adaptations:**
 
-1. Keep only `name` and `description` in frontmatter (OhMyOpenCode ignores other fields)
+1. Keep only `name` and `description` in frontmatter (OhMyOpenAgent ignores other fields)
 2. Remove any `npx skills` commands or install references
 3. Remove agent-specific paths (`.claude/`, `.cursor/rules/`)
 4. Adjust file paths to match our conventions if needed
