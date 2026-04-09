@@ -193,7 +193,21 @@
       "tea login list*": "allow",
       "tea pr list*": "allow"
     },
-    "edit": "ask"
+    "edit": "ask",
+    "read": "allow",
+    "glob": "allow",
+    "grep": "allow",
+    "list": "allow",
+    "lsp": "allow",
+    "task": "allow",
+    "todowrite": "allow",
+    "skill": "allow",
+    "question": "allow",
+    "webfetch": "allow",
+    "websearch": "allow",
+    "codesearch": "allow",
+    "external_directory": "ask",
+    "doom_loop": "ask"
   },
   "model": "anthropic/claude-opus-4-6",
   "plugin": [
