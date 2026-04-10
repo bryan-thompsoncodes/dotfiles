@@ -1,4 +1,5 @@
 .DS_Store
+!AGENTS.md
 configstore
 dot-gitconfig.github
 dot-gitconfig.local

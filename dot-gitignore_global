@@ -6,3 +6,7 @@
 # Notes vault - synced via Syncthing, not git
 .notes
 .notes/
+
+# Agent instructions - local context only, not committed
+# To track in a specific repo: add `!AGENTS.md` to that repo's .gitignore
+AGENTS.md
