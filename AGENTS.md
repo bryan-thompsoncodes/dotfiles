@@ -148,3 +148,4 @@ git diff --check                 # Trailing whitespace check
 - `gpg-agent.conf` hardcodes `pinentry-mac` — NixOS users must override manually
 - `dot-gitconfig` has hardcoded `excludesfile = /Users/bryan/.gitignore_global` — not portable to other usernames
 - This repo syncs to 3 remotes: git.snowboardtechie.com (primary), Codeberg, GitHub
+- `AGENTS.md` is globally gitignored via `dot-gitignore_global`. Repos that need to track it (dotfiles, nix-configs) use `!AGENTS.md` in their `.gitignore` to override.

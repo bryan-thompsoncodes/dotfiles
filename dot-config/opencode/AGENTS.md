@@ -63,7 +63,7 @@
 
 **Branch Policy:** Never commit directly to `main` or `master`. All work must be done on a feature branch. **Exception:** The `dotfiles` repo — committing directly to `main` is fine here.
 
-**AGENTS.md files are globally gitignored.** They exist locally in repos for agent context but are NEVER committed. Do not propose committing them, do not include them in PRs, and do not suggest updating them as part of a PR diff.
+**AGENTS.md files are globally gitignored.** They exist locally in repos for agent context and are not committed by default. Exceptions: `dotfiles` and `nix-configs` explicitly track their AGENTS.md files via `!AGENTS.md` in their repo `.gitignore`. For all other repos, do not propose committing them, do not include them in PRs, and do not suggest updating them as part of a PR diff.
 
 1. **Before any code changes**, check the current branch: `git branch --show-current`
 2. If on `main` or `master`, create and switch to a feature branch before making any commits
