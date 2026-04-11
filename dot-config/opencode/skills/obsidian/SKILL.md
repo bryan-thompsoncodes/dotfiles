@@ -38,6 +38,7 @@ BASE_PATH="~/notes"
 | Vault | Path | Purpose |
 |-------|------|---------|
 | Workday | `${BASE_PATH}/workday` | Work - VA.gov development |
+| Second Brain | `${BASE_PATH}/second-brain` | Personal - vehicles, hobbies, learning |
 | Burnt Ice | `${BASE_PATH}/burnt-ice` | Personal - Game development |
 
 ---

@@ -17,6 +17,16 @@
 
 ## Obsidian Vault Integration
 
+**Known Vaults:**
+
+| Vault | Path | Purpose |
+|-------|------|---------|
+| Workday | `~/notes/workday` | Work — VA.gov, Simpler Grants |
+| Second Brain | `~/notes/second-brain` | Personal — vehicles, hobbies, learning |
+| Burnt Ice | `~/notes/burnt-ice` | Personal — Game development |
+
+### Workday Vault
+
 **Vault Path:** `~/notes/workday`
 
 | Folder | Purpose |
@@ -30,6 +40,22 @@
 - **For Agent** — Tasks user wants help with
 - **Agent Updates** — Agent logs completed work here
 - **End of Day** — EOD summary section
+
+### Second Brain Vault
+
+**Vault Path:** `~/notes/second-brain`
+
+| Folder | Purpose |
+|--------|---------|
+| `Explorations/` | Athena-notes exploration-type notes |
+| `Templates/` | Note templates |
+| Root level | Vehicle/project notes, hub pages |
+
+**Patterns:**
+- Tags: `#area/{topic}` (e.g., `#area/moto`), `#type/{note-type}`
+- Aliases: `#project/{category}/{name}` (e.g., `#project/learn-auto/te300`)
+- Hub pages: `Moto.md`, `Learn automotive skills.md` — link to sub-notes
+- Vehicle notes link to: build plans, service logs, engine/system reference notes
 
 **Linking:** Use Obsidian wikilinks `[[Project Name|display text]]`
 

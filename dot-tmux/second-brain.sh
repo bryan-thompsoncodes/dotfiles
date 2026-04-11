@@ -23,7 +23,7 @@ tmux has-session -t "$SESSION_NAME" 2>/dev/null
 if [ $? != 0 ]; then
   # Create new session with opencode window
   tmux new-session -d -s "$SESSION_NAME" -n "Muse" -c "$PROJECT_DIR"
-  tmux send-keys -t "$SESSION_NAME:1" "opencode --agent muse" C-m
+  tmux send-keys -t "$SESSION_NAME:1" "opencode --prompt @Muse" C-m
 fi
 
 # Attach to the session (or switch if already in tmux)
