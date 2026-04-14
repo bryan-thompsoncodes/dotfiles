@@ -182,7 +182,7 @@ The skill will be available via `load_skills=["{skill-name}"]` in task delegatio
 **Popular skill sources:**
 
 - `vercel-labs/agent-skills` - React, Next.js, web development
-- `anthropics/skills` - General purpose (PDF, DOCX, design, testing)
+- `openai/agent-skills` - General purpose (PDF, DOCX, design, testing)
 - `obra/superpowers` - Agent workflow patterns (brainstorming, debugging, TDD)
 - `expo/skills` - React Native / Expo
 

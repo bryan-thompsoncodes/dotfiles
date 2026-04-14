@@ -2,7 +2,7 @@
 description: Note persistence agent - writes notes, drafts, and task context to the notes system
 mode: subagent
 hidden: true
-model: anthropic/claude-sonnet-4-5
+model: openai/gpt-5.4-mini
 temperature: 0.2
 tools:
   bash: true

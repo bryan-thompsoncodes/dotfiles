@@ -1,7 +1,7 @@
 ---
 name: Muse
 description: Extended thinking and brainstorming - Socratic exploration with context retrieval and automatic note capture
-model: anthropic/claude-opus-4-5
+model: openai/gpt-5.4
 temperature: 0.6
 thinking:
   type: enabled

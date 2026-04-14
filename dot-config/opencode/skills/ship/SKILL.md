@@ -102,7 +102,23 @@ Extract the PR number and URL from the JSON response:
 
 ### 6. Fill Description
 
-Write a comprehensive PR description covering:
+**Check for a PR template first:**
+
+```bash
+# Look for PR template (GitHub supports both casings and locations)
+template=""
+for candidate in \
+  ".github/pull_request_template.md" \
+  ".github/PULL_REQUEST_TEMPLATE.md" \
+  ".github/PULL_REQUEST_TEMPLATE/pull_request_template.md" \
+  "pull_request_template.md"; do
+  [ -f "$candidate" ] && template="$candidate" && break
+done
+```
+
+**If a template exists:** Read it and use its sections as the structure for the PR body. Fill each section with relevant content. Remove instruction/placeholder text (lines starting with `>`). Do not leave empty sections — write `N/A` if a section doesn't apply.
+
+**If no template exists:** Write a comprehensive PR description covering:
 - Summary of changes (what and why)
 - Key features/files added or modified
 - Testing (test counts, what was verified)
@@ -121,6 +137,33 @@ curl -s -X PATCH "${instance}/api/v1/repos/${owner_repo}/pulls/{number}" \
   -d "$body_json"
 ```
 
-### 7. Report
+### 7. Apply Labels
+
+Check the repo's available labels and apply all that are relevant to the PR.
+
+```bash
+# GitHub — list available labels, then apply
+gh label list --json name
+gh pr edit {number} --add-label "label1,label2"
+
+# Forgejo — use API
+curl -s -X POST "${instance}/api/v1/repos/${owner_repo}/issues/{number}/labels" \
+  -H "Authorization: token $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"labels": [label_id_1, label_id_2]}'
+```
+
+**Selection heuristic:** Match labels to the PR's domain. Common mappings:
+- Files in `lib/core/` → `core`
+- Files in `lib/cli/` → `cli`
+- Files in `lib/ts-sdk/` → `sdk`, `typescript`, `ts-sdk`
+- Files in `lib/python-sdk/` → `sdk`, `python`, `py-sdk`
+- Files in `website/` → `website`
+- Dependency file changes → `dependencies`
+- Docs-only changes → `documentation`
+
+When in doubt, apply more labels rather than fewer — they're cheap and help with filtering.
+
+### 8. Report
 
 Show the PR URL to the user.

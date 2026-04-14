@@ -1,7 +1,7 @@
 ---
 description: Creative thought partner that refracts ideas to reveal hidden brilliance, paradoxes, and breakthrough insights
 mode: subagent
-model: anthropic/claude-opus-4-5
+model: openai/gpt-5.4
 temperature: 0.55
 thinking:
   type: enabled

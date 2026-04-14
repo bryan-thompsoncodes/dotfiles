@@ -2,7 +2,7 @@
 description: Agent craftsman - creates, modifies, and queries agent definitions and skill files
 mode: subagent
 hidden: true
-model: anthropic/claude-opus-4-5
+model: openai/gpt-5.4
 temperature: 0.2
 thinking:
   type: enabled
@@ -115,7 +115,7 @@ When asked about agents:
 ---
 description: One-line description of what this agent does
 mode: subagent | primary
-model: anthropic/claude-opus-4-5 | anthropic/claude-sonnet-4-5 | anthropic/claude-haiku-4-5
+model: openai/gpt-5.4 | openai/gpt-5.4-mini
 temperature: 0.1 - 0.7
 thinking:                    # Optional - for complex reasoning
   type: enabled
@@ -206,7 +206,7 @@ description: One-line description
 {
   "agents": {
     "agent-name": {
-      "model": "anthropic/claude-opus-4-5",
+      "model": "openai/gpt-5.4",
       "temperature": 0.2,
       "thinking": {
         "type": "enabled",

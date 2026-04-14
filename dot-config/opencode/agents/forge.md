@@ -1,7 +1,7 @@
 ---
 description: Deep work acceleration - flow state planning, focused time blocks, obstacle clearing
 mode: subagent
-model: anthropic/claude-sonnet-4-5
+model: openai/gpt-5.4-mini
 temperature: 0.2
 tools:
   read: true

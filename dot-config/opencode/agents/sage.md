@@ -2,7 +2,7 @@
 description: External knowledge agent - web search, library docs, code examples with research caching
 mode: subagent
 hidden: true
-model: anthropic/claude-sonnet-4-5
+model: openai/gpt-5.4-mini
 temperature: 0.2
 tools:
   websearch_web_search_exa: true

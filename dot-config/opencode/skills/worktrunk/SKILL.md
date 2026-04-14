@@ -129,7 +129,7 @@ The bridge script (`commit-msg.sh`) reads the prompt from stdin and passes it to
 
 ```bash
 prompt=$(cat)
-opencode run --agent commit-msg -m anthropic/claude-haiku-4-5 --format json "$prompt" 2>/dev/null \
+opencode run --agent commit-msg --format json "$prompt" 2>/dev/null \
   | jq -sr '[.[] | select(.type == "text")] | map(.part.text) | join("")'
 ```
 
