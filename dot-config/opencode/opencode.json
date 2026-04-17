@@ -34,20 +34,6 @@
             "context": 32768,
             "output": 4096
           }
-        },
-        "qwen3.5:27b": {
-          "name": "Qwen 3.5 27B",
-          "limit": {
-            "context": 32768,
-            "output": 4096
-          }
-        },
-        "qwen3.5:9b": {
-          "name": "Qwen 3.5 9B",
-          "limit": {
-            "context": 32768,
-            "output": 4096
-          }
         }
       }
     }
@@ -178,8 +164,7 @@
     "doom_loop": "ask"
   },
   "plugin": [
-    "oh-my-openagent@latest",
-    "opencode-openai-codex-auth"
+    "oh-my-openagent@latest"
   ],
   "mcp": {
     "vads": {
