@@ -146,6 +146,6 @@ git diff --check                 # Trailing whitespace check
 - `dot-config/opencode/` has its own `.gitignore` with selective whitelisting (track configs, ignore node_modules)
 - `grb` function: `grb` = rebase last 3, `grb N` = rebase last N, `grb branch` = rebase onto branch
 - `gpg-agent.conf` hardcodes `pinentry-mac` — NixOS users must override manually
-- `dot-gitconfig` has hardcoded `excludesfile = /Users/bryan/.gitignore_global` — not portable to other usernames
+- Global gitignore lives at `dot-config/git/ignore` → `~/.config/git/ignore` (XDG path, referenced by `dot-gitconfig` excludesfile)
 - This repo syncs to 3 remotes: git.snowboardtechie.com (primary), Codeberg, GitHub
-- `AGENTS.md` is globally gitignored via `dot-gitignore_global`. Repos that need to track it (dotfiles, nix-configs) use `!AGENTS.md` in their `.gitignore` to override.
+- `AGENTS.md` is globally gitignored via `dot-config/git/ignore`. Repos that need to track it (dotfiles, nix-configs) use `!AGENTS.md` in their `.gitignore` to override.

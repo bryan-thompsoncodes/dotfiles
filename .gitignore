@@ -24,6 +24,7 @@ dot-config/gh/
 dot-config/containers/
 dot-config/sol/
 dot-config/grafana/
+dot-config/openchamber/
 
 # GPG - only track gpg-agent.conf, ignore everything else
 dot-gnupg/*

@@ -15,7 +15,7 @@
 	gpgsign = true
 
 [core]
-	excludesfile = ~/.gitignore_global
+	excludesfile = ~/.config/git/ignore
 	fileMode = false
 	hooksPath = ~/.git-hooks
 	editor = nvim

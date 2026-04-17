@@ -10,3 +10,6 @@
 # Agent instructions - local context only, not committed
 # To track in a specific repo: add `!AGENTS.md` to that repo's .gitignore
 AGENTS.md
+
+# Claude Code local settings - machine-specific, never committed
+**/.claude/settings.local.json
