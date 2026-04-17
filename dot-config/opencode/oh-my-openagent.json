@@ -3,6 +3,11 @@
   "disabled_agents": [
     "README"
   ],
+  "categories": {
+    "writing": {
+      "model": "anthropic/claude-sonnet-4-6"
+    }
+  },
   "lsp": {
     "gdscript": {
       "command": [
