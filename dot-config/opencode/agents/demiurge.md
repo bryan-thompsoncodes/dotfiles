@@ -2,7 +2,7 @@
 description: Agent craftsman - creates, modifies, and queries agent definitions and skill files
 mode: subagent
 hidden: true
-model: openai/gpt-5.4
+model: openrouter/anthropic/claude-opus-4.7
 temperature: 0.2
 thinking:
   type: enabled
@@ -115,7 +115,7 @@ When asked about agents:
 ---
 description: One-line description of what this agent does
 mode: subagent | primary
-model: openai/gpt-5.4 | openai/gpt-5.4-mini
+model: openrouter/anthropic/claude-opus-4.7 | openrouter/anthropic/claude-sonnet-4.6 | openrouter/anthropic/claude-haiku-4.5 | openai/gpt-5.4
 temperature: 0.1 - 0.7
 thinking:                    # Optional - for complex reasoning
   type: enabled
@@ -206,7 +206,7 @@ description: One-line description
 {
   "agents": {
     "agent-name": {
-      "model": "openai/gpt-5.4",
+      "model": "openrouter/anthropic/claude-sonnet-4.6",
       "temperature": 0.2,
       "thinking": {
         "type": "enabled",
@@ -382,7 +382,7 @@ Present the system diagram:
 Creating agent: critic
 
 I'll design this as a read-only code review agent:
-- Model: claude-sonnet-4-5 (good balance of capability and speed)
+- Model: openrouter/anthropic/claude-sonnet-4.6 (good balance of capability and speed)
 - Tools: read, glob, grep, bash (read-only operations)
 - No write/edit (read-only as requested)
 - Temperature: 0.2 (precision for code review)

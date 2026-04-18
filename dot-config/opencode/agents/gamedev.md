@@ -1,7 +1,7 @@
 ---
 description: Game development assistant for Burnt Ice - Godot 4.5 roguelike project with design docs and phase tracking
 mode: subagent
-model: openai/gpt-5.4-mini
+model: openrouter/anthropic/claude-sonnet-4.6
 temperature: 0.3
 tools:
   write: true

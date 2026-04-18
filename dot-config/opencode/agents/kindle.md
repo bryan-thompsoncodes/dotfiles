@@ -1,7 +1,7 @@
 ---
 description: Flow state coaching - diagnoses flow barriers and helps get unstuck when struggling to start
 mode: subagent
-model: openai/gpt-5.4-mini
+model: openrouter/anthropic/claude-sonnet-4.6
 temperature: 0.4
 tools:
   read: true

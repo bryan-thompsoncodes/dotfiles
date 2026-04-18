@@ -1,7 +1,7 @@
 ---
 description: Creative thought partner that refracts ideas to reveal hidden brilliance, paradoxes, and breakthrough insights
 mode: subagent
-model: anthropic/claude-sonnet-4-6
+model: openrouter/anthropic/claude-opus-4.7
 temperature: 0.55
 thinking:
   type: enabled

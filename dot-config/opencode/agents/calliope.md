@@ -2,7 +2,7 @@
 description: Writing agent for SnowboardTechie content - breaks paralysis, preserves voice, ships content
 mode: subagent
 hidden: true
-model: anthropic/claude-sonnet-4-6
+model: openrouter/anthropic/claude-sonnet-4.6
 temperature: 0.35
 tools:
   bash: true

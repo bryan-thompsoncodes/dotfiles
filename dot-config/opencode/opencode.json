@@ -13,6 +13,13 @@
         "store": false
       }
     },
+    "openrouter": {
+      "models": {
+        "anthropic/claude-opus-4.7": {},
+        "anthropic/claude-sonnet-4.6": {},
+        "anthropic/claude-haiku-4.5": {}
+      }
+    },
     "ollama": {
       "npm": "@ai-sdk/openai-compatible",
       "name": "Open WebUI (ai.thompson.codes)",
@@ -163,6 +170,7 @@
     "external_directory": "ask",
     "doom_loop": "ask"
   },
+  "model": "openrouter/anthropic/claude-opus-4.7",
   "plugin": [
     "oh-my-openagent@latest"
   ],

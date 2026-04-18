@@ -1,7 +1,7 @@
 ---
 description: VA.gov accessibility testing specialist - WCAG compliance, a11y audits, and inclusive design guidance
 mode: subagent
-model: anthropic/claude-sonnet-4-6
+model: openrouter/anthropic/claude-sonnet-4.6
 temperature: 0.2
 tools:
   bash: true
