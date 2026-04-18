@@ -5,6 +5,8 @@ description: End-to-end GitHub/Forgejo ticket workflow. Use when the user shares
 
 # Issue Work
 
+> **Claude Code only.** This skill and its companion agents (`impl-reviewer`, `ticket-analyst`) live under `dot-claude/` and target Claude Code's `~/.claude/` directory. They are not used by OpenCode — OpenCode agents and skills live under `dot-config/opencode/` and use a different frontmatter format, tool set, and state layout. The `EnterWorktree` tool and `Skill` tool references throughout this skill are Claude Code primitives.
+
 End-to-end workflow for taking a GitHub or Forgejo ticket from URL to review-ready implementation. Four phases: **Intake → Plan → Implement → Self-Review**, with a human approval checkpoint between Plan and Implement.
 
 Standalone — does not require the Athena Notes plugin or any specific note system.
