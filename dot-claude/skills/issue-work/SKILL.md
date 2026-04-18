@@ -132,8 +132,14 @@ if ! git -C "$TRUNK" fetch origin "$DEFAULT_BRANCH"; then
   echo "WARNING: could not fetch origin/$DEFAULT_BRANCH — worktree will be based on the local ref, which may be stale." >&2
 fi
 
-# Working tree clean? (modified or staged — ignore untracked)
-git -C "$TRUNK" status --porcelain | grep -E '^[ MADRC]'
+# Working tree clean? (modified, staged, type-changed, or unmerged — ignore untracked).
+# Porcelain v1 first column codes we care about:
+#   M/A/D/R/C  — staged change
+#   T          — type change (file ↔ symlink, etc.)
+#   U          — unmerged (mid-conflict) — resuming into a conflict is dangerous
+# The first column can also be a space when the change is only in the
+# working tree (`^ [MD]`), so match that case explicitly.
+git -C "$TRUNK" status --porcelain | grep -E '^([MADRCTU]| [MD])'
 ```
 
 If the trunk is dirty (modified/staged, not just untracked), stop and offer: stash / commit / abort. Do not silently stash.

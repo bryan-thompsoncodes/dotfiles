@@ -154,7 +154,8 @@ trap 'rm -f "$scratch"' EXIT
 jq -r '.body'    issue.json    >  "$scratch"
 jq -r '.[].body' comments.json >> "$scratch"
 
-rg -oE '(?:[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)?#[0-9]+|\bhttps?://[^\s)]+\b|\b[a-f0-9]{7,40}\b' "$scratch" \
+rg -oE '(?:[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)?#[0-9]+|\bhttps?://[^\s)]+|\b[a-f0-9]{7,40}\b' "$scratch" \
+  | sed -E 's/[.,;:!?]+$//' \
   | sort -u
 ```
 

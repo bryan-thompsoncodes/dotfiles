@@ -139,10 +139,22 @@ Paginate if needed:
 ```bash
 page=1
 while :; do
-  resp=$(curl -sS "${AUTH[@]}" \
+  # Capture body + HTTP status together so we can distinguish "done"
+  # (200 with `[]`) from "auth broke mid-paginate" (401/403 with a
+  # non-array error object). Without the status check, a mid-loop
+  # 401 returns `{"message":"Unauthorized"}`, which is neither `[]`
+  # nor a JSON array — so the old `[[ "$resp" == "[]" ]]` break
+  # never fires and `jq -s 'add'` blows up on a non-array input.
+  resp=$(curl -sS -w $'\n%{http_code}' "${AUTH[@]}" \
     "$INSTANCE/api/v1/repos/$OWNER/$REPO/issues/$N/comments?page=$page&limit=50")
-  [[ "$resp" == "[]" ]] && break
-  echo "$resp"
+  code="${resp##*$'\n'}"
+  body="${resp%$'\n'*}"
+  if [[ "$code" != "200" ]]; then
+    echo "Forgejo paginate failed (HTTP $code): $body" >&2
+    exit 1
+  fi
+  [[ "$body" == "[]" ]] && break
+  echo "$body"
   page=$((page + 1))
 done | jq -s 'add'
 ```
@@ -185,8 +197,12 @@ trap 'rm -f "$scratch"' EXIT
 jq -r '.body'   issue.json    >  "$scratch"
 jq -r '.[].body' comments.json >> "$scratch"
 
-# Extract candidates
-rg -oE '(?:[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)?#[0-9]+|\bhttps?://[^\s)]+\b|\b[a-f0-9]{7,40}\b' "$scratch" \
+# Extract candidates. The URL sub-pattern stops at whitespace or `)`
+# (common in markdown link closers), then we trim trailing sentence
+# punctuation — `.,;:!?` — because prose like "see https://example.com."
+# otherwise captures the period and 404s every title fetch.
+rg -oE '(?:[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)?#[0-9]+|\bhttps?://[^\s)]+|\b[a-f0-9]{7,40}\b' "$scratch" \
+  | sed -E 's/[.,;:!?]+$//' \
   | sort -u
 ```
 
@@ -233,10 +249,16 @@ If not cloned, skip silently.
 # Assumes this block runs inside a `for url in "${urls[@]}"; do ... done`
 # loop — the `continue` below only has meaning with a surrounding loop.
 
-# Parse host and strip any :port suffix so `github.com:22` still matches
-# the `github.com` allowlist entry.
+# Extract the authority (scheme://authority/path), then strip userinfo
+# BEFORE stripping the port. Userinfo-first matters: a URL like
+# `https://github.com:anything@evil.internal/x` has authority
+# `github.com:anything@evil.internal`. Stripping `:port` first would
+# yield `github.com` (allowlisted) even though the real host the fetcher
+# hits is `evil.internal`. Strip `user[:pass]@` first so the real host
+# is what we check.
 host=$(printf '%s' "$url" | awk -F/ '{print $3}')
-host="${host%%:*}"
+host="${host##*@}"   # drop userinfo first (defeats user:pass@host spoof)
+host="${host%%:*}"   # then drop :port so `github.com:22` still matches
 
 # Reject empty hosts outright (e.g. malformed `https:///path` URLs) —
 # otherwise they would match an empty "$FORGE_HOST" entry below and slip
