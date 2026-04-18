@@ -27,7 +27,7 @@ All per-ticket state lives at:
 ~/.claude/issue-work/{owner}-{repo}-{N}/
 ```
 
-This survives worktree teardown. Resume is supported by reading `progress.md` frontmatter `status:` field.
+This survives worktree teardown. Resume is supported by reading `progress.md` frontmatter `status:` field. Valid values, in order: `intake` → `planned` → `implementing` → `reviewed`.
 
 ---
 
@@ -52,13 +52,13 @@ Match the input against these patterns **in order** (stop at the first match):
 
 ```bash
 # 1. GitHub URL — check this FIRST (note the /issues/ path overlaps with Forgejo)
-^https?://github\.com/([^/]+)/([^/]+)/(issues|pull)/([0-9]+)
+^https?://github\.com/([^/]+)/([^/]+)/(issues|pull)/([0-9]+)/?$
 
 # 2. Shorthand — always GitHub
 ^([A-Za-z0-9_.-]+)/([A-Za-z0-9_.-]+)#([0-9]+)$
 
 # 3. Forgejo URL — only reached if neither of the above matched
-^https?://([^/]+)/([^/]+)/([^/]+)/(issues|pulls)/([0-9]+)
+^https?://([^/]+)/([^/]+)/([^/]+)/(issues|pulls)/([0-9]+)/?$
 ```
 
 **Ordering matters.** GitHub issue URLs also satisfy the Forgejo pattern (both use `/issues/`), so GitHub must be checked first. Only PRs differ by path (`/pull/` vs `/pulls/`).
@@ -271,15 +271,15 @@ After user approval:
 
 ### 3.4 Test suite detection
 
-Run tests after implementation. Detect by manifest:
+Run tests after implementation. Detect by manifest, checking monorepo drivers **first** so a repo with both `nx.json` and `package.json` uses the affected-graph runner instead of `npm test`:
 
-| Manifest | Command |
-|---|---|
-| `package.json` with `test` script | `npm test` or `yarn test` or `pnpm test` (match lockfile) |
-| `pyproject.toml` | `pytest` |
-| `Cargo.toml` | `cargo test` |
-| `go.mod` | `go test ./...` |
-| `nx.json` / `turbo.json` | `nx affected -t test` or `turbo test` |
+| Order | Manifest | Command |
+|---|---|---|
+| 1 | `nx.json` / `turbo.json` | `nx affected -t test` or `turbo test` |
+| 2 | `package.json` with `test` script | `npm test` or `yarn test` or `pnpm test` (match lockfile) |
+| 3 | `pyproject.toml` | `pytest` |
+| 4 | `Cargo.toml` | `cargo test` |
+| 5 | `go.mod` | `go test ./...` |
 
 Also run lint + typecheck when configured:
 
@@ -307,7 +307,7 @@ Tests: {pass/fail summary}
 Lint/typecheck: {summary}
 ```
 
-When implementation is complete and green, set `status: reviewed` is **not** accurate yet — leave it `implementing` until Phase 4 finishes.
+When implementation is complete and green, do **not** set `status: reviewed` yet — leave it `implementing` until Phase 4 finishes.
 
 ---
 
@@ -386,7 +386,7 @@ gh pr create --draft --title "{ticket-title}" \
 | Ticket is a PR (review work, not new work) | Skip worktree creation; `gh pr checkout {N}` in trunk or fetch branch; swap Phase 3 for "review against plan"; Phase 4 reviewers still run |
 | Tests fail 3× | Stop; surface last failure output; ask user |
 | Critical review findings | Present prominently; recommend fix-before-ship; never auto-ship |
-| User amends plan after approval | Overwrite `plan.md`; reset status `planned`; re-enter ExitPlanMode |
+| User amends plan after approval | Overwrite `plan.md`; reset status `planned`; re-present plan for approval (see 2.4) |
 | Repo not cloned locally | Ask before `gh repo clone` to `~/code/{repo}` |
 | Forgejo ticket | `ticket-analyst` uses REST API; everything else identical |
 | Pasted raw text (no URL) | Skip fetch; ask user for repo; `context.md` has only Body |

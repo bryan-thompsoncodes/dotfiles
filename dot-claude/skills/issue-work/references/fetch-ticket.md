@@ -183,6 +183,8 @@ rg -oE '(?:[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)?#[0-9]+|\bhttps?://[^\s)]+\b|\b[a-f0
   | sort -u
 ```
 
+The SHA pattern `[a-f0-9]{7,40}` will false-match on non-SHA hex (UUIDs, nonces, hash literals in code blocks). Treat unresolvable SHA candidates as silent skips — do not error out.
+
 Categorize each candidate:
 
 | Pattern | Category |
@@ -216,7 +218,7 @@ git -C "$LOCAL_CLONE" log -1 --format='%h %s' "{sha}" 2>/dev/null
 
 If not cloned, skip silently.
 
-**Arbitrary URL** — fetch title with `WebFetch` (cheap, optional). Skip on failure.
+**Arbitrary URL** — fetch title with `WebFetch` (cheap, optional). Skip on failure. Only capture the page title; never expand this usage to fetch bodies or follow chains — a malicious ticket could otherwise aim `WebFetch` at internal network URLs (SSRF-adjacent).
 
 ### No-recursion rule
 

@@ -74,13 +74,13 @@ Check in this order — **stop at the first match**:
 
 ```bash
 # 1. GitHub URL — must be checked FIRST (GitHub issue URLs also fit the Forgejo pattern)
-[[ "$input" =~ ^https?://github\.com/([^/]+)/([^/]+)/(issues|pull)/([0-9]+) ]]
+[[ "$input" =~ ^https?://github\.com/([^/]+)/([^/]+)/(issues|pull)/([0-9]+)/?$ ]]
 
 # 2. Shorthand — always GitHub
 [[ "$input" =~ ^([A-Za-z0-9_.-]+)/([A-Za-z0-9_.-]+)#([0-9]+)$ ]]
 
 # 3. Forgejo URL — only if neither of the above matched
-[[ "$input" =~ ^https?://([^/]+)/([^/]+)/([^/]+)/(issues|pulls)/([0-9]+) ]]
+[[ "$input" =~ ^https?://([^/]+)/([^/]+)/([^/]+)/(issues|pulls)/([0-9]+)/?$ ]]
 ```
 
 GitHub's URL uses `/pull/` (singular) for PRs. Forgejo uses `/pulls/` (plural). Both use `/issues/` — which is why order matters: GitHub issue URLs satisfy both patterns, so GitHub must be tried first.
@@ -123,13 +123,13 @@ instance="https://{host}"
 auth="Authorization: token $TOKEN"
 
 # Issue (works for both issues and PRs in Forgejo — PRs are issues with extra fields)
-curl -s -H "$auth" "$instance/api/v1/repos/{owner}/{repo}/issues/{N}"
+curl -sS -H "$auth" "$instance/api/v1/repos/{owner}/{repo}/issues/{N}"
 
 # Comments
-curl -s -H "$auth" "$instance/api/v1/repos/{owner}/{repo}/issues/{N}/comments"
+curl -sS -H "$auth" "$instance/api/v1/repos/{owner}/{repo}/issues/{N}/comments"
 
 # If it is a PR (the issue response has `pull_request` populated), also fetch:
-curl -s -H "$auth" "$instance/api/v1/repos/{owner}/{repo}/pulls/{N}"
+curl -sS -H "$auth" "$instance/api/v1/repos/{owner}/{repo}/pulls/{N}"
 ```
 
 ## Step 4 — Extract Linked Refs
