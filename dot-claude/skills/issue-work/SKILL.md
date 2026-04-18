@@ -138,8 +138,8 @@ fi
 #   T          — type change (file ↔ symlink, etc.)
 #   U          — unmerged (mid-conflict) — resuming into a conflict is dangerous
 # The first column can also be a space when the change is only in the
-# working tree (`^ [MD]`), so match that case explicitly.
-git -C "$TRUNK" status --porcelain | grep -E '^([MADRCTU]| [MD])'
+# working tree (`^ [MDT]`), so match that case explicitly.
+git -C "$TRUNK" status --porcelain | grep -E '^([MADRCTU]| [MDT])'
 ```
 
 If the trunk is dirty (modified/staged, not just untracked), stop and offer: stash / commit / abort. Do not silently stash.

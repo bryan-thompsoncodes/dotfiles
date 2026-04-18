@@ -137,6 +137,12 @@ curl -sS "${AUTH[@]}" \
 Paginate if needed:
 
 ```bash
+# Collect pages into an array, then `jq` once after the loop — do NOT
+# pipe the `while` into `jq` directly. A pipeline runs each side in a
+# subshell, so `exit 1` from inside the loop only exits that subshell
+# and `jq` still runs on the partial aggregate, masking the failure.
+# Buffering + explicit post-loop jq keeps failure loud.
+pages=()
 page=1
 while :; do
   # Capture body + HTTP status together so we can distinguish "done"
@@ -154,9 +160,10 @@ while :; do
     exit 1
   fi
   [[ "$body" == "[]" ]] && break
-  echo "$body"
+  pages+=("$body")
   page=$((page + 1))
-done | jq -s 'add'
+done
+printf '%s\n' "${pages[@]}" | jq -s 'add // []'
 ```
 
 ### PR-specific fields (if `is_pr: true`)
