@@ -27,7 +27,9 @@ All per-ticket state lives at:
 ~/.claude/issue-work/{owner}-{repo}-{N}/
 ```
 
-This survives worktree teardown. Resume is supported by reading `progress.md` frontmatter `status:` field. Valid values, in order: `intake` → `planned` → `implementing` → `reviewed`.
+This survives worktree teardown. Resume is supported by reading `progress.md` frontmatter `status:` field. Valid values, in order: `intake` → `planned` → `implementing` → `implemented` → `reviewed`.
+
+`implementing` means Phase 3 is in progress (code may be half-written, tests may be failing). `implemented` means Phase 3 finished cleanly and Phase 4 has not yet started — so resume can jump straight to review without re-running tests.
 
 ---
 
@@ -94,19 +96,33 @@ If no local clone: ask before running `gh repo clone {owner}/{repo} ~/code/{repo
 
 Run all of these against the trunk (not a worktree).
 
-**First, detect the default branch** (don't assume `main`):
+**First, detect the default branch** (don't assume `main`).
+
+GitHub:
 
 ```bash
 DEFAULT_BRANCH=$(gh repo view {owner}/{repo} --json defaultBranchRef --jq .defaultBranchRef.name)
-# Forgejo equivalent — use the API from references/fetch-ticket.md
 ```
 
-**Then run the rest of the pre-flight:**
+Forgejo — use the repo record; `default_branch` is a top-level field:
 
 ```bash
-gh auth status                                            # GitHub auth
-[[ -n "${FORGEJO_TOKEN:-$GITEA_TOKEN}" ]]                 # Forgejo auth (only if forgejo ticket)
-git -C "$TRUNK" fetch origin "$DEFAULT_BRANCH"            # fetch the actual default branch
+DEFAULT_BRANCH=$(curl -sS "${AUTH[@]}" \
+  "$INSTANCE/api/v1/repos/{owner}/{repo}" \
+  | jq -r '.default_branch')
+```
+
+**Then run the rest of the pre-flight.** Branch by forge so the GitHub-only check doesn't run against a Forgejo ticket (and vice versa):
+
+```bash
+if [[ "$FORGE" == "github" ]]; then
+  gh auth status
+elif [[ "$FORGE" == "forgejo" ]]; then
+  [[ -n "${FORGEJO_TOKEN:-$GITEA_TOKEN}" ]] \
+    || { echo "Set FORGEJO_TOKEN" >&2; exit 1; }
+fi
+
+git -C "$TRUNK" fetch origin "$DEFAULT_BRANCH"   # fetch the actual default branch
 
 # Working tree clean? (modified or staged — ignore untracked)
 git -C "$TRUNK" status --porcelain | grep -E '^[ MADRC]'
@@ -244,7 +260,7 @@ Then wait for the user's next message. Do not implement anything until you see a
 
 On amendment: overwrite `plan.md` with the revised version, keep `status: planned` in frontmatter, and re-present. Iterate until approved.
 
-(If the harness happens to be in Plan Mode when this skill runs, `ExitPlanMode` is the harness-native approval gate and you can use it in place of the inline prompt above. Do not try to enter Plan Mode from inside the skill — that's not a thing.)
+**Plan Mode note.** If the harness is already in Plan Mode when this skill runs, `ExitPlanMode` is the harness-native approval gate — use it in place of the inline prompt above. Do **not** attempt to *enter* Plan Mode from inside the skill; that's not a supported operation.
 
 ---
 
@@ -307,7 +323,9 @@ Tests: {pass/fail summary}
 Lint/typecheck: {summary}
 ```
 
-When implementation is complete and green, do **not** set `status: reviewed` yet — leave it `implementing` until Phase 4 finishes.
+When implementation is complete and green (all tests + lint + typecheck pass), set `status: implemented`. Do **not** set `status: reviewed` yet — that happens after Phase 4 synthesizes the reviewer findings.
+
+The distinction matters on resume: `implementing` means code may be half-written, so resume re-runs tests and continues editing. `implemented` means code is green and resume jumps straight to Phase 4.
 
 ---
 
@@ -367,7 +385,16 @@ Show the user:
 
 ```bash
 cd {worktree}
-gh pr create --draft --title "{ticket-title}" \
+# Pull the title from context.md's YAML frontmatter instead of inlining it.
+# Ticket titles can contain quotes, backticks, or $ that would mangle a
+# naked "..." argument and potentially run a subcommand.
+TITLE=$(awk '
+  /^---$/ { n++; next }
+  n == 1 && /^title:/ {
+    sub(/^title:[[:space:]]*/, "")
+    print; exit
+  }' ~/.claude/issue-work/{owner}-{repo}-{N}/context.md)
+gh pr create --draft --title "$TITLE" \
   --body-file ~/.claude/issue-work/{owner}-{repo}-{N}/summary.md
 ```
 

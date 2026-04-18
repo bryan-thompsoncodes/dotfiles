@@ -21,14 +21,23 @@ TARGET_REPO="{repo}"  # e.g. "apps"
 Glob(pattern="$HOME/code/*/.git")
 ```
 
-For each match, the parent dir basename is the clone name. If the basename == `{repo}`, verify the remote:
+For each match, the parent dir basename is the clone name. If the basename == `{repo}`, verify the remote.
+
+The verification pattern must match the **forge host the ticket came from**. Pass the host in as `FORGE_HOST` so Forgejo/Gitea instances resolve too:
 
 ```bash
-cd "$CANDIDATE" && \
-  git remote get-url origin | grep -iE "(github\.com[:/]|git@github\.com:){owner}/{repo}(\.git)?$"
+# FORGE_HOST — the host from the ticket URL (e.g. "github.com",
+# "codeberg.org", "git.snowboardtechie.com"). Defaults to github.com
+# for shorthand refs like owner/repo#N.
+FORGE_HOST="${FORGE_HOST:-github.com}"
+# Escape dots in the host for regex safety.
+FORGE_HOST_RE="${FORGE_HOST//./\\.}"
+
+git -C "$CANDIDATE" remote get-url origin \
+  | grep -iE "${FORGE_HOST_RE}[:/]{owner}/{repo}(\.git)?$"
 ```
 
-If the remote matches, use `$CANDIDATE` as the trunk. Done.
+The single `[:/]` class covers both HTTPS (`host/owner/repo`) and SSH (`host:owner/repo`) remotes — no need for a separate `git@` branch. If the remote matches, use `$CANDIDATE` as the trunk. Done.
 
 ### 2. One directory deeper (org subdirs)
 
@@ -57,10 +66,13 @@ If no basename match, grep all clones for the remote URL. This catches renamed l
 ```bash
 # Iterate every .git parent under ~/code/ (1 and 2 levels deep)
 shopt -s nullglob  # so missing patterns expand to empty instead of literal
+FORGE_HOST="${FORGE_HOST:-github.com}"
 for dir in "$HOME"/code/*/.git "$HOME"/code/*/*/.git; do
   parent="$(dirname "$dir")"
   remote=$(git -C "$parent" remote get-url origin 2>/dev/null) || continue
-  if [[ "$remote" == *"{owner}/{repo}"* ]]; then
+  # Match both host AND owner/repo — a bare "{owner}/{repo}" substring
+  # match would false-positive on forks hosted on the wrong forge.
+  if [[ "$remote" == *"$FORGE_HOST"*"{owner}/{repo}"* ]]; then
     echo "$parent"
     break
   fi

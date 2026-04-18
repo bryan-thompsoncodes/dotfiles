@@ -87,12 +87,14 @@ No official CLI for Forgejo is as reliable as `gh` for comments. Use the REST AP
 ### Auth
 
 ```bash
-: "${FORGEJO_TOKEN:=$GITEA_TOKEN}"
-if [[ -z "$FORGEJO_TOKEN" ]]; then
+# Safe under `set -u` — the `:-` keeps GITEA_TOKEN-unset from erroring.
+# Must match the form in dot-claude/agents/ticket-analyst.md Step 3.
+TOKEN="${FORGEJO_TOKEN:-${GITEA_TOKEN:-}}"
+if [[ -z "$TOKEN" ]]; then
   echo "Set FORGEJO_TOKEN in your shell env" >&2
   exit 1
 fi
-AUTH=(-H "Authorization: token $FORGEJO_TOKEN")
+AUTH=(-H "Authorization: token $TOKEN")
 ```
 
 `tea` CLI stores tokens at `~/.config/tea/config.yml`. If the user is logged in via `tea login`, parse the token:
@@ -174,12 +176,17 @@ curl -sS "${AUTH[@]}" \
 Run against the body + every comment body:
 
 ```bash
+# Use a private temp file — never a predictable path like /tmp/txt
+# (race / symlink-clobber risk on multi-user hosts, parallel runs).
+scratch=$(mktemp -t issue-work.XXXXXX)
+trap 'rm -f "$scratch"' EXIT
+
 # Combine body + all comment bodies into one stream
-jq -r '.body' issue.json                          > /tmp/txt
-jq -r '.[].body' comments.json                   >> /tmp/txt
+jq -r '.body'   issue.json    >  "$scratch"
+jq -r '.[].body' comments.json >> "$scratch"
 
 # Extract candidates
-rg -oE '(?:[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)?#[0-9]+|\bhttps?://[^\s)]+\b|\b[a-f0-9]{7,40}\b' /tmp/txt \
+rg -oE '(?:[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)?#[0-9]+|\bhttps?://[^\s)]+\b|\b[a-f0-9]{7,40}\b' "$scratch" \
   | sort -u
 ```
 
