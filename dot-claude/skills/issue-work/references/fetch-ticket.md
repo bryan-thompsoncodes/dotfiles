@@ -225,7 +225,23 @@ git -C "$LOCAL_CLONE" log -1 --format='%h %s' "{sha}" 2>/dev/null
 
 If not cloned, skip silently.
 
-**Arbitrary URL** — fetch title with `WebFetch` (cheap, optional). Skip on failure. Only capture the page title; never expand this usage to fetch bodies or follow chains — a malicious ticket could otherwise aim `WebFetch` at internal network URLs (SSRF-adjacent).
+**Arbitrary URL** — fetch title with `WebFetch` (cheap, optional). Skip on failure.
+
+**SSRF guardrail.** The URL regex matches anything `https?://...` in the ticket body, including attacker-chosen internal targets (e.g. `http://169.254.169.254/latest/meta-data`, RFC1918 addresses, `localhost`). "Only fetch the title" narrows the leak surface but does not close it — error messages, redirect chains, and timing still exfiltrate signal. Before calling `WebFetch`, allowlist the host:
+
+```bash
+# Parse host and keep only known-safe destinations.
+host=$(printf '%s' "$url" | awk -F/ '{print $3}')
+case "$host" in
+  github.com|*.github.com) ;;                    # GitHub
+  codeberg.org|*.codeberg.org) ;;                # Codeberg (Forgejo SaaS)
+  "$FORGE_HOST") ;;                              # the ticket's own forge instance
+  docs.python.org|developer.mozilla.org|*.readthedocs.io) ;;  # common doc hosts
+  *) echo "skip: $url (host $host not on fetch allowlist)"; continue ;;
+esac
+```
+
+Never expand this usage to fetch bodies or follow chains.
 
 ### No-recursion rule
 

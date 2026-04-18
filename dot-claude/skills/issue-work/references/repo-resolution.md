@@ -67,12 +67,15 @@ If no basename match, grep all clones for the remote URL. This catches renamed l
 # Iterate every .git parent under ~/code/ (1 and 2 levels deep)
 shopt -s nullglob  # so missing patterns expand to empty instead of literal
 FORGE_HOST="${FORGE_HOST:-github.com}"
+# Use the same anchored regex as step 1 — a loose `*host*owner/repo*`
+# glob would false-positive on remotes like
+# `git@github.com.attacker.tld:evil/repo` where the real host is the
+# attacker and "github.com" just appears as a subdomain prefix.
+FORGE_HOST_RE="${FORGE_HOST//./\\.}"
 for dir in "$HOME"/code/*/.git "$HOME"/code/*/*/.git; do
   parent="$(dirname "$dir")"
   remote=$(git -C "$parent" remote get-url origin 2>/dev/null) || continue
-  # Match both host AND owner/repo — a bare "{owner}/{repo}" substring
-  # match would false-positive on forks hosted on the wrong forge.
-  if [[ "$remote" == *"$FORGE_HOST"*"{owner}/{repo}"* ]]; then
+  if echo "$remote" | grep -iqE "${FORGE_HOST_RE}[:/]{owner}/{repo}(\.git)?$"; then
     echo "$parent"
     break
   fi

@@ -53,14 +53,16 @@ Do not re-fetch or re-plan unless the user says refresh.
 Match the input against these patterns **in order** (stop at the first match):
 
 ```bash
-# 1. GitHub URL — check this FIRST (note the /issues/ path overlaps with Forgejo)
-^https?://github\.com/([^/]+)/([^/]+)/(issues|pull)/([0-9]+)/?$
+# 1. GitHub URL — check this FIRST (note the /issues/ path overlaps with Forgejo).
+#    Trailing `([/#].*)?` tolerates browser-pasted subroutes and fragments
+#    (e.g. /pull/123/files, /pull/123/commits, /issues/456#issuecomment-42).
+^https?://github\.com/([^/]+)/([^/]+)/(issues|pull)/([0-9]+)([/#].*)?$
 
 # 2. Shorthand — always GitHub
 ^([A-Za-z0-9_.-]+)/([A-Za-z0-9_.-]+)#([0-9]+)$
 
 # 3. Forgejo URL — only reached if neither of the above matched
-^https?://([^/]+)/([^/]+)/([^/]+)/(issues|pulls)/([0-9]+)/?$
+^https?://([^/]+)/([^/]+)/([^/]+)/(issues|pulls)/([0-9]+)([/#].*)?$
 ```
 
 **Ordering matters.** GitHub issue URLs also satisfy the Forgejo pattern (both use `/issues/`), so GitHub must be checked first. Only PRs differ by path (`/pull/` vs `/pulls/`).
@@ -118,11 +120,17 @@ DEFAULT_BRANCH=$(curl -sS "${AUTH[@]}" \
 if [[ "$FORGE" == "github" ]]; then
   gh auth status
 elif [[ "$FORGE" == "forgejo" ]]; then
-  [[ -n "${FORGEJO_TOKEN:-$GITEA_TOKEN}" ]] \
+  # Safe under `set -u` — nested `:-` keeps GITEA_TOKEN-unset from erroring.
+  # Must stay in sync with ticket-analyst.md Step 3 and fetch-ticket.md Auth.
+  [[ -n "${FORGEJO_TOKEN:-${GITEA_TOKEN:-}}" ]] \
     || { echo "Set FORGEJO_TOKEN" >&2; exit 1; }
 fi
 
-git -C "$TRUNK" fetch origin "$DEFAULT_BRANCH"   # fetch the actual default branch
+# Fetch the actual default branch. Warn on failure (offline / auth), do not
+# silently continue with a stale local ref — the worktree base would rot.
+if ! git -C "$TRUNK" fetch origin "$DEFAULT_BRANCH"; then
+  echo "WARNING: could not fetch origin/$DEFAULT_BRANCH — worktree will be based on the local ref, which may be stale." >&2
+fi
 
 # Working tree clean? (modified or staged — ignore untracked)
 git -C "$TRUNK" status --porcelain | grep -E '^[ MADRC]'
@@ -392,6 +400,12 @@ TITLE=$(awk '
   /^---$/ { n++; next }
   n == 1 && /^title:/ {
     sub(/^title:[[:space:]]*/, "")
+    # YAML allows `title: "foo"` or `title: '\''foo'\''` — strip one
+    # matching pair of surrounding quotes so they do not leak into
+    # the PR title.
+    if (match($0, /^".*"$/) || match($0, /^'\''.*'\''$/)) {
+      $0 = substr($0, 2, length($0) - 2)
+    }
     print; exit
   }' ~/.claude/issue-work/{owner}-{repo}-{N}/context.md)
 gh pr create --draft --title "$TITLE" \

@@ -73,14 +73,16 @@ Do not add your own analysis beyond the Open Questions section. Downstream agent
 Check in this order — **stop at the first match**:
 
 ```bash
-# 1. GitHub URL — must be checked FIRST (GitHub issue URLs also fit the Forgejo pattern)
-[[ "$input" =~ ^https?://github\.com/([^/]+)/([^/]+)/(issues|pull)/([0-9]+)/?$ ]]
+# 1. GitHub URL — must be checked FIRST (GitHub issue URLs also fit the Forgejo pattern).
+#    Trailing `([/#].*)?` tolerates browser-pasted subroutes and fragments
+#    (e.g. /pull/123/files, /issues/456#issuecomment-42).
+[[ "$input" =~ ^https?://github\.com/([^/]+)/([^/]+)/(issues|pull)/([0-9]+)([/#].*)?$ ]]
 
 # 2. Shorthand — always GitHub
 [[ "$input" =~ ^([A-Za-z0-9_.-]+)/([A-Za-z0-9_.-]+)#([0-9]+)$ ]]
 
 # 3. Forgejo URL — only if neither of the above matched
-[[ "$input" =~ ^https?://([^/]+)/([^/]+)/([^/]+)/(issues|pulls)/([0-9]+)/?$ ]]
+[[ "$input" =~ ^https?://([^/]+)/([^/]+)/([^/]+)/(issues|pulls)/([0-9]+)([/#].*)?$ ]]
 ```
 
 GitHub's URL uses `/pull/` (singular) for PRs. Forgejo uses `/pulls/` (plural). Both use `/issues/` — which is why order matters: GitHub issue URLs satisfy both patterns, so GitHub must be tried first.
@@ -143,12 +145,20 @@ From the ticket body + every comment body, extract references using these patter
 | Commit SHA | 7–40 hex chars | `git -C {local-clone} log -1 --format='%h %s' {sha}` if cloned, else skip |
 | URL to issue/PR | `https://github.com/...` | fetch title via `gh` (parse owner/repo/N from URL) |
 
-Use `rg` to extract candidates:
+Use `rg` to extract candidates. Combine the ticket body and every comment body into a single temp file first — reading the files by path, not stdin, so `rg` does not hang waiting for input:
 
 ```bash
-rg -oE '(?:[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)?#[0-9]+|\bhttps?://[^\s)]+\b|\b[a-f0-9]{7,40}\b' \
+scratch=$(mktemp -t issue-work.XXXXXX)
+trap 'rm -f "$scratch"' EXIT
+
+jq -r '.body'    issue.json    >  "$scratch"
+jq -r '.[].body' comments.json >> "$scratch"
+
+rg -oE '(?:[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)?#[0-9]+|\bhttps?://[^\s)]+\b|\b[a-f0-9]{7,40}\b' "$scratch" \
   | sort -u
 ```
+
+See [references/fetch-ticket.md](../skills/issue-work/references/fetch-ticket.md#linked-reference-extraction) for the long form (pagination, categorization, SSRF allowlist for URL resolution).
 
 For each candidate, fetch its title + state (no body, no comments — one level deep). Skip if the fetch fails; record failures quietly (do not block).
 
