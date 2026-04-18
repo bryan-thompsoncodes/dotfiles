@@ -230,8 +230,24 @@ If not cloned, skip silently.
 **SSRF guardrail.** The URL regex matches anything `https?://...` in the ticket body, including attacker-chosen internal targets (e.g. `http://169.254.169.254/latest/meta-data`, RFC1918 addresses, `localhost`). "Only fetch the title" narrows the leak surface but does not close it — error messages, redirect chains, and timing still exfiltrate signal. Before calling `WebFetch`, allowlist the host:
 
 ```bash
-# Parse host and keep only known-safe destinations.
+# Assumes this block runs inside a `for url in "${urls[@]}"; do ... done`
+# loop — the `continue` below only has meaning with a surrounding loop.
+
+# Parse host and strip any :port suffix so `github.com:22` still matches
+# the `github.com` allowlist entry.
 host=$(printf '%s' "$url" | awk -F/ '{print $3}')
+host="${host%%:*}"
+
+# Reject empty hosts outright (e.g. malformed `https:///path` URLs) —
+# otherwise they would match an empty "$FORGE_HOST" entry below and slip
+# through the allowlist.
+if [[ -z "$host" ]]; then
+  echo "skip: $url (empty host)"
+  continue
+fi
+
+# The "$FORGE_HOST" arm is only meaningful when FORGE_HOST is set; the
+# empty-host guard above ensures an unset/empty FORGE_HOST cannot match.
 case "$host" in
   github.com|*.github.com) ;;                    # GitHub
   codeberg.org|*.codeberg.org) ;;                # Codeberg (Forgejo SaaS)
