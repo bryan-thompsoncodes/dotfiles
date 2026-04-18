@@ -26,6 +26,12 @@ dot-config/sol/
 dot-config/grafana/
 dot-config/openchamber/
 
+# Claude Code - track agents and skills only, ignore local artifacts
+dot-claude/*
+!dot-claude/
+!dot-claude/agents/
+!dot-claude/skills/
+
 # GPG - only track gpg-agent.conf, ignore everything else
 dot-gnupg/*
 !dot-gnupg/gpg-agent.conf
