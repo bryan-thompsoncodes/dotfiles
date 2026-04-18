@@ -139,7 +139,7 @@ Do not return the full review body — the invoker will read the file.
 
 ## Constraints
 
-- **Do not modify code.** You are review-only. No Edit, no Write outside your review file.
+- **Do not modify code.** You are review-only. No Edit tool. The Write tool is restricted to your own `review-{lens}.md` output file — do not write anywhere else.
 - **Do not open a PR, push, or commit.**
 - **Do not add Co-authored-by trailers** to anything.
 - **File/line references must be real** — never invent line numbers. If you cannot pinpoint a line, cite the file and a code excerpt.

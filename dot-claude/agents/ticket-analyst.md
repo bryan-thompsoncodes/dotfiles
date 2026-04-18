@@ -122,16 +122,18 @@ if [[ -z "$TOKEN" ]]; then
 fi
 
 instance="https://{host}"
-auth="Authorization: token $TOKEN"
+# Use an array for the auth header so the token survives intact if it ever
+# contains spaces or shell metacharacters. Matches fetch-ticket.md.
+AUTH=(-H "Authorization: token $TOKEN")
 
 # Issue (works for both issues and PRs in Forgejo — PRs are issues with extra fields)
-curl -sS -H "$auth" "$instance/api/v1/repos/{owner}/{repo}/issues/{N}"
+curl -sS "${AUTH[@]}" "$instance/api/v1/repos/{owner}/{repo}/issues/{N}"
 
 # Comments
-curl -sS -H "$auth" "$instance/api/v1/repos/{owner}/{repo}/issues/{N}/comments"
+curl -sS "${AUTH[@]}" "$instance/api/v1/repos/{owner}/{repo}/issues/{N}/comments"
 
 # If it is a PR (the issue response has `pull_request` populated), also fetch:
-curl -sS -H "$auth" "$instance/api/v1/repos/{owner}/{repo}/pulls/{N}"
+curl -sS "${AUTH[@]}" "$instance/api/v1/repos/{owner}/{repo}/pulls/{N}"
 ```
 
 ## Step 4 — Extract Linked Refs

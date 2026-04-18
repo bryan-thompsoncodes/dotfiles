@@ -200,7 +200,7 @@ Prompt template for each Explore agent:
 > - Test locations and conventions in this area
 > - Any gotchas or non-obvious coupling
 >
-> Write your findings to `~/.claude/issue-work/{owner}-{repo}-{N}/explore.md` (append if a second Explore is running — use a `## Area: {name}` heading).
+> Write your findings to `~/.claude/issue-work/{owner}-{repo}-{N}/explore-{area-slug}.md` where `{area-slug}` is a short kebab-case tag for your scope (e.g. `frontend`, `api`, `sdk`). Each Explore writes its own file — do **not** share a file with other Explores running in parallel. Phase 2.3 will read every `explore-*.md` and merge them into `plan.md`.
 
 ### 2.2 External research (conditional, inline)
 
@@ -221,7 +221,7 @@ Use `WebSearch` + `WebFetch` to look up official docs. Capture findings directly
 
 ### 2.3 Synthesize plan.md
 
-After exploration returns, write `plan.md`:
+After exploration returns, read every `explore-*.md` file in the state dir and merge the findings. Then write `plan.md`:
 
 ```markdown
 ---
@@ -232,7 +232,7 @@ updated: {iso8601}
 
 ## Problem
 
-{2–3 sentences from context.md + explore.md}
+{2–3 sentences synthesized from context.md and the merged explore-*.md files}
 
 ## Approach
 
