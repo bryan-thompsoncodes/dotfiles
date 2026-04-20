@@ -1,65 +1,43 @@
 {
   "$schema": "https://raw.githubusercontent.com/code-yeongyu/oh-my-openagent/dev/assets/oh-my-opencode.schema.json",
-  "disabled_agents": [
-    "README"
-  ],
-  "lsp": {
-    "gdscript": {
-      "command": [
-        "/Users/bryan/.config/opencode/scripts/gdscript-lsp-bridge.sh"
-      ],
-      "extensions": [
-        ".gd"
-      ]
-    },
-    "marksman": {
-      "command": [
-        "marksman",
-        "server"
-      ],
-      "extensions": [
-        ".md"
-      ]
-    }
-  },
   "agents": {
-    "sisyphus": {
-      "model": "openrouter/anthropic/claude-opus-4.7",
-      "variant": "max"
-    },
-    "sisyphus-junior": {
-      "model": "openrouter/openai/gpt-5.4-mini"
-    },
     "hephaestus": {
+      "model": "openrouter/openai/gpt-5.4"
+    },
+    "oracle": {
+      "model": "openrouter/openai/gpt-5.4",
+      "variant": "high"
+    },
+    "librarian": {
+      "model": "openrouter/anthropic/claude-haiku-4.5"
+    },
+    "explore": {
+      "model": "openrouter/anthropic/claude-haiku-4.5"
+    },
+    "multimodal-looker": {
       "model": "openrouter/openai/gpt-5.4"
     },
     "prometheus": {
       "model": "openrouter/anthropic/claude-opus-4.7",
       "variant": "max"
     },
-    "oracle": {
-      "model": "openrouter/openai/gpt-5.4",
-      "variant": "high"
+    "metis": {
+      "model": "openrouter/anthropic/claude-opus-4.7",
+      "variant": "max"
     },
     "momus": {
       "model": "openrouter/openai/gpt-5.4",
       "variant": "xhigh"
     },
-    "metis": {
-      "model": "openrouter/anthropic/claude-opus-4.7",
-      "variant": "max"
-    },
     "atlas": {
       "model": "openrouter/anthropic/claude-sonnet-4.6"
     },
-    "explore": {
-      "model": "openrouter/anthropic/claude-haiku-4.5"
+    "sisyphus-junior": {
+      "model": "openrouter/openai/gpt-5.4-mini"
     },
-    "librarian": {
-      "model": "openrouter/anthropic/claude-haiku-4.5"
-    },
-    "multimodal-looker": {
-      "model": "openrouter/openai/gpt-5.4"
+    "sisyphus": {
+      "model": "openrouter/anthropic/claude-opus-4.7",
+      "variant": "max"
     },
     "muse": {
       "model": "openrouter/anthropic/claude-opus-4.7",
@@ -138,6 +116,10 @@
     "deep": {
       "model": "openrouter/openai/gpt-5.4"
     },
+    "artistry": {
+      "model": "openrouter/anthropic/claude-opus-4.7",
+      "variant": "max"
+    },
     "quick": {
       "model": "openrouter/openai/gpt-5.4-mini"
     },
@@ -150,10 +132,6 @@
     },
     "writing": {
       "model": "openrouter/anthropic/claude-sonnet-4.6"
-    },
-    "artistry": {
-      "model": "openrouter/anthropic/claude-opus-4.7",
-      "variant": "max"
     },
     "ideation": {
       "model": "openrouter/anthropic/claude-opus-4.7",
@@ -168,6 +146,28 @@
       "model": "openrouter/openai/gpt-5.4",
       "variant": "high",
       "description": "Code-focused tasks using GPT Codex - optimized for code generation, refactoring, and implementation"
+    }
+  },
+  "disabled_agents": [
+    "README"
+  ],
+  "lsp": {
+    "gdscript": {
+      "command": [
+        "/Users/bryan/.config/opencode/scripts/gdscript-lsp-bridge.sh"
+      ],
+      "extensions": [
+        ".gd"
+      ]
+    },
+    "marksman": {
+      "command": [
+        "marksman",
+        "server"
+      ],
+      "extensions": [
+        ".md"
+      ]
     }
   },
   "_migrations": [
