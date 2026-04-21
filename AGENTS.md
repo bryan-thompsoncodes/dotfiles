@@ -43,7 +43,8 @@ dotfiles/
 | Add tmux session | `dot-tmux/` | Follow va-server-stack.sh pattern |
 | Add git identity | `dot-gitconfig` | Add `includeIf` + new identity file |
 | Change platform behavior | `setup-platform-configs.sh` | Handles stow edge cases |
-| Add AI agent/skill | `dot-config/opencode/agents/` or `skills/` | See opencode/AGENTS.md for identity |
+| Add Claude Code agent/skill | `dot-claude/agents/` or `dot-claude/skills/` | User-global, personal |
+| Add opencode agent/skill | `dot-config/opencode/agents/` or `skills/` | See opencode/AGENTS.md for identity |
 
 ## CONVENTIONS
 
