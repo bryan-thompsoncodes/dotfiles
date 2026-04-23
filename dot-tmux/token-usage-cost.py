@@ -62,6 +62,9 @@ def main() -> int:
     except Exception:
         return 0
 
+    if total_cost <= 0:
+        return 0
+
     color = select_color(total_cost)
     display = format_total(total_cost)
     sys.stdout.write(f"#[fg={color}]💸 {display}#[fg=default] | ")
