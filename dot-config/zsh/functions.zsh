@@ -149,23 +149,36 @@ function obsidian {
 }
 
 # Code function: opens editor in specified project directory or current directory
+# Resolves $1 by checking ~/code/$1 first, then any ~/code/*/$1 (org-style
+# containers like HHS/, common-grants/, games/). Auto-discovers new containers
+# so adding a new org dir needs no edit here.
 function code {
   local target_dir
 
   if [[ -n $1 && $1 != "." ]]; then
     local dir="$HOME/code/$1"
-    local va_dir="$HOME/code/department-of-veterans-affairs/$1"
-    local hhs_dir="$HOME/code/HHS/$1"
 
     if [[ -d $dir ]]; then
       target_dir="$dir"
-    elif [[ -d $hhs_dir ]]; then
-      target_dir="$hhs_dir"
-    elif [[ -d $va_dir ]]; then
-      target_dir="$va_dir"
     else
-      echo "Directory $1 not found in ~/code, ~/code/HHS or ~/code/department-of-veterans-affairs"
-      return 1
+      local matches=()
+      local container
+      for container in "$HOME"/code/*/; do
+        [[ -d "${container}$1" ]] || continue
+        # Skip if the container itself is a git repo (it's a project, not an org dir)
+        [[ -d "${container}.git" ]] && continue
+        matches+=("${container}$1")
+      done
+
+      if (( ${#matches[@]} == 0 )); then
+        echo "Directory $1 not found in ~/code or any ~/code/*/ container"
+        return 1
+      elif (( ${#matches[@]} > 1 )); then
+        echo "Ambiguous: $1 exists in multiple containers:"
+        printf '  %s\n' "${matches[@]}"
+        echo "Using first match. Disambiguate with: code <container>/$1"
+      fi
+      target_dir="${matches[1]}"
     fi
   else
     target_dir="$PWD"
