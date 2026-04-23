@@ -19,7 +19,7 @@ dotfiles/
 │   ├── opencode/        # AI agent system: agents/, skills/, model configs
 │   └── zsh/             # Modular shell: env -> options -> plugins -> functions -> aliases
 ├── dot-gnupg/           # GPG agent (pinentry-mac hardcoded, NixOS must override)
-├── dot-tmux/            # Tmux sessions: va-server-stack.sh, opencode-editor.sh
+├── dot-tmux/            # Tmux sessions: va-server-stack.sh, code-editor.sh
 ├── dot-git-hooks/       # Global pre-commit: validates user.email is set
 ├── dot-gitconfig        # Multi-identity via includeIf (VA repos vs personal)
 ├── dot-zshrc            # Shell loader: P10k + modular config sourcing

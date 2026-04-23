@@ -173,7 +173,7 @@ function code {
 
   cd "$target_dir" || return 1
 
-  local session_script="$HOME/.tmux/opencode-editor.sh"
+  local session_script="$HOME/.tmux/code-editor.sh"
   if [[ ! -x $session_script ]]; then
     echo "Session script $session_script not found or not executable"
     return 1
