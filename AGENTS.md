@@ -96,6 +96,7 @@ Colors are centralized but defined in three places that MUST stay in sync:
 | Never stow `~/.gnupg/` directory | Contains sensitive unmanaged files; manual symlink only |
 | Never overwrite `dot-config/opencode/AGENTS.md` | Identity/behavioral file, not coding guidelines |
 | Never add to `.stow-local-ignore` without checking nested impact | Root AGENTS.md ignore also blocks opencode/AGENTS.md |
+| Never run Forgejo merges in parallel against the same base | API returns `HTTP 200` + `merged=true` for both, but only one advances `main`; the loser is recorded with a `merge_commit_sha` that doesn't exist in the repo and can't be reopened. Serialize merges. |
 
 ## STOW QUIRKS
 
