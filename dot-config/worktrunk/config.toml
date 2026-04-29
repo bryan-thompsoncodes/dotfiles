@@ -15,7 +15,7 @@ command = "~/.config/worktrunk/commit-msg.sh"
 summary = true     # LLM branch summaries in wt list --full
 
 # Global hooks (run for all repos, no approval needed)
-[post-create]
+[pre-start]
 copy-ignored = "wt step copy-ignored"
 direnv = "[ -f .envrc ] && direnv allow"
 
@@ -24,7 +24,7 @@ tmux = "[ -n \"$WT_SKIP_TMUX_RENAME\" ] && exit 0; [ -n \"$TMUX\" ] && tmux rena
 
 # vets-website project overrides (hooks append to global hooks)
 [projects."github.com/department-of-veterans-affairs/vets-website"]
-post-create.deps = "yarn install --frozen-lockfile"
+pre-start.deps = "yarn install --frozen-lockfile"
 pre-commit.lint = "yarn lint:changed"
 pre-merge.test = "yarn test:changed"
 list.url = "http://localhost:{{ branch | hash_port }}"
