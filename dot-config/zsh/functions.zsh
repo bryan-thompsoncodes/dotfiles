@@ -194,3 +194,7 @@ function code {
 
   "$session_script"
 }
+
+function sgg-staging-fuzz {
+  "$HOME/code/dotfiles/scripts/sgg-staging-fuzz.py" "$@"
+}
