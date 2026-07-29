@@ -1,6 +1,6 @@
 ---
 name: pr-self-review
-description: Iterative self-review loop for PRs you authored. Runs four review lenses (correctness / security / simplicity / over-engineering, the last carrying the ponytail philosophy), validates their findings against the PR's documented intent, automatically applies reasonable in-scope fixes, and loops until the diff is clean. The agent rejects false positives and defers settled overlaps without asking; user input is reserved for valid blocking findings whose reasonable fixes would materially contradict the PR's intent. Triggers on `/pr-self-review [pr-url]`, "review my PR", or invocation from `issue-work` Phase 4.
+description: Iterative self-review loop for PRs you authored. Runs six review lenses (correctness / security / simplicity / over-engineering / type-design / test-coverage, with over-engineering carrying the ponytail philosophy), validates their findings against the PR's documented intent, automatically applies reasonable in-scope fixes, and loops until the diff is clean. The agent rejects false positives and defers settled overlaps without asking; user input is reserved for valid blocking findings whose reasonable fixes would materially contradict the PR's intent. Triggers on `/pr-self-review [pr-url]`, "review my PR", or invocation from `issue-work` Phase 4.
 ---
 
 # PR Self-Review
@@ -199,11 +199,11 @@ If every note-discovery call returns "no matches," write `[]` — do not error.
 
 ## Phase 2 — Review pass
 
-### 2.1 Run all four `diff-reviewer` lenses
+### 2.1 Run all six `diff-reviewer` lenses
 
-**All four lenses are required every pass** — correctness, security, simplicity, and over-engineering. Never drop a lens to save budget. The `over_engineering` lens carries the ponytail philosophy inline. Use Hermes `delegate_task` or the host's `Task`/`Agent` equivalent. **On Hermes, dispatch at most three children in the first batch, wait, then dispatch the fourth; never exceed three active children.** If delegation is unavailable, run the lenses serially. Each reviewer gets:
+**All six lenses are required every pass** — correctness, security, simplicity, over-engineering, type-design, and test-coverage. Never drop a lens to save budget. The `over_engineering` lens carries the ponytail philosophy inline. Use Hermes `delegate_task` or the host's `Task`/`Agent` equivalent. **On Hermes, dispatch in batches of at most three; never exceed three active children.** If delegation is unavailable, run the lenses serially. Each reviewer gets:
 
-- `lens` — `correctness` | `security` | `simplicity` | `over-engineering`
+- `lens` — `correctness` | `security` | `simplicity` | `over-engineering` | `type-design` | `test-coverage`
 - `diff_range` — `{base-branch}...HEAD`
 - `worktree_path` — absolute
 - `plan_path` — `{state-dir}/plan.md` if present (pre-pr mode), else `null`
@@ -219,12 +219,24 @@ Reviewers do **not** change behavior when the caches are empty — missing-file 
 
 ### 2.2 Filter
 
-After the four reviewers return, merge their findings and filter against the in-memory **session suppression set** (initially empty):
+After all reviewers return, **collapse same-pass duplicates first**, then filter against the in-memory **session suppression set** (initially empty).
+
+**Same-pass cross-lens merge.** Independent lenses routinely land on the same defect — the more serious the bug, the more of them notice it. Group this pass's findings by the lens-independent key `{file}|{line}|{sha8(message)}` and collapse each group into one finding before disposition:
+
+- Keep the **highest** severity reported in the group; a lens that under-rated the defect does not drag it down.
+- Record every reporting lens in `reported_by: [lens, …]`, and keep the clearest of the group's descriptions as the finding text.
+- Carry the union of any `related_issue` / `related_note` tags the group's members attached.
+- Disposition the merged finding **once**. Multiple lenses agreeing is corroboration, not extra work — and it is a signal worth noting in `summary.md`, not a reason to re-litigate.
+
+Findings that differ only by lens but describe genuinely different problems on the same line will differ in `sha8(message)` and stay separate. When two findings on one line are near-duplicates the hash doesn't catch, merge them by hand and note both lenses.
+
+**Then apply suppression:**
 
 - Suppression key: `{lens}|{file}|{line}|{sha8(message)}`. The message hash tolerates whitespace differences but catches rewording.
+- A merged finding is suppressed only when **every** lens in its `reported_by` set is already suppressed for that key. If one lens's view of the defect was rejected on an earlier pass but another lens raises it fresh, the finding survives to disposition — this is exactly the case the lens-scoped key exists to protect.
 - Findings whose key is already suppressed are dropped before disposition.
 
-Cross-lens observations (the reviewer's optional bottom-of-file section) surface as normal findings under the lens that noticed them.
+Cross-lens observations (the reviewer's optional bottom-of-file section) surface as normal findings under the lens that noticed them, and participate in the merge above like any other finding.
 
 ### 2.3 Validate + disposition
 
@@ -272,6 +284,8 @@ Do not file follow-up issues during autonomous disposition. A deferred finding m
 - `line` — line number; for a range (`42-48`), use the first number.
 - `sha8(message)` — first 8 hex chars of SHA-256 of the finding text, normalized (lowercased, whitespace runs collapsed to single space, leading/trailing whitespace stripped). Tolerates reformatting between passes but still catches reworded findings.
 
+A merged finding (§2.2) holds one key per lens in its `reported_by` set. Record a disposition against all of them, so a later pass recognizes the defect no matter which lens re-raises it.
+
 **Session state** (in-memory, never persisted):
 
 ```
@@ -279,11 +293,11 @@ suppression_set:    Set<string>                                      # suppressi
 rejections:         List<{key, reason, evidence}>                    # agent-rejected findings
 deferrals:          List<{key, reason, related_context}>             # valid but separately owned/non-blocking
 escalations:        List<{key, conflict, recommendation, resolution}># material intent conflicts only
-bound_findings:     List<{key, file, line, lens, summary}>           # valid fixes blocked only by correction cap
-fixes_per_pass:     List<List<{key, file, line, lens, summary, files_touched: Set<string>}>>
+bound_findings:     List<{key, file, line, lens, reported_by, summary}> # valid fixes blocked only by correction cap
+fixes_per_pass:     List<List<{key, file, line, lens, reported_by, summary, files_touched: Set<string>}>>
                                                                      # populated at native disposition or Codex reconciliation; empty sets become acks
-pending_worker_fixes: List<{key, file, line, lens, severity, finding}> # delegated issue-work paths only; cleared after each worker pass
-acks:               List<{key, file, line, lens, summary, pass}>     # fix-without-diff; for summary.md
+pending_worker_fixes: List<{key, file, line, lens, severity, reported_by, finding}> # delegated issue-work paths only; cleared after each worker pass
+acks:               List<{key, file, line, lens, reported_by, summary, pass}> # fix-without-diff; for summary.md
 pass_count:         int
 worker_correction_passes: int                                        # bounded independently to 2 for this review run
 ```
@@ -461,7 +475,7 @@ Frontmatter `ticket:` field is retained (not renamed) so tools that key on it ke
 
 ## Related Agents
 
-- `diff-reviewer` — the four-lens agent (correctness / security / simplicity / over-engineering), reused as-is. See `agents/diff-reviewer.md`.
+- `diff-reviewer` — the six-lens agent (correctness / security / simplicity / over-engineering / type-design / test-coverage), reused as-is. See `agents/diff-reviewer.md`.
 
 ## Related Skills
 
