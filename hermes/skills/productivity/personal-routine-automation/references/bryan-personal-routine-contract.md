@@ -38,9 +38,9 @@ The collector reads bounded, read-only context from:
 - IP-geolocated `wttr.in` weather, currently resolving to Bend, Oregon;
 - Bryan's physical whiteboard through his report during the reset.
 
-The weekday personal morning brief is a separate one-minute update. It reads only non-work calendars, today's incomplete Reminders, actionable weather, the current weekly hub, and bounded recent Second Brain project activity. It excludes the SGG vault, work repositories, GitHub, work mail, and the `Bryan @ Agile6` calendar. It never writes a note.
+The weekday personal morning brief is a separate one-minute update. It reads only Bryan's non-work calendars, today's incomplete Reminders, actionable weather, the current weekly hub, and bounded recent Second Brain project activity. It excludes the SGG vault, work repositories, GitHub, work mail, and the calendars named `Bryan @ Agile6` and `Traci`. It never writes a note and never uses or mentions events from Traci's calendar.
 
-Traci's calendar is included only when an event affects shared availability, transportation, household responsibilities, date planning, or an opportunity for support. Subscription-calendar birthdays are informational, not availability constraints, unless separate evidence shows a gathering, call, travel, or other commitment. Source failure means unknown, not empty.
+Subscription-calendar birthdays are informational, not availability constraints, unless separate evidence shows a gathering, call, travel, or other commitment. Source failure means unknown, not empty.
 
 ## Artifact paths
 

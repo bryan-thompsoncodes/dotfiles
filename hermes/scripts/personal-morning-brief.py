@@ -16,7 +16,7 @@ HOME = Path.home()
 HERMES_HOME = Path(os.environ.get("HERMES_HOME", HOME / ".hermes"))
 SECOND_BRAIN = HOME / "second-brain"
 PACIFIC = ZoneInfo("America/Los_Angeles")
-WORK_CALENDARS = {"Bryan @ Agile6"}
+EXCLUDED_CALENDARS = {"Bryan @ Agile6", "Traci"}
 
 
 def command(args: list[str], *, timeout: int = 45, cwd: Path | None = None) -> tuple[str, str | None]:
@@ -50,7 +50,11 @@ def json_command(args: list[str], *, timeout: int = 45) -> tuple[Any, str | None
 def collect_calendar() -> tuple[list[dict[str, Any]], str | None]:
     binary = HERMES_HOME / "scripts" / "bin" / "sgg-calendar-events"
     data, error = json_command([str(binary), "2"], timeout=30)
-    rows = [row for row in (data or []) if str(row.get("calendar", "")).strip() not in WORK_CALENDARS]
+    rows = [
+        row
+        for row in (data or [])
+        if str(row.get("calendar", "")).strip() not in EXCLUDED_CALENDARS
+    ]
     return rows, error
 
 

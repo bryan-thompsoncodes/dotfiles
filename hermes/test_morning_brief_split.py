@@ -41,7 +41,8 @@ class MorningBriefSplitContractTest(unittest.TestCase):
 
         self.assertIn("Detailed SGG work state belongs only in the SGG morning brief", prompt)
         self.assertNotIn("SGG_NOTES", collector)
-        self.assertIn('WORK_CALENDARS = {"Bryan @ Agile6"}', collector)
+        self.assertIn('EXCLUDED_CALENDARS = {"Bryan @ Agile6", "Traci"}', collector)
+        self.assertIn("Never use or mention events from Traci's calendar", prompt)
         self.assertIn("recentSecondBrainPaths", collector)
 
     def test_work_brief_does_not_promote_proposals_or_other_peoples_actions(self) -> None:
