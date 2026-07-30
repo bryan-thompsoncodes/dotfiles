@@ -182,11 +182,12 @@ Revision results replace `plan_deviations` with `findings_addressed` and `unreso
 3. **Trusting the report.** Read the diff and rerun tests; structured output is not proof.
 4. **Starting a fresh revision.** Preserve and resume `worker_session_id`.
 5. **Passing chat history.** Pass a self-contained plan and review contracts instead.
-6. **Concurrent writes.** Parent and worker never edit one worktree at the same time.
-7. **Silent cloud fallback.** A local failure stops the run. Do not bypass the wrapper with the default Hermes profile or another provider.
-8. **Treating the sandbox as a separate account.** It enforces write, network, Git metadata, and known-credential boundaries, but is not a VM-level confidentiality boundary for every user-readable path.
-9. **Infinite correction loops.** Two revisions, then user escalation.
-10. **Using a session from another worktree.** Retained sessions are bound to the resolved repository root and Git common directory; a mismatch fails before inference.
+6. **Treating inventory as inference health.** `qwen_worker.py check` proves configuration and model presence, not that Ollama can complete a request. Before a long implementation run, make one bounded tiny chat-completion probe against the exact loopback model. If it times out with zero bytes, inspect the worker connection and repository diff. Stop only the demonstrably hung worker. Unload the model with `ollama stop qwen3.6:35b-a3b-coding-nvfp4` only after proving no unrelated request can be using that model; otherwise escalate without unloading it. Wait until a safely unloaded model disappears, then retry the tiny probe before launching another bounded worker. Never claim progress from an established socket alone.
+7. **Concurrent writes.** Parent and worker never edit one worktree at the same time.
+8. **Silent cloud fallback.** A local failure stops the run. Do not bypass the wrapper with the default Hermes profile or another provider.
+9. **Treating the sandbox as a separate account.** It enforces write, network, Git metadata, and known-credential boundaries, but is not a VM-level confidentiality boundary for every user-readable path.
+10. **Infinite correction loops.** Two revisions, then user escalation.
+11. **Using a session from another worktree.** Retained sessions are bound to the resolved repository root and Git common directory; a mismatch fails before inference.
 
 ## Verification Checklist
 

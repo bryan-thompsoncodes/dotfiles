@@ -9,6 +9,7 @@ import sys
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any
+from urllib.parse import quote
 from urllib.request import Request, urlopen
 from zoneinfo import ZoneInfo
 
@@ -17,6 +18,19 @@ HERMES_HOME = Path(os.environ.get("HERMES_HOME", HOME / ".hermes"))
 SECOND_BRAIN = HOME / "second-brain"
 PACIFIC = ZoneInfo("America/Los_Angeles")
 EXCLUDED_CALENDARS = {"Bryan @ Agile6", "Traci"}
+WEATHER_LOCATION_FILE = Path(
+    os.environ.get("PERSONAL_WEATHER_LOCATION_FILE", HOME / ".secrets" / "personal-weather-location")
+)
+
+
+def configured_weather_location() -> str:
+    location = os.environ.get("PERSONAL_WEATHER_LOCATION", "").strip()
+    if location:
+        return location
+    try:
+        return WEATHER_LOCATION_FILE.read_text(encoding="utf-8").strip()
+    except OSError:
+        return ""
 
 
 def command(args: list[str], *, timeout: int = 45, cwd: Path | None = None) -> tuple[str, str | None]:
@@ -65,8 +79,12 @@ def collect_reminders() -> tuple[list[dict[str, Any]], str | None]:
 
 
 def collect_weather() -> tuple[dict[str, Any] | None, str | None]:
+    location = configured_weather_location()
+    if not location:
+        return None, f"weather location is not configured in {WEATHER_LOCATION_FILE}"
     try:
-        request = Request("https://wttr.in/?format=j1", headers={"User-Agent": "Hermes-personal-morning/1.0"})
+        weather_url = f"https://wttr.in/{quote(location)}?format=j1"
+        request = Request(weather_url, headers={"User-Agent": "Hermes-personal-morning/1.0"})
         with urlopen(request, timeout=20) as response:
             data = json.load(response)
         area = (data.get("nearest_area") or [{}])[0]
@@ -74,7 +92,7 @@ def collect_weather() -> tuple[dict[str, Any] | None, str | None]:
         today = (data.get("weather") or [{}])[0]
         astronomy = (today.get("astronomy") or [{}])[0]
         return {
-            "source": "wttr.in IP geolocation",
+            "source": "wttr.in configured location",
             "area": ((area.get("areaName") or [{}])[0].get("value")),
             "region": ((area.get("region") or [{}])[0].get("value")),
             "current": {

@@ -1,10 +1,9 @@
 ---
 name: sprint-deliverable-update
 description: >
-  Draft or post a sprint update comment on a deliverable issue. Use when asked to
-  "write the sprint update for [deliverable]", "post the update on #7309", or
-  "draft the deliverable comment for this sprint."
-version: 2.0.0
+  Draft or post sprint updates and final completion summaries on deliverable
+  issues, with review-ready evidence and verified screenshot rendering.
+version: 2.1.0
 author: Bryan Thompson
 license: MIT
 metadata:
@@ -15,8 +14,9 @@ metadata:
 
 # Sprint Deliverable Update
 
-Write a sprint update comment on an individual deliverable issue (e.g., #7309, #7311,
-#6195). This is the per-deliverable update that the team posts at the end of each sprint.
+Write either a sprint update or a final completion summary on an individual deliverable
+issue (e.g., #7309, #7311, #6195). Classify the artifact before gathering evidence or
+drafting; the two formats are not interchangeable.
 
 The project-level rollup that combines all these comments into a board status update
 is a separate skill: `sprint-status-update`.
@@ -32,6 +32,57 @@ is a separate skill: `sprint-status-update`.
    list come from the planning doc — not from cadence math or the previous comment. The
    format and voice come from the latest sibling-deliverable updates. See
    **Gather sources first** below.
+5. **Final means final.** A draft called complete, post-ready, or review-ready contains
+   no editorial instructions, TODOs, placeholders, or suggestions to add evidence later.
+6. **Embed or omit.** If the artifact mentions a screenshot, the screenshot must appear
+   immediately as a Markdown image. Never write “add,” “attach,” or “consider adding” a
+   screenshot in user-facing copy.
+7. **Resolve images before handoff.** A review bundle may use relative image paths only
+   when every file is packaged beside the Markdown. A post-ready comment must use live
+   HTTPS image URLs; `/tmp`, `file://`, and bare local paths are forbidden.
+
+## Choose the artifact type
+
+Classify the request before drafting:
+
+- **Sprint update:** progress during one sprint. Use `## Sprint X.Y updates`, status,
+  goal, accomplishments, rollover, risks, next sprint, and optional newly completed
+  criteria.
+- **Deliverable summary:** final completion evidence for the whole deliverable. Use the
+  exact current precedent when the user supplies one. Default to `# Deliverable summary`,
+  then `## Acceptance criteria` and `## Metrics`; quote and address every item. Do not
+  include sprint goal, rollover, risks, or next-sprint sections.
+
+When the requested format is ambiguous but the user links an established comment, the
+linked precedent decides. Do not substitute a familiar sprint-update shape.
+
+## Visual evidence gate
+
+Treat images as part of the artifact, not as follow-up work:
+
+1. Inventory the strongest evidence images before drafting and map each one to the exact
+   criterion or metric it proves.
+2. Capture or generate the images, then inspect the pixels for legibility, cropping,
+   stale claims, credentials, and sensitive data.
+3. Embed each accepted image next to its evidence using `![alt text](target)`.
+4. Before calling a review artifact ready, run
+   `<skill-dir>/scripts/validate-deliverable-comment.py --artifact <deliverable-summary|sprint-update> --mode review --root <bundle-dir> <markdown>`,
+   resolving `<skill-dir>` to the absolute directory containing this `SKILL.md`.
+   Every relative target must exist in the bundle.
+5. Before posting, upload images first and replace every relative target with a live
+   HTTPS URL. Run the validator with the same explicit `--artifact` in `post` mode with
+   `--check-urls`.
+6. After posting, fetch the created comment with GitHub's full JSON media type and verify
+   the Markdown image count equals the rendered `<img>` count. Tool success alone is not
+   proof that images rendered.
+
+Prefer GitHub user attachments for posted comments. Read
+[`references/visual-evidence-and-posting.md`](references/visual-evidence-and-posting.md)
+for upload discovery, the GitHub-hosted fallback, and exact verification commands.
+
+**Stop conditions:** Do not ask for review while an image target is unresolved. Do not
+repeatedly narrate upload failures to the user. Diagnose one method, switch to a verified
+authorized path, and return only when the complete artifact is inspectable.
 
 ## Gather sources first
 
@@ -96,7 +147,7 @@ planned, what rolled over, whether any ACs/metrics were intentionally held back.
 Enumerate the deliverable's sub-issues and filter to the sprint window from step 1. See
 **When Drafting From Scratch** below for the GraphQL query.
 
-## Template
+## Sprint update template
 
 ```markdown
 ## Sprint X.Y updates
@@ -127,6 +178,41 @@ have any questions!
 
 - [planned work]
 ```
+
+## Deliverable summary template
+
+Use this for final completion evidence across the entire deliverable:
+
+```markdown
+# Deliverable summary
+
+Summarizes the work on this deliverable and provides evidence for how it satisfies the
+acceptance criteria and meets the target metrics. @juchang111 [other established
+stakeholders] See below for our evidence of deliverable completion. Please let us know if
+there are any questions or clarifications we can provide!
+
+## Acceptance criteria
+
+### [Bolded criterion name]
+
+> - [x] **[Criterion name]:** [Exact criterion text]
+
+[Concrete evidence and links.]
+
+![Descriptive alt text](RESOLVED_IMAGE_TARGET)
+
+## Metrics
+
+### [Bolded metric name]
+
+> - [x] **[Metric name]:** [Exact metric text]
+
+[Concrete evidence and links.]
+```
+
+Address every acceptance criterion and metric, including unresolved items. Never mark an
+item complete merely to make the summary look finished; use the authoritative issue state
+or explicit user direction.
 
 ## Criteria Completed
 

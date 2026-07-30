@@ -10,6 +10,7 @@ import sys
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any
+from urllib.parse import quote
 from urllib.request import Request, urlopen
 from zoneinfo import ZoneInfo
 
@@ -19,6 +20,19 @@ SECOND_BRAIN = HOME / "second-brain"
 SGG_NOTES = HOME / "code" / "notes" / "sgg"
 PACIFIC = ZoneInfo("America/Los_Angeles")
 PILOT_REVIEW_DATE = "2026-08-09"
+WEATHER_LOCATION_FILE = Path(
+    os.environ.get("PERSONAL_WEATHER_LOCATION_FILE", HOME / ".secrets" / "personal-weather-location")
+)
+
+
+def configured_weather_location() -> str:
+    location = os.environ.get("PERSONAL_WEATHER_LOCATION", "").strip()
+    if location:
+        return location
+    try:
+        return WEATHER_LOCATION_FILE.read_text(encoding="utf-8").strip()
+    except OSError:
+        return ""
 
 
 def command(args: list[str], timeout: int = 45, cwd: Path | None = None) -> tuple[str, str | None]:
@@ -71,8 +85,12 @@ def collect_mail(now: datetime, mode: str) -> tuple[list[dict[str, Any]], str | 
 
 
 def collect_weather() -> tuple[dict[str, Any] | None, str | None]:
+    location = configured_weather_location()
+    if not location:
+        return None, f"weather location is not configured in {WEATHER_LOCATION_FILE}"
     try:
-        request = Request("https://wttr.in/?format=j1", headers={"User-Agent": "Hermes-personal-alignment/1.0"})
+        weather_url = f"https://wttr.in/{quote(location)}?format=j1"
+        request = Request(weather_url, headers={"User-Agent": "Hermes-personal-alignment/1.0"})
         with urlopen(request, timeout=20) as response:
             data = json.load(response)
         area = (data.get("nearest_area") or [{}])[0]
@@ -98,7 +116,7 @@ def collect_weather() -> tuple[dict[str, Any] | None, str | None]:
                 ],
             })
         compact = {
-            "source": "wttr.in IP geolocation",
+            "source": "wttr.in configured location",
             "area": ((area.get("areaName") or [{}])[0].get("value")),
             "region": ((area.get("region") or [{}])[0].get("value")),
             "current": {

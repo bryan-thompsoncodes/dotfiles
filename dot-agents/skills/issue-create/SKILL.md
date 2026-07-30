@@ -48,6 +48,22 @@ Three cases:
 2. **Exactly one template** → use it.
 3. **Multiple templates** → interactive clarification (Hermes: `clarify`) with each template's `name` field as the option label. Let the user pick.
 
+### 1.2.1 Calibrate against existing repository patterns
+
+Before Q&A or drafting, inspect two or three recent comparable issues from the target repository whenever the forge is accessible. This is required even when a template exists: the template defines the allowed shape, while accepted issues show how the team actually uses it.
+
+Capture and apply the repository's established conventions for:
+
+- title prefixes and phrasing;
+- exact template and heading structure;
+- labels and issue type;
+- milestone and project placement;
+- parent/sub-issue linkage;
+- links to the source PR, review thread, epic, dependencies, sibling tickets, and related prior work;
+- dependency ordering, overlap, and conditional closure or absorption.
+
+Do not copy metadata mechanically. Verify that each label and relationship fits the ticket's actual scope and that referenced issues are genuinely a parent, dependency, sibling, related work, or possible replacement. A ticket draft is incomplete until its proposed metadata and relationships are shown alongside the body. If the live forge is inaccessible, say which conventions could not be verified instead of silently omitting them.
+
 ### 1.3 Default structure (no templates)
 
 When the target repo has no `ISSUE_TEMPLATE` directory, propose this six-section structure and use it as if it were a legacy Markdown template:

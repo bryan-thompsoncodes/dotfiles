@@ -10,6 +10,7 @@ WORK_PROMPT = ROOT / "automations" / "workday-morning-brief" / "prompt.md"
 PERSONAL_PROMPT = ROOT / "automations" / "personal-morning-brief" / "prompt.md"
 WORK_COLLECTOR = ROOT / "scripts" / "sgg-morning-brief.py"
 PERSONAL_COLLECTOR = ROOT / "scripts" / "personal-morning-brief.py"
+ALIGNMENT_COLLECTOR = ROOT / "scripts" / "personal-alignment-brief.py"
 
 
 class MorningBriefSplitContractTest(unittest.TestCase):
@@ -44,6 +45,15 @@ class MorningBriefSplitContractTest(unittest.TestCase):
         self.assertIn('EXCLUDED_CALENDARS = {"Bryan @ Agile6", "Traci"}', collector)
         self.assertIn("Never use or mention events from Traci's calendar", prompt)
         self.assertIn("recentSecondBrainPaths", collector)
+
+    def test_personal_weather_uses_private_configuration(self) -> None:
+        for path in (PERSONAL_COLLECTOR, ALIGNMENT_COLLECTOR):
+            collector = path.read_text(encoding="utf-8")
+
+            self.assertIn('os.environ.get("PERSONAL_WEATHER_LOCATION", "")', collector)
+            self.assertIn('HOME / ".secrets" / "personal-weather-location"', collector)
+            self.assertIn('f"https://wttr.in/{quote(location)}?format=j1"', collector)
+            self.assertNotIn("wttr.in IP geolocation", collector)
 
     def test_work_brief_does_not_promote_proposals_or_other_peoples_actions(self) -> None:
         prompt = WORK_PROMPT.read_text(encoding="utf-8")

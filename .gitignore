@@ -52,5 +52,11 @@ dot-gnupg/*
 # Stale backups from opencode config edits
 *.backup*
 
+# Machine-generated Git LFS hooks in the global hooks directory
+dot-git-hooks/post-checkout
+dot-git-hooks/post-commit
+dot-git-hooks/post-merge
+dot-git-hooks/pre-push
+
 # Zed - track settings/keymap, ignore the LMDB prompt-library store (machine-local, binary)
 dot-config/zed/prompts/

@@ -214,6 +214,11 @@ Two distinct shapes by message type:
   what to expect after merge" shape. Each paragraph led by a labeling phrase
   ("Quick context on why:", "The reason I think it's safe to land on its
   own:", "One thing I tacked on:"). See samples.md PR #842 review request.
+  For a consolidated review queue, group links by work class and priority
+  (for example, the primary release audit separately from dependency
+  maintenance). Tag the intended reviewers and state that the PRs are ready;
+  do not invent reviewer allocation, ask them to split the batch, or add a
+  coordination question the user did not request.
 - **Casual DM:** multiple short sends rather than packed paragraphs. Question
   + follow-up question pattern ("No, how are you doing with that? Do you
   happen to be more excited than bummed?"). See samples.md [friend] DM.

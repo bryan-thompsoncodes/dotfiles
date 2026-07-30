@@ -35,7 +35,7 @@ The collector reads bounded, read-only context from:
 - all Apple calendars;
 - incomplete Apple Reminders;
 - Apple Mail on Sunday, filtered to commitments, appointments, travel, purchases requiring action, property/vehicle projects, family/shared plans, important people, or active goals;
-- IP-geolocated `wttr.in` weather, currently resolving to Bend, Oregon;
+- location-specific `wttr.in` weather configured privately through `PERSONAL_WEATHER_LOCATION` or `~/.secrets/personal-weather-location`;
 - Bryan's physical whiteboard through his report during the reset.
 
 The weekday personal morning brief is a separate one-minute update. It reads only Bryan's non-work calendars, today's incomplete Reminders, actionable weather, the current weekly hub, and bounded recent Second Brain project activity. It excludes the SGG vault, work repositories, GitHub, work mail, and the calendars named `Bryan @ Agile6` and `Traci`. It never writes a note and never uses or mentions events from Traci's calendar.
