@@ -14,11 +14,30 @@ ALIGNMENT_COLLECTOR = ROOT / "scripts" / "personal-alignment-brief.py"
 
 
 class MorningBriefSplitContractTest(unittest.TestCase):
+    def test_manifest_pins_each_agent_job_to_its_intended_model(self) -> None:
+        manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
+        jobs = {job["name"]: job for job in manifest["cronJobs"]}
+        expected = {
+            "Workday Morning Brief": "gpt-5.6-terra",
+            "Personal Morning Brief": "gpt-5.6-luna",
+            "Personal Weekday Close": "gpt-5.6-luna",
+            "Personal Saturday Orientation": "gpt-5.6-luna",
+            "Personal Sunday Reset": "gpt-5.6-luna",
+            "Workday Dependency Triage": "gpt-5.6-sol",
+        }
+
+        self.assertEqual(set(jobs), set(expected))
+        for name, model in expected.items():
+            self.assertEqual(jobs[name]["model"], model)
+            self.assertEqual(jobs[name]["provider"], "openai-codex")
+
     def test_manifest_routes_personal_morning_brief_to_second_brain(self) -> None:
         manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
         job = next(job for job in manifest["cronJobs"] if job["name"] == "Personal Morning Brief")
 
         self.assertEqual(job["schedule"], "20 7 * * 1-5")
+        self.assertEqual(job["model"], "gpt-5.6-luna")
+        self.assertEqual(job["provider"], "openai-codex")
         self.assertEqual(job["deliver"], "matrix:!5hH-Wud0Gd7hS1Z214EwjEMUvqtH8FBVOZhIZj0sqR4")
         self.assertEqual(job["script"], "personal-morning-brief.py")
         self.assertEqual(job["workdir"], "/Users/bryan/second-brain")

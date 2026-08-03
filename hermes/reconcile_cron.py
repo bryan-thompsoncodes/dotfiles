@@ -96,6 +96,8 @@ def main() -> int:
             "prompt": prompt,
             "schedule": definition["schedule"],
             "name": name,
+            "model": definition["model"],
+            "provider": definition["provider"],
             "deliver": definition["deliver"],
             "skills": definition["skills"],
             "script": definition["script"],
@@ -127,6 +129,8 @@ def main() -> int:
         expected = {
             "name": name,
             "schedule_display": definition["schedule"],
+            "model": definition["model"],
+            "provider": definition["provider"],
             "prompt": prompt,
             "deliver": definition["deliver"],
             "skills": definition["skills"],
