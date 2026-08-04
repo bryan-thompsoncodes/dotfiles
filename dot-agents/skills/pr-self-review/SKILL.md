@@ -150,10 +150,13 @@ Write the merged cache to `{state-dir}/related-issues.json`:
     "url": "https://...",
     "labels": ["tech-debt"],
     "match_reason": "closes | refs | path | label",
-    "body_excerpt": "first 400 chars"
+    "body_excerpt": "first 400 chars",
+    "acceptance_criteria": [{ "checked": false, "text": "..." }]
   }
 ]
 ```
+
+**Acceptance-criteria extraction.** For `closes` entries only, scan the *full* fetched body for GitHub task-list lines (`- [ ]` / `- [x]`, any indent) and store each as an `acceptance_criteria` entry with its checked state and text. Store the checklist lines only; the 400-char `body_excerpt` truncation above is unchanged, and the rest of the body still never enters context. Checklist lines are bounded and are the one part of the body this skill must read in full — an AC list sits at the bottom of a long issue, which is exactly where the excerpt window cannot reach. No task-list lines, or no `closes` entry → `acceptance_criteria: []`, and §2.3's AC sweep has nothing to check. Never treat a checked box as evidence the work is done; the box records what someone claimed, not what the diff contains.
 
 `match_reason` distinguishes the four match dimensions. `closes` is body-scoped: it covers `Closes #N` / `Fixes #N` / `Resolves #N` declarative tags found in the PR body. `refs` covers `Refs #N` / `Related #N` body tags and all timeline `cross-referenced` events; timeline cross-references always classify as `refs` regardless of how the referencing PR itself tagged the issue. `path` and `label` are unchanged from the (B) and (C) dimensions above. Phase 2.3 uses this field when deciding whether an overlap is source intent or separately tracked work.
 
@@ -255,6 +258,25 @@ Do not ask the user to disposition routine findings. For each finding, choose on
 - **reject** — the finding is false, already handled, speculative, unsupported by evidence, or would make the code worse. Record a concrete rationale and the evidence checked, then add its key to the suppression set.
 - **defer** — the finding is valid but non-blocking and demonstrably owned by a separately tracked issue or settled decision outside this PR. Record the issue/note and why the current PR remains correct without the change, then suppress it. A related-context tag alone is not enough evidence to defer.
 - **escalate** — the finding is valid and blocking, but every reasonable correction would materially contradict the documented PR intent. This is the only finding disposition that asks the user.
+
+**Validate the claim, not just the observation.** A finding carries up to three separable claims: an *observation* (what the code does), an *explanation* (why it does it), and a *prescription* (what to change). Reading the code confirms only the first. Confirm each one you intend to rely on:
+
+- **An explanation is a hypothesis until you change something and watch the effect.** Confirming the named cause *exists* is not confirming it *causes* the effect. If a finding says "X is why Y," break or remove X and observe, or read the implementation that would have to produce Y. Seeing X sitting in a config file is not evidence that X does anything.
+- **Test the cheaper alternative before discarding it.** If a simpler fix exists and you rule it out as ineffective, risky, or out of scope, establish that by running it. A rejected alternative you never tried is an unverified claim you are about to ship as rationale.
+- **Comparative claims need every side read.** "This differs from / duplicates / mirrors / flattens Z" requires reading Z, and every Z the claim implies — the sibling SDK, the other language's equivalent, the prior art it says it matches. Checking one side is not checking the comparison.
+- **A prescription encodes the reviewer's assumptions about this repo.** Before adopting a suggested shape (export this helper, extract that component, add a dependency), grep for how the nearest sibling already solves it. Reviewers propose without knowing local convention.
+
+A finding whose observation holds but whose explanation you could not establish may still be a **fix** — but the unverified explanation must not reach a code comment, commit message, PR body, or `summary.md` rationale. Repeating a reviewer's "why" as your own is the most common way this phase ships confident, wrong artifacts. Record which of the three claims you actually verified, and report to the user only the confidence you earned.
+
+**Convergence is not corroboration.** Lenses that flagged the same defect (§2.2 `reported_by`) read the same files and can share a blind spot. N lenses asserting one explanation is one claim from N correlated sources, not N independent confirmations — weigh it as single-sourced. Agreement raises the cost of the error, not the confidence in it.
+
+**Acceptance-criteria sweep.** The six lenses read the diff, not the ticket, so an obligation nobody implemented produces no finding — there is no line of code for a reviewer to object to. Absence of findings is therefore not evidence the ACs are met. Before disposition ends, walk every `acceptance_criteria` entry from every `closes` cache entry and judge each against the diff and the branch state independently of what the lenses returned:
+
+- **met** — cite the specific file, test, or artifact that satisfies it.
+- **unmet** — raise it as a finding keyed to the `ac-conformance` lens and run it through the normal fix / reject / defer / escalate flow. Severity is Major by default, Critical when the AC is the PR's stated purpose. Use `{file}:{line}` of the nearest relevant code, or the AC index when it points at no file.
+- **out-of-scope** — the AC is real but belongs to separate work (a follow-up PR, an upstream filing, a release step). Record which, and why this PR is complete without it. This is a `defer`, so it needs the same evidence any deferral needs.
+
+Documentation, changelog, doc-comment, and "note the remaining limitation" ACs are the ones this sweep exists to catch, because no code-shaped lens will ever raise them. Do not mark an AC met because a related mechanism landed: an AC asking for a caveat *in the docs* is unmet until the caveat is in the docs, however correct the implementation is. Do not mark one met on the strength of the PR body saying so, and do not silently narrow an AC to the part the diff happens to satisfy.
 
 **Source-issue rule.** When `related_issue: #N` points to a cache entry with `match_reason: closes`, treat that issue as PR intent. Never defer merely because the finding overlaps the issue this PR claims to close. Validate it and either fix it automatically, reject it with evidence, or escalate only under the material-conflict gate below. `refs`, `path`, `label`, and related-note matches may support defer, but do not force it.
 
@@ -420,9 +442,20 @@ not appear here.}
 
 - [pass {k}] [{lens}] [{file}:{line}] {finding}
 
+## Acceptance Criteria
+
+{One line per AC from every `closes` issue, in ticket order, with the §2.3 sweep's
+verdict and its evidence. Omit the section entirely when `acceptance_criteria` is
+empty for every entry; never write it as "N/A". An unmet AC also appears in the
+severity section matching its disposition.}
+
+- [{met | unmet | out-of-scope}] {issue}#{AC index}: {AC text} — {evidence, or the work that owns it}
+
 ## Ship Readiness
 
 {Clear recommendation, incorporating the 3.0 verification result: "Ready to merge" | "Outstanding blocking intent conflict — do not merge" | "Correction bound reached — do not merge" | "Verification failed — do not merge: {key output}" | "Review stopped with open findings"}
+
+An unmet AC is a blocker unless the §2.3 sweep dispositioned it out-of-scope with the owning work named. Do not report "Ready to merge" over an open AC.
 ```
 
 Two-axis shape: the `## Critical Issues` / `## Major Issues` / `## Minor / Nit` sections preserve the `issue-work` Phase 4.3 contract (Phase 4.3 reads these to present outstanding findings before the ship gate). The `## Fixed automatically` / `## Rejected after validation` / `## Deferred / Already Tracked` / `## Escalated for Intent Decision` / `## Correction-Bound Findings` / `## Acknowledged` sections preserve the disposition audit trail unique to this skill. Both belong; don't drop either half.
