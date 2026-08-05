@@ -3,7 +3,7 @@ name: sprint-deliverable-update
 description: >
   Draft or post sprint updates and final completion summaries on deliverable
   issues, with review-ready evidence and verified screenshot rendering.
-version: 2.4.0
+version: 2.5.0
 author: Bryan Thompson
 license: MIT
 metadata:
@@ -36,9 +36,10 @@ is a separate skill: `sprint-status-update`.
    Accomplishments section is a few top-level takeaways synthesized across the tickets
    that landed — not one bullet per ticket, however well-written each bullet is. Each
    takeaway names what changed for someone outside the team and links to the thing
-   itself — the new endpoint, spec page, docs page, released package — not the ticket
-   that closed. A bullet that means nothing to a reader who doesn't follow the repo
-   gets rewritten. See **The narrative pass** below.
+   itself — the new endpoint, spec page, docs page, released package. Ticket refs may
+   ride along as provenance next to a takeaway, but a ticket is never the subject or
+   organizing unit of a bullet. A bullet that means nothing to a reader who doesn't
+   follow the repo gets rewritten. See **The narrative pass** below.
 6. **Final means final.** A draft called complete, post-ready, or review-ready contains
    no editorial instructions, TODOs, placeholders, or suggestions to add evidence later.
 7. **Embed or omit.** If the artifact mentions a screenshot, the screenshot must appear
@@ -173,8 +174,11 @@ have any questions!
 
 ### Accomplishments
 
-- [what changed, and what it now makes possible, with the link going to the feature,
-  spec, docs page, or release — not to the ticket that closed]
+- [Takeaway: what changed and what it now makes possible, linking to the rendered
+  artifact. Issue refs may sit alongside as provenance.]
+  - [When a takeaway covers enumerable things — routes, models, pages — nest them as
+    sub-bullets the reader can scan and click (e.g. ``GET /common-grants/orgs/`` or a
+    linked model page) instead of weaving them into prose.]
 
 ### Rollover
 
@@ -199,9 +203,12 @@ to each ticket's bullet is the failure mode, not the fix. Work top-down instead:
    remembers only two or three things about this sprint, what should they be? Those
    takeaways — not the tickets — become the Accomplishments bullets.
 2. **Attach the work as evidence.** Under each takeaway, the shipped things (endpoint,
-   spec page, docs page, released package) appear as supporting links. Several tickets
-   from one effort collapse into one takeaway; a ticket that supports no takeaway is
-   probably maintenance — fold such items into one housekeeping line or drop them.
+   spec page, docs page, released package) appear as supporting links — as nested
+   sub-bullets when they enumerate (routes, models, pages), so the reader scans and
+   clicks rather than parsing prose. Ticket refs sit alongside as provenance. Several
+   tickets from one effort collapse into one takeaway; a ticket that supports no
+   takeaway is probably maintenance — fold such items into one housekeeping line or
+   drop them.
 3. **Say what it sets up.** Progress toward an AC, a metric, an unblocked consumer, a
    decision now settled. This usually exists only in the drafter's head and is the most
    valuable line in the comment. A spike that redirected the approach is a takeaway even
@@ -214,8 +221,9 @@ Checks before calling the draft done:
 - **Lead.** Each takeaway opens with what someone can do or rely on now that they
   couldn't before, and a reader can click through to see the new thing.
 - **Link stability.** Links point at stable targets — released packages, main-branch
-  paths, published docs — never feature/HOLD-branch URLs, which break when the branch
-  merges.
+  paths, published docs. Feature/HOLD-branch URLs and per-PR preview deployments both
+  break when the branch merges; if a preview is the only place the artifact renders,
+  pair it with a durable reference (the PR or the main-branch path).
 
 Applies to both artifact types: the same rule governs evidence paragraphs under an AC or
 metric, which describe what the reader can now verify rather than which issues closed.
