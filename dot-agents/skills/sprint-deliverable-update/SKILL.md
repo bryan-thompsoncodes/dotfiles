@@ -3,7 +3,7 @@ name: sprint-deliverable-update
 description: >
   Draft or post sprint updates and final completion summaries on deliverable
   issues, with review-ready evidence and verified screenshot rendering.
-version: 2.1.0
+version: 2.2.0
 author: Bryan Thompson
 license: MIT
 metadata:
@@ -32,12 +32,18 @@ is a separate skill: `sprint-status-update`.
    list come from the planning doc — not from cadence math or the previous comment. The
    format and voice come from the latest sibling-deliverable updates. See
    **Gather sources first** below.
-5. **Final means final.** A draft called complete, post-ready, or review-ready contains
+5. **Never list tickets.** Closed sub-issues are the raw input, not the update. Each
+   accomplishment names what changed for someone outside the team, and links to the thing
+   itself — the new endpoint, spec page, docs page, released package, PR that shows the
+   feature — not the ticket that closed. Group several related tickets into one
+   accomplishment. A bullet that means nothing to a reader who doesn't follow the repo
+   gets rewritten. See **The narrative pass** below.
+6. **Final means final.** A draft called complete, post-ready, or review-ready contains
    no editorial instructions, TODOs, placeholders, or suggestions to add evidence later.
-6. **Embed or omit.** If the artifact mentions a screenshot, the screenshot must appear
+7. **Embed or omit.** If the artifact mentions a screenshot, the screenshot must appear
    immediately as a Markdown image. Never write “add,” “attach,” or “consider adding” a
    screenshot in user-facing copy.
-7. **Resolve images before handoff.** A review bundle may use relative image paths only
+8. **Resolve images before handoff.** A review bundle may use relative image paths only
    when every file is packaged beside the Markdown. A post-ready comment must use live
    HTTPS image URLs; `/tmp`, `file://`, and bare local paths are forbidden.
 
@@ -164,7 +170,8 @@ have any questions!
 
 ### Accomplishments
 
-- [what got done, with links to PRs/artifacts where helpful]
+- [what changed, and what it now makes possible, with the link going to the feature,
+  spec, docs page, or release — not to the ticket that closed]
 
 ### Rollover
 
@@ -178,6 +185,26 @@ have any questions!
 
 - [planned work]
 ```
+
+## The narrative pass
+
+The closed-ticket filter tells you which work landed. It does not tell a stakeholder why
+the sprint mattered. After the draft is assembled from evidence, reread it once as the
+audience — Julius and other stakeholders who don't read the repo — and add the through-line
+that no individual ticket shows:
+
+- **What can someone do now that they couldn't before the sprint?** Say that, and link to
+  it. A reader should be able to click through and see the new thing.
+- **Which tickets were one effort?** Collapse them into a single accomplishment named after
+  the outcome. Five tickets behind one filter surface is one accomplishment, not five.
+- **What does this sprint's work set up?** Progress toward an AC, a metric, an unblocked
+  consumer, a decision now settled. This is usually the part that exists only in the
+  drafter's head, and it is the most valuable line in the comment.
+- **What was learned or changed course?** A spike that redirected the approach is an
+  accomplishment even with nothing shipped.
+
+Applies to both artifact types: the same rule governs evidence paragraphs under an AC or
+metric, which describe what the reader can now verify rather than which issues closed.
 
 ## Deliverable summary template
 
@@ -288,5 +315,10 @@ gh api graphql -f query='
 Filter results for issues closed during the sprint period (closedAt > SPRINT_START_DATE).
 
 Sub-issues may be in either `HHS/simpler-grants-gov` or `HHS/simpler-grants-protocol`.
+
+This list is where drafting starts, not what gets posted. Open the merged PRs behind the
+closed tickets to find what actually changed and what to link to, then translate the list
+per **The narrative pass**. A draft whose Accomplishments bullets map one-to-one onto
+ticket titles is not finished.
 
 **Always get user approval before posting.**
