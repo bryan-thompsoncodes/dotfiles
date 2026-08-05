@@ -3,7 +3,7 @@ name: sprint-deliverable-update
 description: >
   Draft or post sprint updates and final completion summaries on deliverable
   issues, with review-ready evidence and verified screenshot rendering.
-version: 2.3.0
+version: 2.4.0
 author: Bryan Thompson
 license: MIT
 metadata:
@@ -32,11 +32,12 @@ is a separate skill: `sprint-status-update`.
    list come from the planning doc — not from cadence math or the previous comment. The
    format and voice come from the latest sibling-deliverable updates. See
    **Gather sources first** below.
-5. **Never list tickets.** Closed sub-issues are the raw input, not the update. Each
-   accomplishment names what changed for someone outside the team, and links to the thing
-   itself — the new endpoint, spec page, docs page, released package, PR that shows the
-   feature — not the ticket that closed. Group several related tickets into one
-   accomplishment. A bullet that means nothing to a reader who doesn't follow the repo
+5. **Never list tickets.** Closed sub-issues are the raw input, not the update. The
+   Accomplishments section is a few top-level takeaways synthesized across the tickets
+   that landed — not one bullet per ticket, however well-written each bullet is. Each
+   takeaway names what changed for someone outside the team and links to the thing
+   itself — the new endpoint, spec page, docs page, released package — not the ticket
+   that closed. A bullet that means nothing to a reader who doesn't follow the repo
    gets rewritten. See **The narrative pass** below.
 6. **Final means final.** A draft called complete, post-ready, or review-ready contains
    no editorial instructions, TODOs, placeholders, or suggestions to add evidence later.
@@ -191,19 +192,30 @@ have any questions!
 ## The narrative pass
 
 The closed-ticket filter tells you which work landed. It does not tell a stakeholder why
-the sprint mattered. After the draft is assembled from evidence, reread it once as the
-audience — Julius and other stakeholders who don't read the repo — and add the through-line
-that no individual ticket shows:
+the sprint mattered. The narrative pass is synthesis, not enrichment: adding more detail
+to each ticket's bullet is the failure mode, not the fix. Work top-down instead:
 
-- **What can someone do now that they couldn't before the sprint?** Say that, and link to
-  it. A reader should be able to click through and see the new thing.
-- **Which tickets were one effort?** Collapse them into a single accomplishment named after
-  the outcome. Five tickets behind one filter surface is one accomplishment, not five.
-- **What does this sprint's work set up?** Progress toward an AC, a metric, an unblocked
-  consumer, a decision now settled. This is usually the part that exists only in the
-  drafter's head, and it is the most valuable line in the comment.
-- **What was learned or changed course?** A spike that redirected the approach is an
-  accomplishment even with nothing shipped.
+1. **Name the takeaways first.** Before writing any bullet, answer: if the stakeholder
+   remembers only two or three things about this sprint, what should they be? Those
+   takeaways — not the tickets — become the Accomplishments bullets.
+2. **Attach the work as evidence.** Under each takeaway, the shipped things (endpoint,
+   spec page, docs page, released package) appear as supporting links. Several tickets
+   from one effort collapse into one takeaway; a ticket that supports no takeaway is
+   probably maintenance — fold such items into one housekeeping line or drop them.
+3. **Say what it sets up.** Progress toward an AC, a metric, an unblocked consumer, a
+   decision now settled. This usually exists only in the drafter's head and is the most
+   valuable line in the comment. A spike that redirected the approach is a takeaway even
+   with nothing shipped.
+
+Checks before calling the draft done:
+
+- **Count.** If Accomplishments bullets ≈ closed tickets, it is still a ticket list
+  wearing prose. Typical sprints yield 2–4 takeaways.
+- **Lead.** Each takeaway opens with what someone can do or rely on now that they
+  couldn't before, and a reader can click through to see the new thing.
+- **Link stability.** Links point at stable targets — released packages, main-branch
+  paths, published docs — never feature/HOLD-branch URLs, which break when the branch
+  merges.
 
 Applies to both artifact types: the same rule governs evidence paragraphs under an AC or
 metric, which describe what the reader can now verify rather than which issues closed.
