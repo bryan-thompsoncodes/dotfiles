@@ -3,7 +3,7 @@ name: sprint-deliverable-update
 description: >
   Draft or post sprint updates and final completion summaries on deliverable
   issues, with review-ready evidence and verified screenshot rendering.
-version: 2.2.0
+version: 2.3.0
 author: Bryan Thompson
 license: MIT
 metadata:
@@ -41,8 +41,9 @@ is a separate skill: `sprint-status-update`.
 6. **Final means final.** A draft called complete, post-ready, or review-ready contains
    no editorial instructions, TODOs, placeholders, or suggestions to add evidence later.
 7. **Embed or omit.** If the artifact mentions a screenshot, the screenshot must appear
-   immediately as a Markdown image. Never write “add,” “attach,” or “consider adding” a
-   screenshot in user-facing copy.
+   immediately as an embedded image — either `![alt](target)` or the `<img>` tag GitHub's
+   comment composer produces for a pasted file; both are accepted. Never write “add,”
+   “attach,” or “consider adding” a screenshot in user-facing copy.
 8. **Resolve images before handoff.** A review bundle may use relative image paths only
    when every file is packaged beside the Markdown. A post-ready comment must use live
    HTTPS image URLs; `/tmp`, `file://`, and bare local paths are forbidden.
@@ -79,8 +80,9 @@ Treat images as part of the artifact, not as follow-up work:
    HTTPS URL. Run the validator with the same explicit `--artifact` in `post` mode with
    `--check-urls`.
 6. After posting, fetch the created comment with GitHub's full JSON media type and verify
-   the Markdown image count equals the rendered `<img>` count. Tool success alone is not
-   proof that images rendered.
+   the image count the body declares equals the rendered `<img>` count. Count tags — the
+   rendered `src` is a signed URL on a different host, so never match on the posted URL.
+   Tool success alone is not proof that images rendered.
 
 Prefer GitHub user attachments for posted comments. Read
 [`references/visual-evidence-and-posting.md`](references/visual-evidence-and-posting.md)
