@@ -67,6 +67,27 @@ class MorningBriefSplitContractTest(unittest.TestCase):
         self.assertIn("Never use or mention events from Traci's calendar", prompt)
         self.assertIn("recentSecondBrainPaths", collector)
 
+    def test_personal_routines_do_not_resurface_alcohol_by_default(self) -> None:
+        prompt_paths = [
+            PERSONAL_PROMPT,
+            ROOT / "automations" / "personal-weekday-close" / "prompt.md",
+            ROOT / "automations" / "personal-saturday-orientation" / "prompt.md",
+            ROOT / "automations" / "personal-sunday-reset" / "prompt.md",
+        ]
+        for path in prompt_paths:
+            prompt = path.read_text(encoding="utf-8").lower()
+            self.assertIn("never", prompt, path)
+            self.assertIn("sobriety", prompt, path)
+            if path != PERSONAL_PROMPT:
+                self.assertIn("unless bryan explicitly raises", prompt, path)
+
+        skill = (ROOT / "skills" / "productivity" / "personal-routine-automation" / "SKILL.md").read_text(encoding="utf-8")
+        contract = (ROOT / "skills" / "productivity" / "personal-routine-automation" / "references" / "bryan-personal-routine-contract.md").read_text(encoding="utf-8")
+        self.assertNotIn("Bryan's alcohol direction is near-abstinence", skill)
+        self.assertNotIn("Alcohol direction: as close to abstinence", contract)
+        self.assertIn("unless Bryan explicitly raises that topic in the current conversation", skill)
+        self.assertIn("unless Bryan explicitly raises that topic in the current conversation", contract)
+
     def test_personal_weather_uses_private_configuration(self) -> None:
         for path in (PERSONAL_COLLECTOR, ALIGNMENT_COLLECTOR):
             collector = path.read_text(encoding="utf-8")

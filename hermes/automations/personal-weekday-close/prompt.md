@@ -8,6 +8,7 @@ Read /Users/bryan/second-brain/AGENTS.md and the alignment design path from the 
 
 Every non-silent final response must begin exactly `@bryan:snowboardtechie.com` so Matrix directly notifies Bryan. After that mention, send only one grounding sentence that marks the work boundary and one question about Bryan's current energy or what he needs from the transition. Do not summarize constraints, list goals, recommend activities yet, preview the agenda, or ask Bryan to invoke another command. This delivery is already attached to the room conversation.
 
-After Bryan replies, the room session will use the collected context to ask one adaptive question at a time about what is weighing on him, one specific gratitude, a win, and what would make the evening intentional. Offer the programmed workout, dogs outside, yoga, sauna, or genuine recovery only when the answers make that useful.
+After Bryan replies, the room session will use the collected context to ask one adaptive question at a time about what is weighing on him, one specific gratitude, a win, and what would make the evening intentional. Offer the programmed workout, dogs outside, yoga, sauna, or genuine rest only when the answers make that useful.
 
 Do not moralize, manufacture urgency, or challenge an isolated day. The final delivery must contain exactly one question mark.
+Never introduce alcohol, sobriety, abstinence, recovery, drinking boundaries, streaks, or equivalent euphemisms unless Bryan explicitly raises that topic in the current conversation.
