@@ -7,7 +7,7 @@ four coding agents he runs: **Claude Code**, **Pi**, **OpenCode**, and **Hermes*
 
 `skills/` is a flat pool — one directory per skill, one canonical copy. Each tool
 gets a *curated subset* via per-skill symlinks created by
-[`../setup-platform-configs.sh`](../setup-platform-configs.sh):
+[`../scripts/reconcile-agent-skills.sh`](../scripts/reconcile-agent-skills.sh):
 
 ```
 ~/.claude/skills/<name>          -> dot-agents/skills/<name>
@@ -16,65 +16,45 @@ gets a *curated subset* via per-skill symlinks created by
 ~/.hermes/skills/personal/<name> -> dot-agents/skills/<name>
 ```
 
-The setup script is idempotent: it links the curated skills, prunes symlinks that
-are no longer curated, and **never touches** anything that isn't a symlink into
-this pool — so Claude's plugin skills (`gsd-*`, `superpowers`, etc.) are left alone.
+The reconciler is idempotent and has two modes: `--check` reports the plan
+without touching anything; `--apply` links the curated skills, prunes symlinks
+that are no longer curated, and **never touches** anything that isn't a symlink
+into this pool — so Claude's plugin skills (`gsd-*`, `superpowers`, etc.) and
+Omarchy's packaged skill links (`omarchy`, `diagnose-crash`) are left alone.
+The legacy `setup-platform-configs.sh` delegates its agent-skill step to this
+reconciler, and `scripts/setup-omarchy.sh` invokes it as the only payload of the
+additive Omarchy setup.
 
 Why a flat pool instead of per-tool subfolders: most skills are wanted by 2+ tools.
 Subfolders would force either duplicate copies or a `common/` + cross-folder symlink
 layer. A flat pool keeps one copy of each skill and makes "give tool X skill Y" a
-one-line change to an array below.
+one-line change to a curation array.
 
 ## Curation
 
-Not every tool gets every skill. Pi is kept lean. Hermes gets adapted personal
-workflows but keeps its bundled/local `obsidian` and `vault-pkm` implementations,
-so those names are intentionally excluded from its pool links. The authoritative
-lists are the `*_SKILLS` arrays in `setup-platform-configs.sh`; this table mirrors
-them.
+Not every tool gets every skill. Pi is kept lean (the common core only). Hermes
+gets adapted personal workflows but keeps its bundled/local `obsidian` and
+`vault-pkm` implementations, so those names are intentionally excluded from its
+pool links.
 
-| Skill | What it does | Claude | OpenCode | Pi | Hermes |
-|-------|--------------|:------:|:--------:|:--:|:------:|
-| `ship` | wrap up worktree → push → open PR | ✅ | ✅ | ✅ | ✅ |
-| `worktrunk` | git worktree (wt) management | ✅ | ✅ | ✅ | ✅ |
-| `git-master` | git workflow (strips AI attribution) | ✅ | ✅ | ✅ | — |
-| `update-pr-description` | fill PR body from template | ✅ | ✅ | ✅ | ✅ |
-| `pr-self-review` | 4-lens autonomous review + fix loop | ✅ | ✅ | ✅ | ✅ |
-| `agent-workspace` | `.agents/` working-dir conventions | ✅ | ✅ | ✅ | — |
-| `vault-pkm` | PKM conventions for vaults | ✅ | ✅ | ✅ | local |
-| `vault-capture` | session-end vault capture | ✅ | ✅ | ✅ | ✅ |
-| `skill-retrospective` | conversation-to-workflow improvement triage | ✅ | ✅ | ✅ | ✅ |
-| `obsidian` | Obsidian vault patterns | ✅ | ✅ | ✅ | bundled |
-| `manual-merge` | Forgejo local squash-merge | ✅ | ✅ | — | ✅ |
-| `issue-create` | draft & post an issue | ✅ | ✅ | — | ✅ |
-| `issue-plan` | prepare a vault-backed implementation plan | ✅ | ✅ | — | ✅ |
-| `issue-work` | end-to-end ticket workflow | ✅ | ✅ | — | ✅ |
-| `loop-issue` | autonomous backlog-drain loop | ✅ | ✅ | — | ✅ |
-| `adr-and-spec-coach` | guide an ADR/spec decision | ✅ | ✅ | — | ✅ |
-| `conforming-tech-specs` | conformance-gated spec pass | ✅ | ✅ | — | ✅ |
-| `voice-bryan` | write in Bryan's voice (teammate-facing) | ✅ | ✅ | — | ✅ |
-| `dx-target` | derive consumer-first DX target | — | — | — | ✅ |
-| `dx-preview` | review implemented consumer DX | — | — | — | ✅ |
-| `gamedev` | Burnt Ice game-dev workflow | — | ✅ | — | — |
-| `sync-hold-branch` | resync long-lived feature branches | ✅ | — | — | — |
-| `catalog-review` | catalog dep-PR review | ✅ | — | — | ✅ |
-| `dependency-review` | single dep-PR review | ✅ | — | — | ✅ |
-| `dependency-triage` | dep-PR triage by blast radius | ✅ | — | — | ✅ |
-| `sprint-deliverable-update` | sprint update comments | ✅ | — | — | ✅ |
-| `weekly-planning` | retired weekly-planning machinery | ✅ | — | — | — |
-| `find-skills` | browse community skills.sh | ✅ | — | — | — |
-
-**Counts:** Claude 25 · OpenCode 19 · Pi 10 · Hermes 20 (28 distinct).
+The **single authoritative curation source** is the set of `*_SKILLS` Bash arrays
+in [`../scripts/reconcile-agent-skills.sh`](../scripts/reconcile-agent-skills.sh):
+`COMMON_SKILLS` (the core shared by Claude, OpenCode, and Pi) plus per-tool
+additions, and Hermes's independent list. A skill existing in the pool does not
+mean every tool receives it. This README intentionally does not mirror the
+membership lists or counts — read the arrays.
 
 ## Adding or re-curating a skill
 
 1. Create `skills/<name>/SKILL.md` (plus optional `references/`, `templates/`).
-2. Add `<name>` to the relevant `*_SKILLS` array(s) in `setup-platform-configs.sh`
-   — or to `COMMON_SKILLS` to give it to all three tools.
-3. Run `./setup-platform-configs.sh` to (re)build the symlinks.
+2. Add `<name>` to the relevant `*_SKILLS` array(s) in
+   `scripts/reconcile-agent-skills.sh` — or to `COMMON_SKILLS` to give it to
+   Claude, OpenCode, and Pi at once.
+3. Run `./scripts/reconcile-agent-skills.sh --check`, review the plan, then
+   re-run with `--apply` to (re)build the symlinks.
 
-To pull a skill from a tool, drop it from that tool's array and re-run — the prune
-step removes the now-stale symlink.
+To pull a skill from a tool, drop it from that tool's array and re-run `--apply`
+— the prune step removes the now-stale symlink.
 
 ## Notes
 

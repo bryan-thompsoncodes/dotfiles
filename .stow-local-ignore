@@ -11,3 +11,5 @@ openchamber
 .claude
 dot-agents
 ^hermes$
+^/scripts$
+^/tests$

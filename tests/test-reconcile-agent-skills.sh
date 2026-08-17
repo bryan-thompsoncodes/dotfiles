@@ -1,0 +1,153 @@
+#!/usr/bin/env bash
+# Integration tests for scripts/reconcile-agent-skills.sh.
+#
+# Runs the reconciler against temporary HOME directories; the real checked-out
+# skill pool is used read-only as the source. All writes are isolated inside
+# the temporary homes, which are removed on exit.
+
+set -u
+
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+RECONCILER="$REPO_ROOT/scripts/reconcile-agent-skills.sh"
+POOL="$(cd "$REPO_ROOT/dot-agents/skills" && pwd)"
+
+TESTS=0
+FAILURES=0
+TMP_HOMES=()
+
+cleanup() {
+    local h
+    for h in "${TMP_HOMES[@]}"; do
+        rm -rf "$h"
+    done
+}
+trap cleanup EXIT
+
+new_home() {
+    local h
+    h="$(mktemp -d "${TMPDIR:-/tmp}/skills-test-home-XXXXXX")"
+    TMP_HOMES+=("$h")
+    echo "$h"
+}
+
+check() { # <description> <command...>
+    local desc="$1"; shift
+    TESTS=$((TESTS + 1))
+    if "$@"; then
+        echo "ok   $desc"
+    else
+        echo "FAIL $desc"
+        FAILURES=$((FAILURES + 1))
+    fi
+}
+
+links_into_pool() { # count symlinks in <dir> that resolve into the pool
+    local dir="$1" count=0 entry tgt
+    if [[ -d "$dir" ]]; then
+        for entry in "$dir"/*; do
+            if [[ -L "$entry" ]]; then
+                tgt="$(readlink -f "$entry" 2>/dev/null || true)"
+                case "$tgt" in
+                    "$POOL"/*) count=$((count + 1)) ;;
+                esac
+            fi
+        done
+    fi
+    echo "$count"
+}
+
+snapshot() { # stable listing of a home's tree, including link targets
+    find "$1" -mindepth 1 \( -type l -printf '%p -> %l\n' \) -o -printf '%p\n' | sort
+}
+
+link_resolves_to() { # <link> <expected-target>
+    [[ -L "$1" && "$(readlink -f "$1")" == "$(readlink -f "$2")" ]]
+}
+
+# --- Test 1: expected curated links are created for all four tools -----------
+H="$(new_home)"
+out="$(HOME="$H" "$RECONCILER" --apply 2>&1)"; rc=$?
+check "t1: apply exits 0 on a fresh home" test "$rc" -eq 0
+check "t1: Claude receives 25 pool links"   test "$(links_into_pool "$H/.claude/skills")" -eq 25
+check "t1: OpenCode receives 19 pool links" test "$(links_into_pool "$H/.config/opencode/skills")" -eq 19
+check "t1: Pi receives 10 pool links"       test "$(links_into_pool "$H/.pi/agent/skills")" -eq 10
+check "t1: Hermes receives 20 pool links"   test "$(links_into_pool "$H/.hermes/skills/personal")" -eq 20
+check "t1: Claude-only skill is linked"     link_resolves_to "$H/.claude/skills/find-skills" "$POOL/find-skills"
+check "t1: OpenCode gets gamedev"           link_resolves_to "$H/.config/opencode/skills/gamedev" "$POOL/gamedev"
+check "t1: Pi does not get manual-merge"    test ! -e "$H/.pi/agent/skills/manual-merge"
+check "t1: Hermes excludes obsidian"        test ! -e "$H/.hermes/skills/personal/obsidian"
+check "t1: Hermes excludes vault-pkm"       test ! -e "$H/.hermes/skills/personal/vault-pkm"
+
+# --- Test 8: re-running --apply is idempotent --------------------------------
+before="$(snapshot "$H")"
+out="$(HOME="$H" "$RECONCILER" --apply 2>&1)"; rc=$?
+after="$(snapshot "$H")"
+check "t8: second apply exits 0"                 test "$rc" -eq 0
+check "t8: second apply changes nothing on disk" test "$before" = "$after"
+check "t8: second apply plans no creates"        bash -c '! grep -q "create link" <<<"$1"' _ "$out"
+check "t8: second apply plans no prunes"         bash -c '! grep -q "prune stale" <<<"$1"' _ "$out"
+
+# --- Tests 2/3/4: foreign and real entries are preserved ----------------------
+H2="$(new_home)"
+FOREIGN_DIR="$H2/fake-package/omarchy-skill"
+mkdir -p "$FOREIGN_DIR" "$H2/.claude/skills" "$H2/.pi/agent/skills"
+# t2: Omarchy-like foreign symlink (non-curated name) in a skill directory
+ln -s "$FOREIGN_DIR" "$H2/.claude/skills/omarchy"
+# t2b: broken foreign symlink
+ln -s "$H2/does-not-exist" "$H2/.claude/skills/diagnose-crash"
+# t3: real directory colliding with a curated name
+mkdir -p "$H2/.claude/skills/ship"
+echo "local content" > "$H2/.claude/skills/ship/marker"
+# t4: foreign regular files, one colliding with a curated name, one not
+echo "keep me" > "$H2/.claude/skills/worktrunk"
+echo "keep me too" > "$H2/.pi/agent/skills/notes.txt"
+
+out="$(HOME="$H2" "$RECONCILER" --apply 2>&1)"; rc=$?
+check "t2: apply exits 0 with foreign entries present" test "$rc" -eq 0
+check "t2: foreign symlink is preserved"        test "$(readlink "$H2/.claude/skills/omarchy")" = "$FOREIGN_DIR"
+check "t2: broken foreign symlink is preserved" test "$(readlink "$H2/.claude/skills/diagnose-crash")" = "$H2/does-not-exist"
+check "t3: colliding real directory is preserved" test -f "$H2/.claude/skills/ship/marker" -a ! -L "$H2/.claude/skills/ship"
+check "t3: collision is warned about"           bash -c 'grep -q "Claude/ship exists and is not a symlink" <<<"$1"' _ "$out"
+check "t4: colliding regular file is preserved" test -f "$H2/.claude/skills/worktrunk" -a ! -L "$H2/.claude/skills/worktrunk"
+check "t4: non-colliding regular file is preserved" test -f "$H2/.pi/agent/skills/notes.txt"
+
+# --- Tests 5/6/7: stale pool links prune under apply, not check ---------------
+# gamedev is in the pool but not curated for Pi, so a Pi link to it is stale.
+ln -s "$POOL/gamedev" "$H2/.pi/agent/skills/gamedev"
+before="$(snapshot "$H2")"
+out="$(HOME="$H2" "$RECONCILER" --check 2>&1)"; rc=$?
+after="$(snapshot "$H2")"
+check "t6: check exits 0"                        test "$rc" -eq 0
+check "t6: check reports the stale link"         bash -c 'grep -q "would prune stale pool link: gamedev" <<<"$1"' _ "$out"
+check "t6: check does not mutate the filesystem" test "$before" = "$after"
+check "t6: stale link still present after check" test -L "$H2/.pi/agent/skills/gamedev"
+
+out="$(HOME="$H2" "$RECONCILER" --apply 2>&1)"; rc=$?
+check "t5: apply exits 0"                        test "$rc" -eq 0
+check "t5: stale pool link is pruned by apply"   test ! -e "$H2/.pi/agent/skills/gamedev" -a ! -L "$H2/.pi/agent/skills/gamedev"
+check "t7: foreign symlink survives apply"       test -L "$H2/.claude/skills/omarchy"
+check "t7: broken foreign symlink survives apply" test -L "$H2/.claude/skills/diagnose-crash"
+
+# --- Test 9: invocation outside the repository root ---------------------------
+H3="$(new_home)"
+out="$(cd / && HOME="$H3" "$RECONCILER" --check 2>&1)"; rc=$?
+check "t9: check from outside the repo exits 0"  test "$rc" -eq 0
+check "t9: source pool resolves independent of cwd" bash -c 'grep -q "would create link: ship" <<<"$1"' _ "$out"
+check "t9: check on a fresh home creates nothing"   test -z "$(find "$H3" -mindepth 1)"
+
+# --- Test 10: missing or malformed arguments fail without mutation ------------
+H4="$(new_home)"
+out="$(HOME="$H4" "$RECONCILER" 2>&1)"; rc=$?
+check "t10: no arguments fails"                  test "$rc" -ne 0
+check "t10: no arguments prints usage"           bash -c 'grep -q "Usage:" <<<"$1"' _ "$out"
+out="$(HOME="$H4" "$RECONCILER" --bogus 2>&1)"; rc=$?
+check "t10: unknown argument fails"              test "$rc" -ne 0
+out="$(HOME="$H4" "$RECONCILER" --check --apply 2>&1)"; rc=$?
+check "t10: conflicting modes fail"              test "$rc" -ne 0
+check "t10: failed invocations did not mutate"   test -z "$(find "$H4" -mindepth 1)"
+
+echo ""
+echo "$TESTS tests, $FAILURES failures"
+if [[ $FAILURES -gt 0 ]]; then
+    exit 1
+fi
