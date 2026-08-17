@@ -9,6 +9,7 @@ MANIFEST = ROOT / "manifest.json"
 WORK_PROMPT = ROOT / "automations" / "workday-morning-brief" / "prompt.md"
 PERSONAL_PROMPT = ROOT / "automations" / "personal-morning-brief" / "prompt.md"
 WORK_COLLECTOR = ROOT / "scripts" / "sgg-morning-brief.py"
+WORK_SYNC = ROOT / "scripts" / "sgg-sync-workday-note.py"
 PERSONAL_COLLECTOR = ROOT / "scripts" / "personal-morning-brief.py"
 ALIGNMENT_COLLECTOR = ROOT / "scripts" / "personal-alignment-brief.py"
 
@@ -56,6 +57,21 @@ class MorningBriefSplitContractTest(unittest.TestCase):
         self.assertNotIn("SECOND_BRAIN", collector)
         self.assertNotIn("collect_reminders", collector)
         self.assertIn('WORK_CALENDARS = {"Bryan @ Agile6"}', collector)
+
+    def test_work_brief_uses_project_owned_sgg_vault(self) -> None:
+        prompt = WORK_PROMPT.read_text(encoding="utf-8")
+        collector = WORK_COLLECTOR.read_text(encoding="utf-8")
+        sync_helper = WORK_SYNC.read_text(encoding="utf-8")
+
+        self.assertIn("/Users/bryan/code/sgg/vault/AGENTS.md", prompt)
+        self.assertIn("/Users/bryan/code/sgg/vault/workdays/DAY.md", prompt)
+        self.assertNotIn("/Users/bryan/code/notes/sgg", prompt)
+        self.assertIn('VAULT_ROOT = SGG_ROOT / "vault"', collector)
+        self.assertIn('git_history(SGG_ROOT, since, "vault")', collector)
+        self.assertNotIn("NOTES_ROOT", collector)
+        self.assertIn('WORKSPACE_ROOT / "vault" / "workdays"', sync_helper)
+        self.assertIn('relative = f"vault/workdays/{day}.md"', sync_helper)
+        self.assertNotIn('Path.home() / "code" / "notes"', sync_helper)
 
     def test_personal_brief_excludes_sgg_work_details(self) -> None:
         prompt = PERSONAL_PROMPT.read_text(encoding="utf-8")

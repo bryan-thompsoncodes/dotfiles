@@ -15,7 +15,7 @@ from zoneinfo import ZoneInfo
 HOME = Path.home()
 HERMES_HOME = Path(os.environ.get("HERMES_HOME", HOME / ".hermes"))
 SGG_ROOT = HOME / "code" / "sgg"
-NOTES_ROOT = HOME / "code" / "notes"
+VAULT_ROOT = SGG_ROOT / "vault"
 PACIFIC = ZoneInfo("America/Los_Angeles")
 WORK_CALENDARS = {"Bryan @ Agile6"}
 REPOS = (
@@ -147,22 +147,22 @@ def git_history(repo: Path, since: datetime, pathspec: str | None = None) -> tup
 
 def collect_notes(since: datetime, now: datetime) -> tuple[dict[str, Any], list[str]]:
     errors: list[str] = []
-    sgg_history, error = git_history(NOTES_ROOT, since, "sgg")
+    sgg_history, error = git_history(SGG_ROOT, since, "vault")
     if error:
         errors.append(f"SGG vault: {error}")
 
     return {
         "sgg": {
-            "instructionsFile": str(NOTES_ROOT / "sgg" / "AGENTS.md"),
+            "instructionsFile": str(VAULT_ROOT / "AGENTS.md"),
             "canonicalFiles": [
-                str(NOTES_ROOT / "sgg" / "INDEX.md"),
-                str(NOTES_ROOT / "sgg" / "status.md"),
+                str(VAULT_ROOT / "INDEX.md"),
+                str(VAULT_ROOT / "status.md"),
             ],
             "previousWorkdayHistory": sgg_history[:15000],
             "workdayNotes": {
-                "todayPath": str(NOTES_ROOT / "sgg" / "workdays" / f"{now.date().isoformat()}.md"),
+                "todayPath": str(VAULT_ROOT / "workdays" / f"{now.date().isoformat()}.md"),
                 "previousWorkdayPath": str(
-                    NOTES_ROOT / "sgg" / "workdays" / f"{since.date().isoformat()}.md"
+                    VAULT_ROOT / "workdays" / f"{since.date().isoformat()}.md"
                 ),
                 "pilotReviewDate": "2026-07-30",
             },

@@ -4,7 +4,7 @@ The injected collector output contains bounded, read-only data only from the `Br
 
 Scope boundary:
 1. This is a work-only SGG briefing. Personal projects, personal reminders, and personal calendar events belong in the Second Brain morning brief. Never read `/Users/bryan/second-brain`, other project vaults, Apple Reminders, personal calendars, or personal mail from this job.
-2. Read `/Users/bryan/code/notes/sgg/AGENTS.md`, `/Users/bryan/code/notes/sgg/INDEX.md`, and `/Users/bryan/code/notes/sgg/status.md` first. INDEX.md, status.md, and the relevant technical MOC are canonical. Dated plans, drafts, sessions, and workday notes are historical or noncanonical unless promoted by a canonical surface.
+2. Read `/Users/bryan/code/sgg/vault/AGENTS.md`, `/Users/bryan/code/sgg/vault/INDEX.md`, and `/Users/bryan/code/sgg/vault/status.md` first. INDEX.md, status.md, and the relevant technical MOC are canonical. Dated plans, drafts, sessions, and workday notes are historical or noncanonical unless promoted by a canonical surface.
 3. Read notes.sgg.workdayNotes.previousWorkdayPath when it exists. Its Day log and End-of-day handoff are noncanonical carry-forward evidence; canonical SGG state wins.
 4. Except for the exact workday-note workflow below, never edit, create, commit, or push any note. Distinguish canonical state, historical evidence, proposals, and inference.
 
@@ -21,7 +21,7 @@ Mandatory workday-note workflow:
    `python3 /Users/bryan/.hermes/scripts/sgg-sync-workday-note.py prepare DAY`
    If it fails, do not edit any note. Continue the briefing and report the failure clearly at the end.
 6. Synthesize the briefing before writing the note. The generated block must contain concise versions of Starting point, Intended outcome, First action, Schedule constraints, and Active watch list.
-7. The only writable path is notes.sgg.workdayNotes.todayPath, which must equal `/Users/bryan/code/notes/sgg/workdays/DAY.md`.
+7. The only writable path is notes.sgg.workdayNotes.todayPath, which must equal `/Users/bryan/code/sgg/vault/workdays/DAY.md`.
    - If absent, create it with frontmatter `tags: [workday, area/sgg]`, `date: DAY`, `status: open`, and `generated: generatedAt`; title it `# Workday — DAY`.
    - Put generated sections between exactly one `<!-- BEGIN GENERATED MORNING BRIEF -->` and `<!-- END GENERATED MORNING BRIEF -->` marker pair.
    - Outside that block, create `## Day log`, `## End-of-day handoff` with Outcome/Changed/Carry forward fields, and `## Canonical context` linking to [[status]], [[technical/custom-filters-spec-state]], and [[technical/sgg-custom-filters-example-plan]].

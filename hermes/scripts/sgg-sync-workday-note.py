@@ -15,8 +15,8 @@ import sys
 from datetime import date
 from pathlib import Path
 
-NOTES_ROOT = Path.home() / "code" / "notes"
-WORKDAYS_ROOT = NOTES_ROOT / "sgg" / "workdays"
+WORKSPACE_ROOT = Path.home() / "code" / "sgg"
+WORKDAYS_ROOT = WORKSPACE_ROOT / "vault" / "workdays"
 BEGIN_MARKER = "<!-- BEGIN GENERATED MORNING BRIEF -->"
 END_MARKER = "<!-- END GENERATED MORNING BRIEF -->"
 REQUIRED_MANUAL_HEADINGS = ("## Day log", "## End-of-day handoff", "## Canonical context")
@@ -29,7 +29,7 @@ class SyncError(RuntimeError):
 def git(*args: str, check: bool = True) -> subprocess.CompletedProcess[str]:
     result = subprocess.run(
         ["git", *args],
-        cwd=NOTES_ROOT,
+        cwd=WORKSPACE_ROOT,
         text=True,
         capture_output=True,
         check=False,
@@ -48,8 +48,8 @@ def target_for(day: str) -> tuple[Path, str]:
         date.fromisoformat(day)
     except ValueError as exc:
         raise SyncError(str(exc)) from exc
-    relative = f"sgg/workdays/{day}.md"
-    return NOTES_ROOT / relative, relative
+    relative = f"vault/workdays/{day}.md"
+    return WORKSPACE_ROOT / relative, relative
 
 
 def changed_tracked_paths(*, staged: bool) -> set[str]:
@@ -63,7 +63,7 @@ def changed_tracked_paths(*, staged: bool) -> set[str]:
 def require_branch() -> None:
     branch = git("branch", "--show-current").stdout.strip()
     if branch != "main":
-        raise SyncError(f"notes repository is on {branch or 'detached HEAD'}, not main")
+        raise SyncError(f"SGG workspace is on {branch or 'detached HEAD'}, not main")
 
 
 def require_no_staged_changes() -> None:
@@ -104,7 +104,7 @@ def prepare(day: str) -> dict[str, object]:
         git("merge", "--ff-only", "origin/main")
     ahead, behind = divergence()
     if ahead or behind:
-        raise SyncError(f"notes repository is not synchronized (ahead={ahead}, behind={behind})")
+        raise SyncError(f"SGG workspace is not synchronized (ahead={ahead}, behind={behind})")
     return {
         "status": "ready",
         "target": str(target),
