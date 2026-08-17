@@ -87,6 +87,9 @@ def main() -> int:
         matches = [job for job in list_jobs(include_disabled=True) if job.get("name") == name]
         if len(matches) > 1:
             fail(f"refusing to reconcile duplicate cron jobs named {name!r}")
+        if not matches and definition.get("createIfMissing", True) is False:
+            summaries.append({"name": name, "action": "preserve-absent", "jobId": ""})
+            continue
 
         prompt_path = (asset_root / definition["promptFile"]).resolve()
         if asset_root not in prompt_path.parents:
@@ -113,7 +116,22 @@ def main() -> int:
             common["repeat"] = definition["repeat"]
         if matches:
             action = "update"
-            response = json.loads(cronjob(action=action, job_id=matches[0]["id"], **common))
+            current = matches[0]
+            update_fields = dict(common)
+            if current.get("state") in {"completed", "error"} and not current.get("enabled", True):
+                if current.get("schedule_display") != definition["schedule"]:
+                    fail(
+                        f"refusing to change schedule for terminal cron job {name!r}; "
+                        "resume or replace it explicitly"
+                    )
+                # Hermes's cron update tool treats any supplied schedule as an
+                # instruction to enable and reschedule a non-paused job. Omit
+                # the unchanged schedule so completed/error records remain
+                # terminal while their prompt and other durable fields sync.
+                update_fields.pop("schedule", None)
+            response = json.loads(
+                cronjob(action=action, job_id=current["id"], **update_fields)
+            )
         else:
             action = "create"
             response = json.loads(cronjob(action=action, **common))

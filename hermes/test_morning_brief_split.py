@@ -47,6 +47,18 @@ class MorningBriefSplitContractTest(unittest.TestCase):
         self.assertTrue(job["attachToSession"])
         self.assertEqual(job["continuation"]["chatName"], "Second Brain")
 
+    def test_completed_finite_pilots_are_not_recreated(self) -> None:
+        manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
+        jobs = {job["name"]: job for job in manifest["cronJobs"]}
+
+        for name in (
+            "Personal Weekday Close",
+            "Personal Saturday Orientation",
+            "Personal Sunday Reset",
+        ):
+            self.assertGreater(jobs[name]["repeat"], 0)
+            self.assertIs(jobs[name]["createIfMissing"], False)
+
     def test_work_brief_excludes_personal_sources_and_sections(self) -> None:
         prompt = WORK_PROMPT.read_text(encoding="utf-8")
         collector = WORK_COLLECTOR.read_text(encoding="utf-8")
