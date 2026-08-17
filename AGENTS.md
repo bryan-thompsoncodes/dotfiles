@@ -6,7 +6,7 @@
 
 ## OVERVIEW
 
-GNU Stow-managed dotfiles for macOS + NixOS. Single-package stow (`stow . --dotfiles --target $HOME`) with a post-stow setup script for what stow can't handle.
+GNU Stow-managed dotfiles for macOS + NixOS, plus an additive-only deployment profile for Omarchy. On macOS/NixOS: single-package stow (`stow . --dotfiles --target $HOME`) with a post-stow setup script for what stow can't handle. On Omarchy: `scripts/setup-omarchy.sh` only — never root stow (see DEPLOYMENT PROFILES).
 
 ## STRUCTURE
 
@@ -26,7 +26,11 @@ dotfiles/
 ├── dot-zshrc            # Shell loader: P10k + modular config sourcing
 ├── dot-tmux.conf        # Nightfly theme, vim keybinds, TPM plugin configuration
 ├── dot-p10k.zsh         # Powerlevel10k prompt theme
-├── setup-platform-configs.sh  # Post-stow: alacritty, tmux plugins, secrets, AGENTS.md + agent-skill symlinks
+├── scripts/             # Repo-internal deployment scripts (stow-ignored, never stowed to ~)
+│   ├── reconcile-agent-skills.sh  # OWNS skill distribution: canonical *_SKILLS arrays + linking
+│   └── setup-omarchy.sh           # Additive Omarchy entry point (agent skills only)
+├── tests/               # Integration tests for deployment scripts (stow-ignored)
+├── setup-platform-configs.sh  # Post-stow compat entry point: alacritty, tmux plugins, secrets, AGENTS.md; delegates skills to scripts/reconcile-agent-skills.sh
 └── zsa-keyboard-layouts/  # Binary firmware, stored but never stowed
 ```
 
@@ -43,9 +47,16 @@ dotfiles/
 | Add tmux session | `dot-tmux/` | Follow code-editor.sh pattern |
 | Add git identity | `dot-gitconfig` | Add `includeIf` + new identity file |
 | Change platform behavior | `setup-platform-configs.sh` | Handles stow edge cases |
-| Add a shared agent skill | `dot-agents/skills/` | Pool shared by Claude/Pi/OpenCode; curate which tool gets it in `setup-platform-configs.sh`. See `dot-agents/README.md` |
+| Add a shared agent skill | `dot-agents/skills/` | Pool shared by Claude/Pi/OpenCode/Hermes; curate which tool gets it in the `*_SKILLS` arrays in `scripts/reconcile-agent-skills.sh`. See `dot-agents/README.md` |
 | Add Claude Code agent | `dot-claude/agents/` | User-global, personal |
 | Add opencode agent | `dot-config/opencode/agents/` | See opencode/AGENTS.md for identity |
+
+## DEPLOYMENT PROFILES
+
+- **macOS / NixOS (full ownership)**: `stow . --dotfiles --target $HOME` then `./setup-platform-configs.sh`. The setup script remains the compatibility entry point; its agent-skill step delegates to `scripts/reconcile-agent-skills.sh --apply`.
+- **Omarchy (additive only)**: `./scripts/setup-omarchy.sh --check` then `--apply`. Omarchy owns shell, terminal, Neovim, tmux, Git, GPG, and tool settings — full-replacement application configs are NOT deployed there by default. Never run `stow .` or `stow --adopt` on an Omarchy host.
+- **Skill distribution is owned by `scripts/reconcile-agent-skills.sh`**: its `*_SKILLS` arrays are the single curation authority (`dot-agents/README.md` documents rationale only, no mirrored lists). It prunes only symlinks resolving into `dot-agents/skills/` and preserves real dirs, files, foreign/broken symlinks (e.g. Omarchy's `omarchy`/`diagnose-crash` links).
+- **Future reconcilers and profile logic belong under `scripts/`**, invoked from `setup-omarchy.sh`'s reconciler list — never as inline mutation logic in an entry point. New root-level project dirs must get root-anchored `.stow-local-ignore` entries (`^/name$`) so legacy root stow can't deploy them.
 
 ## CONVENTIONS
 
@@ -117,9 +128,20 @@ Colors are centralized but defined in three places that MUST stay in sync:
 ## COMMANDS
 
 ```bash
-# Install
+# Install (macOS/NixOS full ownership only — never on Omarchy)
 stow . --dotfiles --target $HOME
 ./setup-platform-configs.sh
+
+# Install (Omarchy, additive agent skills only)
+./scripts/setup-omarchy.sh --check    # report, no mutation
+./scripts/setup-omarchy.sh --apply
+
+# Reconcile agent skills alone (any platform)
+./scripts/reconcile-agent-skills.sh --check
+./scripts/reconcile-agent-skills.sh --apply
+
+# Test the reconciler (isolated temp homes)
+bash tests/test-reconcile-agent-skills.sh
 
 # Shell reload
 source ~/.zshrc

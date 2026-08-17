@@ -1,8 +1,14 @@
 # Dotfiles
 
-Personal development environment configuration, managed with GNU Stow.
+Personal development environment configuration.
 
-Cross-platform compatible with macOS and NixOS.
+Two deployment models are supported:
+
+- **Full workstation ownership** (macOS, NixOS): GNU Stow symlinks the whole
+  environment — shell, terminal, editor, Git, tmux, GPG, and agent tooling.
+- **Additive assets** (Omarchy): the OS already owns the desktop and development
+  environment; only curated personal agent skills are linked in. See
+  [Omarchy Installation](#omarchy-installation-additive-only).
 
 ## Overview
 
@@ -84,7 +90,7 @@ environment.systemPackages = with pkgs; [
 
 ## Installation
 
-### Fresh System Installation
+### Full Workstation Installation (macOS / NixOS)
 
 From this repository's root directory:
 
@@ -109,6 +115,35 @@ If tmux is already running, reload the config to apply the newly installed plugi
 tmux source-file ~/.tmux.conf
 ```
 
+### Omarchy Installation (Additive Only)
+
+Omarchy ships its own coherent Bash/Foot/Neovim/tmux/Git/GPG configuration.
+Do **not** run `stow .` or `stow --adopt` on an Omarchy host:
+
+- `stow .` conflicts with files Omarchy already owns and, where it would
+  succeed, shadows Omarchy's XDG configs (e.g. `~/.gitconfig` over
+  `~/.config/git/config`) with macOS/Nix-oriented settings.
+- `stow --adopt` is worse: it **moves** Omarchy's live configuration files into
+  this repository, corrupting both.
+
+Use the dedicated additive entry point instead:
+
+```bash
+./scripts/setup-omarchy.sh --check   # report what would change; mutates nothing
+./scripts/setup-omarchy.sh --apply   # perform the additive setup
+```
+
+What it changes: per-tool symlinks for curated personal agent skills in
+`~/.claude/skills`, `~/.config/opencode/skills`, `~/.pi/agent/skills`, and
+`~/.hermes/skills/personal` — nothing else.
+
+What it intentionally leaves untouched: login shell, terminal, Neovim, tmux,
+Git, GPG, Zed/OpenCode/Claude settings, installed packages, and everything under
+`/usr/share/omarchy`. Omarchy-provided skill links (e.g. `omarchy`,
+`diagnose-crash`) are preserved as-is.
+
+Always run `--check` and review the report before running `--apply`.
+
 ### Initial Migration (Existing Dotfiles)
 
 If you're setting up this repo for the first time and want to migrate existing dotfiles:
@@ -119,7 +154,7 @@ stow . --adopt --dotfiles --target $HOME
 
 The `--adopt` flag will move any existing files in your home directory into the dotfiles repo. After adoption, review the changes and commit only the files you want to manage.
 
-**Warning**: Be careful with `--adopt` as it will move existing files into the repo. Review changes before committing.
+**Warning**: Be careful with `--adopt` as it will move existing files into the repo. Review changes before committing. Never use `--adopt` on an Omarchy host — it moves Omarchy-owned configuration into the repository.
 
 ## Structure
 
@@ -145,6 +180,10 @@ dotfiles/
 │   ├── code-editor.sh   # Editor session launched by the `code` function
 │   └── second-brain.sh  # Personal notes session
 ├── hermes/              # Curated Hermes skills, scripts, and cron definitions
+├── scripts/             # Repo-internal deployment scripts (never stowed)
+│   ├── reconcile-agent-skills.sh  # Canonical skill curation + per-tool linking
+│   └── setup-omarchy.sh           # Additive Omarchy entry point
+├── tests/               # Integration tests for the deployment scripts
 ├── dot-gitconfig        # Git configuration (~/.gitconfig)
 ├── dot-gitconfig.local  # Git signing key (~/.gitconfig.local, not tracked)
 ├── dot-zshrc            # Zsh shell loader (~/.zshrc) - sources modular configs
