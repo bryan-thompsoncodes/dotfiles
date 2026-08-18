@@ -2,24 +2,17 @@
 name: adr-and-spec-coach
 author: Bryan
 description: >
-  Use when a technical decision is still open and needs to be captured as an
-  ADR or tech spec — weighing architectural options, choosing between
-  approaches, unsure what the design should be, or new to ADRs/specs and
-  wanting to be guided through the decision rather than handed a finished
-  document. Triggers: "help me write an ADR for…", "I'm deciding between X
-  and Y", "help me think through this design", "write a tech spec for this
-  feature", "I'm new to ADRs". If the decision is already settled and you only
-  need to shape a draft to an existing repo's conventions, use
-  conforming-tech-specs instead.
+  Use when architecture decisions remain open before drafting.
 ---
 
-# ADR & Spec Coach
+# ADR, Spec & Architecture Coach
 
-Guide the author from an open decision to a finished ADR or tech spec by
-deliberating **with** them — one decision at a time, weightiest first — never
-by silently deciding for them. The author makes every load-bearing call; this
-skill surfaces the options, the trade-offs, and a reasoned recommendation so
-the call is informed.
+Guide the author from open architecture or technical-planning decisions to a
+decision-complete ADR, tech spec, or implementation-plan input by deliberating
+**with** them — one decision at a time, weightiest first — never by silently
+deciding for them. The author makes every load-bearing call; this skill
+surfaces the options, trade-offs, and a reasoned recommendation so the call is
+informed.
 
 The failure mode this skill exists to prevent is **deciding for the author** —
 emitting a polished document that buries the real choices, so the author
@@ -27,10 +20,10 @@ learns nothing and can't defend the result later. An ADR's whole value is the
 record of *why this and not the alternatives*; if the author didn't weigh the
 alternatives, the ADR is theater.
 
-This skill owns the **deliberation + drafting** half of spec work. It does not
-enforce repo conventions. When the repo has a conventions index, Phase 5
-routes the finished draft into `conforming-tech-specs` for the conformance
-pass.
+This skill owns **deliberation before drafting**. Generic planning is an
+assembly step after the decisions are settled, not a substitute for this
+workflow. It does not enforce repo conventions. Phase 5 routes a settled
+decision record into the appropriate drafting or conformance workflow.
 
 ---
 
@@ -40,11 +33,17 @@ pass.
 - The author is new to ADRs/specs and wants to learn what to consider.
 - Greenfield work with no established conventions index yet.
 - Any "help me decide / help me think through" framing.
+- A large implementation or infrastructure plan still contains open choices
+  about architecture, deployment, storage, security, migration, models,
+  rollout, authority, or rollback.
+- A fresh-agent handoff is requested before the underlying design is settled.
 
 **When NOT to use:**
 
 - The decision is already made and you only need to make a draft conform to
   repo conventions → `conforming-tech-specs`.
+- Every load-bearing decision is already settled and the user only needs an
+  executable task sequence → use the installed `plan` skill.
 - Pure Q&A about an existing ADR ("what does ADR-0011 say?") → answer directly.
 - A trivial change with no real decision → recommend a regular issue and stop.
 
@@ -57,12 +56,15 @@ deliberation, not a substitute for it.
 
 ### Phase 1 — Frame
 
-Establish what is actually being decided, and which artifact fits:
+Establish what is actually being decided, and which downstream artifact fits:
 
 - **ADR** — captures *one decision* and its alternatives. Use when the request
   is "which of these approaches do we pick."
 - **Tech spec** — describes *a design* with many sub-decisions. Use when the
   request is "how should this whole feature work."
+- **Implementation plan / fresh-agent handoff** — describes *how to execute an
+  already chosen design*. If architecture is still open, use this skill to
+  settle it first, then route the decision record to `plan` in Phase 5.
 
 Teach the distinction the first time it comes up — the author is often new.
 If it's an ADR, you're filling MADR anatomy (see `references/adr-anatomy.md`).
@@ -78,7 +80,7 @@ Use `references/decision-drivers.md` to drive this out.
 that's expensive to undo *and* has several live options is load-bearing. A
 choice with an obvious default and cheap reversal is trivial.
 
-Output a **visible ranked agenda** — show it to the author:
+Output a **visible ranked agenda** — show it to the author before drafting:
 
 ```
 Decisions to settle (heaviest first):
@@ -115,7 +117,30 @@ Record each settled decision (option chosen + the driver that decided it) as
 you go — those become the ADR's Decision/Consequences or the spec's
 Alternatives section.
 
-### Phase 4 — Assemble the draft
+Maintain an assumption ledger while descending the agenda:
+
+- **Verified** — grounded in a current repository, configuration, primary
+  source, or live system.
+- **Inferred** — a plausible interpretation that still needs confirmation.
+- **Proposed** — the agent's recommendation, not an accepted decision.
+
+If the author challenges an assumption, reopen the affected decision instead
+of patching around the correction or defending the draft. When late evidence
+or a new alternative appears, compare it against the settled decision drivers,
+reopen only the decisions it materially changes, and preserve unaffected
+choices.
+
+### Phase 4 — Confirm decision completeness and assemble the draft
+
+Before drafting, show a compact decision summary that distinguishes:
+
+- what the author chose;
+- what the agent merely recommended;
+- verified constraints;
+- unresolved blockers.
+
+If any load-bearing choice remains open, return to Phase 3. Do not bury it in
+an "open questions" section of a polished plan.
 
 Populate the right anatomy from the settled decisions:
 
@@ -123,6 +148,9 @@ Populate the right anatomy from the settled decisions:
   Consequences. (`references/adr-anatomy.md`)
 - **Tech spec:** Goals/Non-Goals → Proposed Design → Alternatives Considered →
   Risks → Rollout/Testing. (`references/spec-anatomy.md`)
+- **Implementation-plan input:** Goal/Non-Goals → Accepted Decisions → Rejected
+  Alternatives → Constraints → Rollout/Rollback → Verification → explicit
+  `execution_authorized: false` unless the author separately authorizes work.
 
 The Options Considered / Alternatives section is not optional padding — it is
 the record of the Phase 3 deliberation. Each rejected option gets a line on
@@ -130,6 +158,10 @@ why it lost. Name what each section is *for* if the author is learning.
 
 ### Phase 5 — Route or finalize
 
+- **Implementation plan or fresh-agent handoff** → invoke the installed `plan`
+  skill only after the decision-completeness gate passes. Supply the accepted
+  decisions, rejected alternatives, constraints, and verification/rollback
+  requirements as its design authority.
 - **Repo has a conventions index** → invoke `conforming-tech-specs`, handing it
   the draft plus the decision record, so it runs the prior-art / conformance
   gate. Tell the author you're doing this and why.
@@ -144,8 +176,11 @@ relevant consequences, risks, rollout, and testing language from the selected
 anatomy. If any check fails, return to the corresponding phase rather than
 papering over the gap in the draft.
 
-**Do not commit. Do not post. Do not open a PR.** This skill produces content
-and stops. The author decides where it lands (ADR file, Google Doc, issue).
+**Planning is not execution authorization.** Do not dispatch an implementation
+agent, edit code, deploy, commit, post, or open a PR merely because the user
+asked for a plan or fresh-agent handoff. The handoff is text until the author
+explicitly asks to execute or dispatch it. This skill produces decision-complete
+content and stops.
 
 ---
 
@@ -164,6 +199,12 @@ and stops. The author decides where it lands (ADR file, Google Doc, issue).
 - **Never finalize a draft with a load-bearing decision silently filled in.**
   If you notice an un-deliberated load-bearing choice in Phase 4, go back to
   Phase 3 for it.
+- **Treat assumptions as proposals until grounded or chosen.** A polished
+  sentence does not turn an inference into an accepted decision.
+- **Reopen rather than patch around corrections.** User challenges and late
+  evidence can invalidate the underlying model, not just one paragraph.
+- **A plan or handoff does not authorize execution or dispatch.** Require a
+  separate explicit instruction before acting on it.
 - **Teach as you go** — name what each section/driver is for the first time it
   appears. The author is often new; the learning is half the point.
 
@@ -178,6 +219,10 @@ You are about to break the contract if you catch yourself:
 - Withholding a recommendation to seem neutral ("it depends on your needs").
 - Drafting the full document before the decisions are settled.
 - Filling in a load-bearing choice yourself because asking feels slow.
+- Treating a challenged assumption as a local wording fix while preserving the
+  same unsupported architecture.
+- Dispatching or implementing because the requested artifact was called a
+  "handoff" or "implementation plan."
 
 All of these mean: back up. One decision, options, a real recommendation, then
 the author chooses.
@@ -191,15 +236,19 @@ the author chooses.
 | "This decision is obvious, I'll just pick it" | If it's truly trivial, surface it as trivial and let them rubber-stamp. If it's load-bearing, it's not yours to pick. |
 | "They're experienced, they can handle a batch" | The skill's value is per-decision deliberation. Experience doesn't change the one-at-a-time contract. |
 | "Let me just draft it and they'll edit" | A finished draft buries the choices. Deliberate first; the draft is the output, not the method. |
+| "They asked for a handoff, so I should launch the next agent" | A handoff is a durable artifact, not dispatch authority. Wait for an explicit execution request. |
 
 ## Completion checklist
 
-- [ ] The artifact type is explicit: one-decision ADR or multi-decision spec.
+- [ ] The downstream artifact is explicit: ADR, tech spec, or implementation plan/handoff.
 - [ ] The ranked agenda accounts for every surfaced decision.
 - [ ] Every load-bearing decision was clarified interactively and chosen by the author.
 - [ ] Each chosen option records the driver that decided it.
+- [ ] Verified constraints, inferences, proposals, and author decisions are distinguishable.
+- [ ] User corrections and late evidence reopened every materially affected decision.
 - [ ] Rejected alternatives and their losing trade-offs are present.
 - [ ] Consequences or risks include negative outcomes, not only benefits.
 - [ ] Rollout and testing are present or explicitly `N/A` with a reason.
 - [ ] Repo conformance was run when a conventions index exists.
-- [ ] No commit, post, or PR was created by this coaching workflow.
+- [ ] The final handoff records execution as unauthorized unless separately granted.
+- [ ] No implementation, dispatch, commit, post, or PR occurred from planning alone.
