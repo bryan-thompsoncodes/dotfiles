@@ -7,6 +7,12 @@
 // custom settings, run `zed: open default settings` from the
 // command palette (cmd-shift-p / ctrl-shift-p)
 {
+  "context_servers": {
+    "mcp-server-context7": {
+      "enabled": true,
+      "remote": false
+    }
+  },
   "language_models": {
     "ollama": {
       "api_url": "http://localhost:11434"
@@ -41,27 +47,22 @@
   "vim_mode": true,
   "agent_servers": {
     "codex-acp": {
-      "default_config_options": {
-        "reasoning_effort": "medium"
-      },
       "type": "registry"
     },
     "claude-acp": {
-      "favorite_config_option_values": {
-        "effort": [
-          "xhigh"
-        ],
-        "model": [
-          "default"
-        ]
-      },
       "default_config_options": {
-        "effort": "xhigh",
-        "model": "default"
+        "mode": "auto",
+        "model": "default",
+        "effort": "high"
       },
-      "type": "registry",
+      "type": "registry"
     },
     "opencode": {
+      "favorite_config_option_values": {
+        "model": [
+          "ollama/qwen3.6:35b-a3b-coding-nvfp4"
+        ]
+      },
       "type": "custom",
       "command": "opencode",
       "args": ["acp"],

@@ -64,3 +64,7 @@ dot-config/zed/prompts/
 # Herdr - track keybinding config, ignore runtime state (logs, sockets, session)
 dot-config/herdr/*
 !dot-config/herdr/config.toml
+
+# Secrets in tool config dirs (tokens/oauth), never track
+dot-config/context7/
+dot-config/github-copilot/
