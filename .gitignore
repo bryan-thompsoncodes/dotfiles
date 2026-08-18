@@ -60,3 +60,7 @@ dot-git-hooks/pre-push
 
 # Zed - track settings/keymap, ignore the LMDB prompt-library store (machine-local, binary)
 dot-config/zed/prompts/
+
+# Herdr - track keybinding config, ignore runtime state (logs, sockets, session)
+dot-config/herdr/*
+!dot-config/herdr/config.toml
