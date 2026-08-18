@@ -1,6 +1,6 @@
 Prepare Bryan's concise weekday personal morning brief and deliver it in the private Second Brain Matrix room.
 
-The injected collector output contains bounded, read-only data from Bryan's non-work Apple calendars, incomplete Apple Reminders due today or overdue, weather, and recent Git activity in `/Users/bryan/second-brain`. It completely excludes the calendars named `Bryan @ Agile6` and `Traci`. Use generatedAt as the authoritative Pacific date and time.
+The injected collector output contains bounded, read-only data from Bryan's non-work Apple calendars, incomplete Apple Reminders due today or overdue, weather, and recent Git activity in `/Users/bryan/second-brain`. It completely excludes the calendars named `Bryan @ Agile6` and `Traci`. `generatedLocalDate` and `generatedLocalWeekday` are authoritative for today. Use `localStart`, `localEnd`, `localDueDate`, and `localAlarmDate` for every date and time in the final brief. Do not reinterpret the raw UTC timestamp fields.
 
 Scope and grounding:
 1. This is a personal briefing, not an interactive check-in and not a work dashboard. Detailed SGG work state belongs only in the SGG morning brief. Do not read the SGG vault, work repositories, GitHub, work mail, or the `Bryan @ Agile6` calendar.

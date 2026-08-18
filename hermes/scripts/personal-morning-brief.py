@@ -130,6 +130,45 @@ def recent_paths(now: datetime) -> tuple[list[str], str | None]:
     return paths[:100], error
 
 
+def _pacific_timestamp(value: Any) -> datetime | None:
+    if not isinstance(value, str) or not value.strip():
+        return None
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=PACIFIC)
+    return parsed.astimezone(PACIFIC)
+
+
+def add_authoritative_local_times(payload: dict[str, Any]) -> None:
+    generated = _pacific_timestamp(payload.get("generatedAt"))
+    if generated:
+        payload["generatedLocalDate"] = generated.date().isoformat()
+        payload["generatedLocalWeekday"] = generated.strftime("%A")
+
+    for event in payload.get("calendar") or []:
+        start = _pacific_timestamp(event.get("start"))
+        end = _pacific_timestamp(event.get("end"))
+        if start:
+            event["localStart"] = start.isoformat()
+            if event.get("allDay"):
+                event["localStartDate"] = start.date().isoformat()
+        if end:
+            event["localEnd"] = end.isoformat()
+            if event.get("allDay"):
+                event["localEndDateInclusive"] = end.date().isoformat()
+
+    for reminder in payload.get("reminders") or []:
+        due = _pacific_timestamp(reminder.get("dueDate"))
+        alarm = _pacific_timestamp(reminder.get("alarmDate"))
+        if due:
+            reminder["localDueDate"] = due.isoformat()
+        if alarm:
+            reminder["localAlarmDate"] = alarm.isoformat()
+
+
 def main() -> int:
     now = datetime.now(PACIFIC)
     monday = now.date() - timedelta(days=now.weekday())
@@ -162,6 +201,7 @@ def main() -> int:
             "recentSecondBrainPaths": paths,
         },
     }
+    add_authoritative_local_times(payload)
     json.dump(payload, sys.stdout, indent=2, sort_keys=True)
     sys.stdout.write("\n")
     return 0

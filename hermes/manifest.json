@@ -60,8 +60,8 @@
     {
       "name": "Personal Morning Brief",
       "schedule": "20 7 * * 1-5",
-      "model": "gemma4:31b-mlx",
-      "provider": "custom",
+      "model": "qwen3.8:27b-mlx",
+      "provider": "custom:local-qwen38",
       "baseUrl": "http://127.0.0.1:11434/v1",
       "promptFile": "automations/personal-morning-brief/prompt.md",
       "deliver": "matrix:!5hH-Wud0Gd7hS1Z214EwjEMUvqtH8FBVOZhIZj0sqR4",

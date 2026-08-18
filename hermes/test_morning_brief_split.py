@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import importlib.util
 import json
 import unittest
 from pathlib import Path
@@ -14,13 +15,21 @@ PERSONAL_COLLECTOR = ROOT / "scripts" / "personal-morning-brief.py"
 ALIGNMENT_COLLECTOR = ROOT / "scripts" / "personal-alignment-brief.py"
 
 
+def load_personal_collector():
+    spec = importlib.util.spec_from_file_location("personal_morning_brief", PERSONAL_COLLECTOR)
+    assert spec and spec.loader
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
 class MorningBriefSplitContractTest(unittest.TestCase):
     def test_manifest_pins_each_agent_job_to_its_intended_model(self) -> None:
         manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
         jobs = {job["name"]: job for job in manifest["cronJobs"]}
         expected = {
             "Workday Morning Brief": ("gpt-5.6-terra", "openai-codex", None),
-            "Personal Morning Brief": ("gemma4:31b-mlx", "custom", "http://127.0.0.1:11434/v1"),
+            "Personal Morning Brief": ("qwen3.8:27b-mlx", "custom:local-qwen38", "http://127.0.0.1:11434/v1"),
             "Personal Weekday Close": ("gemma4:31b-mlx", "custom", "http://127.0.0.1:11434/v1"),
             "Personal Saturday Orientation": ("gemma4:31b-mlx", "custom", "http://127.0.0.1:11434/v1"),
             "Personal Sunday Reset": ("gemma4:31b-mlx", "custom", "http://127.0.0.1:11434/v1"),
@@ -38,8 +47,8 @@ class MorningBriefSplitContractTest(unittest.TestCase):
         job = next(job for job in manifest["cronJobs"] if job["name"] == "Personal Morning Brief")
 
         self.assertEqual(job["schedule"], "20 7 * * 1-5")
-        self.assertEqual(job["model"], "gemma4:31b-mlx")
-        self.assertEqual(job["provider"], "custom")
+        self.assertEqual(job["model"], "qwen3.8:27b-mlx")
+        self.assertEqual(job["provider"], "custom:local-qwen38")
         self.assertEqual(job["baseUrl"], "http://127.0.0.1:11434/v1")
         self.assertEqual(job["deliver"], "matrix:!5hH-Wud0Gd7hS1Z214EwjEMUvqtH8FBVOZhIZj0sqR4")
         self.assertEqual(job["script"], "personal-morning-brief.py")
@@ -94,6 +103,41 @@ class MorningBriefSplitContractTest(unittest.TestCase):
         self.assertIn('EXCLUDED_CALENDARS = {"Bryan @ Agile6", "Traci"}', collector)
         self.assertIn("Never use or mention events from Traci's calendar", prompt)
         self.assertIn("recentSecondBrainPaths", collector)
+
+    def test_personal_collector_adds_authoritative_pacific_timestamps(self) -> None:
+        collector = load_personal_collector()
+        payload = {
+            "generatedAt": "2026-08-18T08:22:32-07:00",
+            "calendar": [
+                {
+                    "title": "Farmers Market",
+                    "allDay": False,
+                    "start": "2026-08-19T18:00:00Z",
+                    "end": "2026-08-19T22:00:00Z",
+                }
+            ],
+            "reminders": [
+                {
+                    "title": "Put trash and recycle bin out",
+                    "dueDate": "2026-08-19T01:00:00Z",
+                }
+            ],
+        }
+
+        collector.add_authoritative_local_times(payload)
+
+        self.assertEqual(payload["generatedLocalDate"], "2026-08-18")
+        self.assertEqual(payload["generatedLocalWeekday"], "Tuesday")
+        self.assertEqual(payload["calendar"][0]["localStart"], "2026-08-19T11:00:00-07:00")
+        self.assertEqual(payload["calendar"][0]["localEnd"], "2026-08-19T15:00:00-07:00")
+        self.assertEqual(payload["reminders"][0]["localDueDate"], "2026-08-18T18:00:00-07:00")
+
+    def test_personal_prompt_requires_authoritative_local_timestamp_fields(self) -> None:
+        prompt = PERSONAL_PROMPT.read_text(encoding="utf-8")
+
+        self.assertIn("`generatedLocalDate` and `generatedLocalWeekday` are authoritative", prompt)
+        self.assertIn("`localStart`, `localEnd`, `localDueDate`, and `localAlarmDate`", prompt)
+        self.assertIn("Do not reinterpret the raw UTC timestamp fields", prompt)
 
     def test_personal_routines_do_not_resurface_alcohol_by_default(self) -> None:
         prompt_paths = [
