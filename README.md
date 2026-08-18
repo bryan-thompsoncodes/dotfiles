@@ -135,9 +135,11 @@ Use the dedicated additive entry point instead:
 
 What it changes: per-tool symlinks for curated personal agent skills in
 `~/.claude/skills`, `~/.config/opencode/skills`, `~/.pi/agent/skills`, and
-`~/.hermes/skills/personal` — nothing else.
+`~/.hermes/skills/personal`, plus one marked `source` line appended to an
+existing `~/.bashrc` (Omarchy's designated personal-additions section) that
+loads the portable aliases from `dot-config/shell/aliases.sh` — nothing else.
 
-What it intentionally leaves untouched: login shell, terminal, Neovim, tmux,
+What it intentionally leaves untouched: login shell selection, terminal, Neovim, tmux,
 Git, GPG, Zed/OpenCode/Claude settings, installed packages, and everything under
 `/usr/share/omarchy`. Omarchy-provided skill links (e.g. `omarchy`,
 `diagnose-crash`) are preserved as-is.

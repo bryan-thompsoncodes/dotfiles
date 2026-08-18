@@ -38,7 +38,7 @@ dotfiles/
 
 | Task | Location | Notes |
 |------|----------|-------|
-| Add shell alias | `dot-config/zsh/aliases.zsh` | Grouped by category |
+| Add shell alias | `dot-config/shell/aliases.sh` if portable (bash+zsh, `command -v`-guarded); `dot-config/zsh/aliases.zsh` for zsh/mac/nix-only (eza ls-family, Nix, ssh) | Shared file is sourced by zsh config and by Omarchy's ~/.bashrc |
 | Add shell function | `dot-config/zsh/functions.zsh` | git/worktree helpers, `code` launcher |
 | Add env variable | `dot-config/zsh/env.zsh` | Use `${VAR:-default}` pattern |
 | Add zsh plugin | `dot-config/zsh/plugins.zsh` | Must add 3-path fallback (Homebrew/NixOS/Linux) |
@@ -54,7 +54,7 @@ dotfiles/
 ## DEPLOYMENT PROFILES
 
 - **macOS / NixOS (full ownership)**: `stow . --dotfiles --target $HOME` then `./setup-platform-configs.sh`. The setup script remains the compatibility entry point; its agent-skill step delegates to `scripts/reconcile-agent-skills.sh --apply`.
-- **Omarchy (additive only)**: `./scripts/setup-omarchy.sh --check` then `--apply`. Omarchy owns shell, terminal, Neovim, tmux, Git, GPG, and tool settings — full-replacement application configs are NOT deployed there by default. Never run `stow .` or `stow --adopt` on an Omarchy host.
+- **Omarchy (additive only)**: `./scripts/setup-omarchy.sh --check` then `--apply`. Omarchy owns shell, terminal, Neovim, tmux, Git, GPG, and tool settings — full-replacement application configs are NOT deployed there by default. Never run `stow .` or `stow --adopt` on an Omarchy host. Additive payload: per-tool agent-skill links (`scripts/reconcile-agent-skills.sh`) + one marked `source` line in `~/.bashrc` loading `dot-config/shell/aliases.sh` (`scripts/reconcile-shell-additions.sh`). Omarchy's own aliases (eza ls-family, zoxide cd, etc.) keep priority — the shared file deliberately omits colliding names.
 - **Skill distribution is owned by `scripts/reconcile-agent-skills.sh`**: its `*_SKILLS` arrays are the single curation authority (`dot-agents/README.md` documents rationale only, no mirrored lists). It prunes only symlinks resolving into `dot-agents/skills/` and preserves real dirs, files, foreign/broken symlinks (e.g. Omarchy's `omarchy`/`diagnose-crash` links).
 - **Future reconcilers and profile logic belong under `scripts/`**, invoked from `setup-omarchy.sh`'s reconciler list — never as inline mutation logic in an entry point. New root-level project dirs must get root-anchored `.stow-local-ignore` entries (`^/name$`) so legacy root stow can't deploy them.
 
