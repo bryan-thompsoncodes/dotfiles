@@ -11,8 +11,10 @@
 
 ## Project vaults & personal vaults
 
-Several repos under `~/code/` have a top-level `vault/` directory (symlinked to
-`~/code/notes/<project>/`). Also `~/second-brain/` is Bryan's personal-knowledge
+Several repos under `~/code/` have a top-level `vault/` directory — tracked
+in-repo for project-owned vaults and workspace repos (e.g. `~/code/sgg/vault/`,
+`~/code/cairn-os/vault/`); `~/code/notes/` holds retained dormant/historical
+vault snapshots. Also `~/second-brain/` is Bryan's personal-knowledge
 vault. When working in any of these — or when capturing decisions, taking notes,
 investigating debugs, recording learnings, or making sense of project context
 that doesn't live in code — invoke the `vault-pkm` skill before writing anything

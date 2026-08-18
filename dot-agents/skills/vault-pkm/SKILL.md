@@ -1,9 +1,10 @@
 ---
 name: vault-pkm
 description: >
-  PKM conventions for Bryan's project vaults (under ~/code/notes/) and personal
-  vault (~/second-brain/). Use when working in a repo with a vault/ symlink, in
-  ~/code/notes/, or in ~/second-brain/ — or when capturing decisions, taking
+  PKM conventions for Bryan's project vaults (tracked vault/ dirs in project or
+  workspace repos, plus retained snapshots under ~/code/notes/) and personal
+  vault (~/second-brain/). Use when working in a repo with a top-level vault/,
+  in ~/code/notes/, or in ~/second-brain/ — or when capturing decisions, taking
   notes, investigating debugs, recording learnings, or making sense of project
   context that doesn't live in code. Encodes MOC-and-spoke topology,
   atomic-spoke discipline, look-first/never-orphan rule, compiled-project
@@ -19,8 +20,12 @@ conventions across his project vaults and personal vault.
 
 ## When this applies
 
-- You're operating in a repo with a `vault/` symlink (project vault)
-- You're operating in `~/code/notes/<project>/` directly
+- You're operating in a repo with a top-level `vault/` — a tracked directory
+  (project-owned vault, e.g. `~/code/cairn-os/vault/`; workspace repo, e.g.
+  `~/code/sgg/vault/`) or a legacy symlink
+- You're operating in `~/code/notes/<project>/` directly (retained
+  dormant/historical snapshots — check the vault's INDEX.md disposition before
+  treating contents as current)
 - You're operating in `~/second-brain/`
 - The user is capturing a decision, investigation, learning, or exploration
 - You're asked "where should this note go?" or "what does the vault say about X?"
