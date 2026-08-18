@@ -68,3 +68,6 @@ dot-config/herdr/*
 # Secrets in tool config dirs (tokens/oauth), never track
 dot-config/context7/
 dot-config/github-copilot/
+
+# Browser Harness - machine-local runtime state and logs
+dot-config/browser-harness/
