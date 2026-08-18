@@ -1,39 +1,23 @@
 # Aliases
-# Organized by category for easy maintenance
+# Portable aliases live in dot-config/shell/aliases.sh, shared with bash on
+# Omarchy hosts. This file loads them and adds what only the fully-owned
+# zsh machines (macOS/NixOS) should have.
 
-# Modern tool replacements
-alias cat="bat"
+# Resolve the shared file relative to this (possibly symlinked) file, so it
+# works before and after stow deploys ~/.config/shell.
+_shared_aliases="${${(%):-%N}:A:h}/../shell/aliases.sh"
+[[ -f "$_shared_aliases" ]] || _shared_aliases="${XDG_CONFIG_HOME:-$HOME/.config}/shell/aliases.sh"
+[[ -f "$_shared_aliases" ]] && source "$_shared_aliases"
+unset _shared_aliases
+
+# eza ls-family — personal flavors for machines this repo fully owns.
+# (Deliberately not shared: Omarchy ships its own eza aliases and keeps them.)
 alias ls="eza --icons"
 alias ll="eza -lah --icons"
 alias la="eza -a --icons"
 alias lla="eza -la"
 alias lsa="eza -lah"
 alias lt="eza --tree --icons"
-alias vim="nvim"
-alias vi="nvim"
-
-# Utility aliases
-alias clr="clear"
-alias docker="podman"
-alias fman="compgen -c | fzf | xargs man"
-alias 2nd-brain="~/.tmux/second-brain.sh"
-
-# Git aliases
-alias ga="git add"
-alias gb="git branch"
-alias gd="git diff"
-alias gs="git status"
-alias gst="git status"
-alias gp="git push"
-alias gl="git log --oneline --graph"
-alias gco="git checkout"
-alias gcob="git checkout -b"
-alias gaa="git add --all"
-alias gcm="git commit -m"
-alias gbd="git branch -d"
-alias gbD="git branch -D"
-alias gpl="git pull"
-alias gpF="git push --force"
 
 # Nix flake update alias
 alias nix-flake-update="nix flake update --flake $HOME/code/nix-configs"
@@ -51,18 +35,6 @@ alias upgrade-a6mbp="nix-flake-update && update-a6mbp"
 alias upgrade-studio="nix-flake-update && update-studio"
 alias upgrade-gnarbox="nix-flake-update && update-gnarbox"
 alias upgrade-inix="nix-flake-update && update-inix"
-
-# Navigation aliases
-alias dotfiles="cd ~/code/dotfiles"
-alias nix-configs="cd ~/code/nix-configs"
-alias sgp="cd ~/code/sgg/HHS/simpler-grants-protocol"
-alias second-brain="cd ~/second-brain/"
-
-# Worktrunk aliases (git worktree management)
-alias wls="wt list"
-alias wsw="wt switch"
-alias wrm="wt remove"
-alias wmg="wt merge"
 
 # Use macOS system SSH for UseKeyChain support (macOS only)
 if [[ "$OSTYPE" == "darwin"* ]]; then
