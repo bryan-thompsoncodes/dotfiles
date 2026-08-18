@@ -30,9 +30,9 @@ class MorningBriefSplitContractTest(unittest.TestCase):
         expected = {
             "Workday Morning Brief": ("gpt-5.6-terra", "openai-codex", None),
             "Personal Morning Brief": ("qwen3.8:27b-mlx", "custom:local-qwen38", "http://127.0.0.1:11434/v1"),
-            "Personal Weekday Close": ("gemma4:31b-mlx", "custom", "http://127.0.0.1:11434/v1"),
-            "Personal Saturday Orientation": ("gemma4:31b-mlx", "custom", "http://127.0.0.1:11434/v1"),
-            "Personal Sunday Reset": ("gemma4:31b-mlx", "custom", "http://127.0.0.1:11434/v1"),
+            "Personal Weekday Close": ("gemma4:31b-mlx", "custom:local-gemma4", "http://127.0.0.1:11434/v1"),
+            "Personal Saturday Orientation": ("gemma4:31b-mlx", "custom:local-gemma4", "http://127.0.0.1:11434/v1"),
+            "Personal Sunday Reset": ("gemma4:31b-mlx", "custom:local-gemma4", "http://127.0.0.1:11434/v1"),
             "Workday Dependency Triage": ("gpt-5.6-sol", "openai-codex", None),
         }
 
