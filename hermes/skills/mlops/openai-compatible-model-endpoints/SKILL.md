@@ -82,6 +82,12 @@ A model accepted by a lightweight coding client may be rejected by a tool-heavy 
 
 Provider registration usually affects new sessions or the model picker. Do not claim the already-running conversation changed models unless an explicit switch succeeded.
 
+### Reasoning labels do not prove transport control
+
+A client or model picker can display `low`, `medium`, or `high` from its own session configuration even when a local OpenAI-compatible endpoint ignores the corresponding request field. Test the exact production API path with `think: false`, `think: true`, `reasoning_effort`, and any documented template kwargs, then compare returned reasoning content and token usage.
+
+On Ollama, the native `/api/chat` route may honor boolean thinking while `/v1/chat/completions` continues emitting reasoning for every variant. In that case, do not add a cosmetic provider override or claim a thinking level is tuned; retain the model's verified sampler/default and document the transport limitation.
+
 ## Supporting material
 
 - See `references/hermes-named-custom-providers.md` for the Hermes-specific named-provider shape, verification sequence, and safe credential-copy pattern.
