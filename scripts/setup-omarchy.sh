@@ -68,9 +68,9 @@ fi
 
 echo "Omarchy additive setup ($MODE)"
 
-# The bounded first release deploys agent skills only.
 RECONCILERS=(
     "$SCRIPT_DIR/reconcile-agent-skills.sh"
+    "$SCRIPT_DIR/reconcile-shell-additions.sh"
 )
 
 for reconciler in "${RECONCILERS[@]}"; do
@@ -82,10 +82,12 @@ cat <<'EOF'
 Ownership summary:
   This setup is additive. It links curated personal agent skills into
   ~/.claude/skills, ~/.config/opencode/skills, ~/.pi/agent/skills, and
-  ~/.hermes/skills/personal — and nothing else.
+  ~/.hermes/skills/personal, and appends one marked source line to an
+  existing ~/.bashrc (Omarchy's designated personal-additions section)
+  loading portable aliases from dot-config/shell/aliases.sh — nothing else.
 
   Intentionally left untouched (Omarchy owns these):
-    - login shell and ~/.bashrc
+    - login shell selection and Omarchy's bash defaults
     - terminal configuration (foot/alacritty)
     - ~/.config/nvim
     - Git configuration (~/.config/git, ~/.gitconfig)
