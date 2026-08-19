@@ -34,6 +34,7 @@ fi
 if [[ -x "$HOME/.tmux/second-brain.sh" ]]; then
   alias 2nd-brain="$HOME/.tmux/second-brain.sh"
 fi
+alias herdr-studio="herdr --remote bryan@bryans-mac-studio"
 
 # Git aliases
 alias ga="git add"
