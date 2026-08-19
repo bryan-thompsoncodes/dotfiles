@@ -36,6 +36,17 @@ if [[ -x "$HOME/.tmux/second-brain.sh" ]]; then
 fi
 alias herdr-studio="herdr --remote bryan@bryans-mac-studio"
 
+# Studio-only Claude agent view for Hermes-managed background sessions.
+if command -v scutil >/dev/null 2>&1; then
+  _local_hostname="$(scutil --get LocalHostName 2>/dev/null)"
+else
+  _local_hostname="$(hostname -s 2>/dev/null)"
+fi
+if [[ "$_local_hostname" == "Bryans-Mac-Studio" ]] && command -v claude >/dev/null 2>&1; then
+  alias hermes-claude='CLAUDE_CONFIG_DIR="$HOME/.hermes/claude-code-worker" claude agents'
+fi
+unset _local_hostname
+
 # Git aliases
 alias ga="git add"
 alias gb="git branch"
