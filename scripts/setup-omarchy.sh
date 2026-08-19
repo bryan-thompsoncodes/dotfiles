@@ -71,6 +71,7 @@ echo "Omarchy additive setup ($MODE)"
 RECONCILERS=(
     "$SCRIPT_DIR/reconcile-agent-skills.sh"
     "$SCRIPT_DIR/reconcile-shell-additions.sh"
+    "$SCRIPT_DIR/reconcile-hindsight.sh"
 )
 
 for reconciler in "${RECONCILERS[@]}"; do
@@ -84,7 +85,10 @@ Ownership summary:
   ~/.claude/skills, ~/.config/opencode/skills, ~/.pi/agent/skills, and
   ~/.hermes/skills/personal, and appends one marked source line to an
   existing ~/.bashrc (Omarchy's designated personal-additions section)
-  loading portable aliases from dot-config/shell/aliases.sh — nothing else.
+  loading portable aliases from dot-config/shell/aliases.sh, and wires the
+  Hindsight memory client (staged runtime in ~/.hindsight, merged Claude
+  hooks / OpenCode plugin entry, token from ~/.secrets/hindsight) — nothing
+  else.
 
   Intentionally left untouched (Omarchy owns these):
     - login shell selection and Omarchy's bash defaults
