@@ -1,7 +1,7 @@
 ---
 name: codex-claude-implementation-loop
 description: "Use when a Codex-backed Hermes parent should plan and gate code changes while Claude Code implements, runs the first tests, and revises from Codex feedback using a subscription-backed CLI session."
-version: 1.1.1
+version: 1.2.0
 author: Hermes Agent
 license: MIT
 metadata:
@@ -53,6 +53,7 @@ Do not use for:
 7. **Fail closed.** Authentication failure, invalid JSON, missing session ID, unexplained file changes, or unverified tests blocks completion.
 8. **Opus primary selection.** Claude implementation and revision passes select Opus. A non-Opus primary model requires the user's explicit confirmation and the wrapper's `--allow-non-opus` acknowledgement; overload never authorizes a silent downgrade. When the user requires literal model purity, load `coding-agent-model-purity`: `--model opus` alone does not prove that internal helpers used only Opus.
 9. **Separate contract and engineering reviews.** Acceptance-criteria traceability and passing tests do not establish code quality. Codex must complete a distinct engineering review for quality, security, simplicity, maintainability, and test quality before calling a diff approval-ready.
+10. **Usage-aware handoffs.** Run Claude's zero-turn `/usage` preflight before every check, implementation, and revision invocation. Warn when any reported window is over 75% used. Above 85%, or when usage cannot be verified, stop unless Bryan explicitly overrides that invocation with `--allow-high-usage`.
 
 ## Prerequisites
 
@@ -64,6 +65,8 @@ claude auth status --text
 ```
 
 The login method must be a Claude subscription account such as Pro, Max, Team, or Enterprise. If `ANTHROPIC_API_KEY` is set, stop and tell the user the worker would risk API billing.
+
+The wrapper also runs Claude's local `/usage` command with zero tools and verifies that it consumed zero turns and zero reported cost. Its normalized `usage_preflight` field includes every reported usage window. A `warning` verdict above 75% is visible but does not stop the handoff. Usage above 85% fails closed; only explicit same-run user approval permits rerunning with `--allow-high-usage`. Treat an unavailable or unparsable usage result the same way rather than silently skipping the gate. The thresholds are strict `>` comparisons, so exactly 75% is normal and exactly 85% warns without blocking.
 
 If the user says one model must be used "throughout," forbids helper or fallback models, or otherwise requires literal model purity, load `coding-agent-model-purity` before execution. Record raw model-usage metadata and treat any observed nonconforming model as non-compliant, independently of code quality.
 
@@ -125,6 +128,8 @@ python3 <skill-dir>/scripts/claude_worker.py implement \
   --plan /absolute/path/to/plan.md \
   --model opus
 ```
+
+If and only if Bryan explicitly overrides a reported high-usage or unavailable-usage block for this invocation, append `--allow-high-usage`. Do not persist the override or infer it from earlier approval of the implementation plan. Revisions rerun the usage check and require a fresh explicit override whenever they remain above the block threshold.
 
 Always use `--model opus` for implementation and revision. Do not fall back or downgrade to Sonnet, Haiku, or another primary model after overload, throttling, or model unavailability. Stop and ask the user first. After explicit confirmation, a non-Opus invocation must also include `--allow-non-opus`.
 
@@ -276,12 +281,14 @@ A shell exit code of zero means Claude ran and produced schema-valid output. It 
 11. **Treating overload as an implementation failure.** Claude may return HTTP 429/529 before doing work. The wrapper retries the same Opus request once by default; if both attempts fail, preserve repository state and report the provider outage. Never downgrade models without explicit user confirmation.
 12. **Equating acceptance with approval.** A diff can meet every requirement and still be insecure, brittle, confusing, or over-engineered. Run and report the separate engineering-review pass before approval.
 13. **Equating `--model opus` with literal purity.** The flag selects the primary model but does not rule out internal helper models. Load `coding-agent-model-purity`, inspect raw metadata, and fail closed when purity is an acceptance criterion.
+14. **Treating plan approval as a usage override.** Approval to implement does not authorize spending above the 85% usage gate. Surface the current windows and ask explicitly before adding `--allow-high-usage` to that one invocation.
 
 ## Verification Checklist
 
 - [ ] Codex inspected the repository and wrote the plan
 - [ ] Initial dirty state was recorded and preserved
 - [ ] Claude authentication was subscription-backed and no Anthropic API key was active
+- [ ] Claude `/usage` was checked with zero model turns; over-75% warnings were surfaced and any over-85% or unavailable result had an explicit same-run override
 - [ ] Any strict model-purity requirement was audited from raw metadata and classified separately from code quality
 - [ ] Claude implemented and ran the first tests
 - [ ] Claude session ID was retained for revisions

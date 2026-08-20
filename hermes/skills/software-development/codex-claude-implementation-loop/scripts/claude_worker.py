@@ -32,6 +32,12 @@ IMPLEMENT_SCHEMA = REFERENCE_DIR / "implementation-result-schema.json"
 REVISION_SCHEMA = REFERENCE_DIR / "revision-result-schema.json"
 MAX_INPUT_CHARS = 200_000
 DEFAULT_WORKER_CONFIG_DIR = Path.home() / ".hermes" / "claude-code-worker"
+USAGE_WARNING_PERCENT = 75.0
+USAGE_BLOCK_PERCENT = 85.0
+USAGE_LINE_RE = re.compile(
+    r"^Current (?P<window>.+?):\s*(?P<percent>\d+(?:\.\d+)?)% used"
+    r"(?:\s*·\s*resets (?P<resets_at>.+))?$"
+)
 
 
 class WorkerError(RuntimeError):
@@ -147,6 +153,121 @@ def verify_subscription_auth(claude_bin: str, worker_env: dict[str, str]) -> str
             f"Claude login is not recognized as subscription-backed: {method}"
         )
     return method
+
+
+def parse_usage_windows(result_text: str) -> list[dict[str, Any]]:
+    windows: list[dict[str, Any]] = []
+    for line in result_text.splitlines():
+        match = USAGE_LINE_RE.match(line.strip())
+        if not match:
+            continue
+        windows.append(
+            {
+                "window": match.group("window"),
+                "used_percentage": float(match.group("percent")),
+                "resets_at": match.group("resets_at"),
+            }
+        )
+    if not windows:
+        raise WorkerError("Claude /usage output did not contain any usage windows")
+    return windows
+
+
+def probe_subscription_usage(
+    claude_bin: str,
+    worker_env: dict[str, str],
+) -> list[dict[str, Any]]:
+    command = [
+        claude_bin,
+        "-p",
+        "--safe-mode",
+        "--name",
+        "Hermes usage preflight",
+        "--prompt-suggestions",
+        "false",
+        "--tools",
+        "",
+        "--max-turns",
+        "1",
+        "--output-format",
+        "json",
+        "/usage",
+    ]
+    completed = run_command(command, timeout=30, env=worker_env)
+    if completed.returncode != 0:
+        detail = (completed.stderr or completed.stdout).strip()[-2000:]
+        raise WorkerError(f"Claude usage preflight failed: {detail}")
+    try:
+        envelope = json.loads(completed.stdout)
+    except json.JSONDecodeError as exc:
+        raise WorkerError(f"Claude usage preflight returned invalid JSON: {exc}") from exc
+    if not isinstance(envelope, dict):
+        raise WorkerError("Claude usage preflight JSON was not an object")
+    if (
+        envelope.get("num_turns") != 0
+        or envelope.get("total_cost_usd") not in {0, 0.0}
+        or envelope.get("modelUsage") not in ({}, None)
+    ):
+        raise WorkerError("Claude /usage unexpectedly performed a billable model turn")
+    result_text = envelope.get("result")
+    if not isinstance(result_text, str):
+        raise WorkerError("Claude usage preflight did not return text output")
+    return parse_usage_windows(result_text)
+
+
+def enforce_usage_preflight(
+    windows: list[dict[str, Any]],
+    *,
+    allow_high_usage: bool,
+) -> dict[str, Any]:
+    highest = max(windows, key=lambda item: item["used_percentage"])
+    highest_percentage = float(highest["used_percentage"])
+    if highest_percentage > USAGE_BLOCK_PERCENT and not allow_high_usage:
+        raise WorkerError(
+            "Claude usage is above the 85% handoff limit "
+            f"({highest['window']}: {highest_percentage:g}%); refusing to launch Opus. "
+            "After explicit user approval, rerun with --allow-high-usage."
+        )
+
+    if highest_percentage > USAGE_BLOCK_PERCENT:
+        status = "overridden"
+    elif highest_percentage > USAGE_WARNING_PERCENT:
+        status = "warning"
+    else:
+        status = "ok"
+    return {
+        "status": status,
+        "warning_threshold_percent": USAGE_WARNING_PERCENT,
+        "block_threshold_percent": USAGE_BLOCK_PERCENT,
+        "highest_window": highest["window"],
+        "highest_used_percentage": highest_percentage,
+        "windows": windows,
+    }
+
+
+def guarded_usage_preflight(
+    claude_bin: str,
+    worker_env: dict[str, str],
+    *,
+    allow_high_usage: bool,
+) -> dict[str, Any]:
+    try:
+        windows = probe_subscription_usage(claude_bin, worker_env)
+    except WorkerError as exc:
+        if not allow_high_usage:
+            raise WorkerError(
+                "Claude usage could not be verified; refusing to launch Opus without "
+                "an explicit override. After user approval, rerun with "
+                f"--allow-high-usage. Preflight error: {exc}"
+            ) from exc
+        return {
+            "status": "unavailable_overridden",
+            "warning_threshold_percent": USAGE_WARNING_PERCENT,
+            "block_threshold_percent": USAGE_BLOCK_PERCENT,
+            "error": str(exc),
+            "windows": [],
+        }
+    return enforce_usage_preflight(windows, allow_high_usage=allow_high_usage)
 
 
 def resolve_repository(workdir_text: str) -> tuple[Path, str]:
@@ -329,6 +450,11 @@ def execute_worker_locked(
         raise WorkerError("claude executable was not found on PATH")
 
     login_method = verify_subscription_auth(claude_bin, worker_env)
+    usage_preflight = guarded_usage_preflight(
+        claude_bin,
+        worker_env,
+        allow_high_usage=args.allow_high_usage,
+    )
     if args.mode == "check":
         return {
             "ok": True,
@@ -336,6 +462,7 @@ def execute_worker_locked(
             "claude_bin": claude_bin,
             "claude_config_dir": str(config_dir),
             "login_method": login_method,
+            "usage_preflight": usage_preflight,
         }
 
     guard_script = Path(__file__).with_name("sgg_route_guard.py")
@@ -420,6 +547,7 @@ def execute_worker_locked(
         "mode": args.mode,
         "model": args.model,
         "login_method": login_method,
+        "usage_preflight": usage_preflight,
         "claude_config_dir": str(config_dir),
         "workdir": str(root),
         "input_file": str(source_path),
@@ -449,8 +577,14 @@ def build_parser() -> argparse.ArgumentParser:
     )
     subparsers = parser.add_subparsers(dest="mode", required=True)
 
-    subparsers.add_parser(
-        "check", help="verify Claude CLI subscription authentication without a model call"
+    check = subparsers.add_parser(
+        "check",
+        help="verify Claude subscription auth and usage without a model call",
+    )
+    check.add_argument(
+        "--allow-high-usage",
+        action="store_true",
+        help="proceed only after the user explicitly overrides the usage guard",
     )
 
     def add_common(subparser: argparse.ArgumentParser) -> None:
@@ -460,6 +594,11 @@ def build_parser() -> argparse.ArgumentParser:
             "--allow-non-opus",
             action="store_true",
             help="allow a non-Opus model only after explicit user confirmation",
+        )
+        subparser.add_argument(
+            "--allow-high-usage",
+            action="store_true",
+            help="proceed only after the user explicitly overrides the usage guard",
         )
         subparser.add_argument("--max-turns", type=int, default=40)
         subparser.add_argument("--timeout", type=int, default=1800)

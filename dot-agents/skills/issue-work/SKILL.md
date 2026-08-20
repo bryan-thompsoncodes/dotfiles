@@ -369,7 +369,7 @@ The intake owner/repository and the resolved clone's origin host plus owner/repo
 For either delegated engine:
 
 1. Record the worktree's baseline status and run the selected readiness command: Claude `claude_worker.py check`; Qwen `qwen_worker.py check`.
-2. Invoke its `implement` command with `plan.md` and `{WORKTREE_PATH}`. The Claude path must select `--model opus` and may not downgrade. The Qwen path pins the wrapper's exact local provider and model and may not use a cloud fallback.
+2. Invoke its `implement` command with `plan.md` and `{WORKTREE_PATH}`. The Claude path must select `--model opus`, run the wrapper's usage preflight, and may not downgrade. Surface any usage window over 75% as a warning. Above 85%, or when usage cannot be verified, stop and ask Bryan for an explicit same-run override before adding `--allow-high-usage`; plan approval is not that override. The Qwen path pins the wrapper's exact local provider and model and may not use a cloud fallback.
 3. Save the normalized envelope as `{state-dir}/{worker}-implementation.json`. Record `implementation_loop:` and its `session_id` as `worker_session_id:` in `progress.md` frontmatter so Phase 4 can resume the same worker context.
 4. Codex reviews the actual repository diff and independently reruns every targeted and broader check required by the plan. Worker JSON is evidence, not the verdict.
 5. For blocking findings, write `{state-dir}/codex-review-{pass}.md` and resume the same worker session with its `revise` command. Repeat the complete Codex gate after each revision; cap the correction loop at two revision passes.

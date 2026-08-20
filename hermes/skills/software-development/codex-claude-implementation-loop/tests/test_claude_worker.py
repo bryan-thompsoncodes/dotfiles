@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import os
 import stat
 import subprocess
@@ -88,6 +89,75 @@ class ClaudeWorkerTests(unittest.TestCase):
             stderr="",
         )
         self.assertFalse(claude_worker.retryable_claude_failure(completed))
+
+    def test_usage_probe_uses_non_billable_local_command(self) -> None:
+        envelope = {
+            "num_turns": 0,
+            "total_cost_usd": 0,
+            "modelUsage": {},
+            "result": (
+                "Current session: 21% used · resets soon\n"
+                "Current week (all models): 32% used · resets later"
+            ),
+        }
+        completed = subprocess.CompletedProcess(
+            ["claude"], 0, stdout=json.dumps(envelope), stderr=""
+        )
+        with mock.patch.object(claude_worker, "run_command", return_value=completed) as run:
+            windows = claude_worker.probe_subscription_usage(
+                "claude", {"CLAUDE_CONFIG_DIR": "/tmp/worker"}
+            )
+
+        command = run.call_args.args[0]
+        self.assertIn("/usage", command)
+        self.assertIn("--safe-mode", command)
+        self.assertIn("--tools", command)
+        self.assertEqual(windows[0]["used_percentage"], 21.0)
+        self.assertEqual(windows[1]["window"], "week (all models)")
+
+    def test_usage_over_75_percent_warns(self) -> None:
+        result = claude_worker.enforce_usage_preflight(
+            [{"window": "session", "used_percentage": 76.0, "resets_at": "soon"}],
+            allow_high_usage=False,
+        )
+
+        self.assertEqual(result["status"], "warning")
+
+    def test_usage_at_85_percent_warns_but_does_not_block(self) -> None:
+        result = claude_worker.enforce_usage_preflight(
+            [{"window": "session", "used_percentage": 85.0, "resets_at": "soon"}],
+            allow_high_usage=False,
+        )
+
+        self.assertEqual(result["status"], "warning")
+
+    def test_usage_over_85_percent_requires_explicit_override(self) -> None:
+        windows = [
+            {"window": "week (all models)", "used_percentage": 86.0, "resets_at": "later"}
+        ]
+        with self.assertRaisesRegex(claude_worker.WorkerError, "--allow-high-usage"):
+            claude_worker.enforce_usage_preflight(windows, allow_high_usage=False)
+
+        overridden = claude_worker.enforce_usage_preflight(
+            windows, allow_high_usage=True
+        )
+        self.assertEqual(overridden["status"], "overridden")
+
+    def test_unavailable_usage_requires_explicit_override(self) -> None:
+        with mock.patch.object(
+            claude_worker,
+            "probe_subscription_usage",
+            side_effect=claude_worker.WorkerError("unavailable"),
+        ):
+            with self.assertRaisesRegex(claude_worker.WorkerError, "explicit override"):
+                claude_worker.guarded_usage_preflight(
+                    "claude", {}, allow_high_usage=False
+                )
+            result = claude_worker.guarded_usage_preflight(
+                "claude", {}, allow_high_usage=True
+            )
+
+        self.assertEqual(result["status"], "unavailable_overridden")
 
 
 if __name__ == "__main__":
