@@ -1,6 +1,6 @@
 # Bryan's Personal Routine Contract
 
-This is the operating contract for the three-week personal-alignment pilot implemented on 2026-07-19. The canonical reasoning is in `/Users/bryan/second-brain/Explorations/2026-07-19-hermes-personal-alignment-routines.md`.
+This is the operating contract for Bryan's personal-alignment routines. The canonical reasoning and revisions are in `/Users/bryan/second-brain/Explorations/2026-07-19-hermes-personal-alignment-routines.md`.
 
 ## Desired outcomes
 
@@ -19,12 +19,11 @@ Generated briefings are ephemeral. If Bryan does not participate, create no note
 
 ## Cadence and suppression
 
-- Weekday personal morning brief: 7:20 AM Pacific, read-only, delivered to Second Brain before the 7:30 AM SGG work brief.
-- Weekdays: 5:00 PM Pacific, or when Bryan starts a close earlier.
-- Saturday: 11:00 AM Pacific, or when Bryan starts earlier.
-- Sunday: 11:00 AM Pacific, or when Bryan starts earlier.
+- Weekday personal morning brief: 7:20 AM Pacific, delta-only and read-only, delivered to Second Brain before the 7:30 AM SGG work brief.
+- Weekly personal orientation: Sunday at 11:00 AM Pacific, or when Bryan starts it earlier.
+- Weekday closes and Saturday orientations remain available on demand but are not scheduled by default.
 
-A completed daily spoke suppresses that day's weekday/Saturday reminder. A created next-week hub suppresses Sunday's reminder. Suppression emits `[SILENT]` and still counts as a pilot run.
+A created next-week hub suppresses Sunday's orientation. The morning brief suppresses itself when its bounded sources contain nothing materially new or newly actionable. Suppression emits `[SILENT]`.
 
 ## Source review
 
@@ -38,7 +37,9 @@ The collector reads bounded, read-only context from:
 - location-specific `wttr.in` weather configured privately through `PERSONAL_WEATHER_LOCATION` or `~/.secrets/personal-weather-location`;
 - Bryan's physical whiteboard through his report during the reset.
 
-The weekday personal morning brief is a separate one-minute update. It reads only Bryan's non-work calendars, today's incomplete Reminders, actionable weather, the current weekly hub, and bounded recent Second Brain project activity. It excludes the SGG vault, work repositories, GitHub, work mail, and the calendars named `Bryan @ Agile6` and `Traci`. It never writes a note and never uses or mentions events from Traci's calendar.
+The weekday personal morning brief is a separate one-minute delta update. Its local collector passes only Bryan's non-work calendars, today's incomplete Reminders, actionable weather, and safe active-goal bullets extracted from the current weekly hub. It excludes recent Git path lists, the SGG vault, work repositories, GitHub, work mail, and the calendars named `Bryan @ Agile6` and `Traci`. Prohibited unattended topics are removed from calendar, reminder, and weekly-direction records before model access. The job never writes a note, never opens additional files, and never uses or mentions events from Traci's calendar. Its previous completed output is supplied for deduplication; unchanged standing items remain silent unless newly actionable or due for a bounded weekly resurfacing.
+
+The scheduled weekly orientation collector is intentionally minimal: it exposes only the authoritative time and whether the coming Monday hub exists. Richer source review begins only after Bryan participates, using the interactive procedure below.
 
 Subscription-calendar birthdays are informational, not availability constraints, unless separate evidence shows a gathering, call, travel, or other commitment. Source failure means unknown, not empty.
 
@@ -54,7 +55,7 @@ Participating through a resting point authorizes these exact non-draft captures 
 
 ## Interaction contracts
 
-All three routines are conversations, not briefings or questionnaires. The scheduled delivery opens with a brief welcome and exactly one small question. Collected context stays in reserve and is introduced only when it helps the next adaptive question. Do not dump the agenda, constraints, candidate list, or all reflection prompts at once, and do not ask Bryan to invoke another command in the same room.
+Interactive routines are conversations, not briefings or questionnaires. The scheduled weekly orientation opens with a brief welcome and exactly one concrete question. Collected context stays in reserve and is introduced only when it helps the next adaptive question. Do not dump the agenda, constraints, candidate list, or all reflection prompts at once, and do not ask Bryan to invoke another command in the same room.
 
 ### Weekday close
 
@@ -82,7 +83,7 @@ Do not introduce alcohol, sobriety, abstinence, recovery, drinking boundaries, s
 
 Resurfacing is not execution authorization. Hermes may execute ordinary steps only after an agreed plan defines scope, intended outcome, constraints, permitted actions, evidence, review points, and stop conditions.
 
-## Pilot operation
+## Current operation
 
 ### Remote workspace
 
@@ -114,9 +115,8 @@ Tracked source lives under `/Users/bryan/code/dotfiles/hermes/`:
 
 Jobs:
 
-- Personal Morning Brief: weekdays at 7:20 AM Pacific, recurring until removed
-- Personal Weekday Close: 15 scheduled pilot runs
-- Personal Saturday Orientation: 3 scheduled pilot runs
-- Personal Sunday Reset: one implementation test plus 3 scheduled pilot runs
+- Personal Morning Brief: weekdays at 7:20 AM Pacific, recurring until removed, synthesized by the OpenAI Terra route from locally filtered inputs
+- Personal Weekly Orientation: Sundays at 11:00 AM Pacific, recurring until removed, with a minimal collector and one-question opening
+- Personal Weekday Close, Personal Saturday Orientation, and Personal Sunday Reset: completed finite pilot records retained for audit but not recreated
 
-The final Sunday is 2026-08-09. Evaluate mental load, transition quality, intentional movement/time, follow-through, artifact usefulness, noise, and useful delegation. Decide explicitly whether to stop, revise, or continue.
+Review the revised morning and weekly routines after two weeks. Evaluate repetition, silence rate, useful replies, capture quality, privacy-boundary compliance, and whether the weekly hub improves subsequent reports. Keep, refine, or remove each component based on observed use.

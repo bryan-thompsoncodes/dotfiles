@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import subprocess
 import sys
 from datetime import datetime, timedelta
@@ -18,6 +19,10 @@ HERMES_HOME = Path(os.environ.get("HERMES_HOME", HOME / ".hermes"))
 SECOND_BRAIN = HOME / "second-brain"
 PACIFIC = ZoneInfo("America/Los_Angeles")
 EXCLUDED_CALENDARS = {"Bryan @ Agile6", "Traci"}
+PROHIBITED_UNATTENDED_PATTERN = re.compile(
+    r"\b(?:alcohol|beer|wine|liquor|whiske?y|cocktail|sobri\w*|abstinen\w*)\b",
+    re.IGNORECASE,
+)
 WEATHER_LOCATION_FILE = Path(
     os.environ.get("PERSONAL_WEATHER_LOCATION_FILE", HOME / ".secrets" / "personal-weather-location")
 )
@@ -61,6 +66,35 @@ def json_command(args: list[str], *, timeout: int = 45) -> tuple[Any, str | None
         return None, f"Invalid JSON: {exc}: {output[:300]}"
 
 
+def contains_prohibited_context(value: Any) -> bool:
+    return isinstance(value, str) and bool(PROHIBITED_UNATTENDED_PATTERN.search(value))
+
+
+def filter_prohibited_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    fields = ("title", "notes", "calendar", "list")
+    return [
+        row
+        for row in rows
+        if not any(contains_prohibited_context(row.get(field)) for field in fields)
+    ]
+
+
+def extract_active_goals(note: str) -> list[str]:
+    in_section = False
+    goals: list[str] = []
+    for line in note.splitlines():
+        if line.strip() == "## Active Goals and Projects":
+            in_section = True
+            continue
+        if in_section and line.startswith("## "):
+            break
+        if in_section and line.startswith("- "):
+            goal = line[2:].strip()
+            if goal and not contains_prohibited_context(goal):
+                goals.append(goal)
+    return goals[:8]
+
+
 def collect_calendar() -> tuple[list[dict[str, Any]], str | None]:
     binary = HERMES_HOME / "scripts" / "bin" / "sgg-calendar-events"
     data, error = json_command([str(binary), "2"], timeout=30)
@@ -69,13 +103,13 @@ def collect_calendar() -> tuple[list[dict[str, Any]], str | None]:
         for row in (data or [])
         if str(row.get("calendar", "")).strip() not in EXCLUDED_CALENDARS
     ]
-    return rows, error
+    return filter_prohibited_rows(rows), error
 
 
 def collect_reminders() -> tuple[list[dict[str, Any]], str | None]:
     data, error = json_command(["remindctl", "today", "--json"], timeout=30)
     rows = [row for row in (data or []) if not row.get("isCompleted", False)]
-    return rows, error
+    return filter_prohibited_rows(rows), error
 
 
 def collect_weather() -> tuple[dict[str, Any] | None, str | None]:
@@ -111,23 +145,6 @@ def collect_weather() -> tuple[dict[str, Any] | None, str | None]:
         }, None
     except Exception as exc:  # noqa: BLE001 - source failures are reported, not fatal
         return None, str(exc)[:1000]
-
-
-def recent_paths(now: datetime) -> tuple[list[str], str | None]:
-    output, error = command(
-        [
-            "git",
-            "log",
-            f"--since={(now - timedelta(days=21)).isoformat()}",
-            "--format=",
-            "--name-only",
-            "--max-count=80",
-        ],
-        timeout=30,
-        cwd=SECOND_BRAIN,
-    )
-    paths = sorted({line.strip() for line in output.splitlines() if line.strip()})
-    return paths[:100], error
 
 
 def _pacific_timestamp(value: Any) -> datetime | None:
@@ -175,7 +192,14 @@ def main() -> int:
     calendar, calendar_error = collect_calendar()
     reminders, reminders_error = collect_reminders()
     weather, weather_error = collect_weather()
-    paths, notes_error = recent_paths(now)
+    current_hub = SECOND_BRAIN / "Journal" / f"{monday.isoformat()}-weekly-plan.md"
+    current_week_direction: list[str] = []
+    notes_error: str | None = None
+    if current_hub.is_file():
+        try:
+            current_week_direction = extract_active_goals(current_hub.read_text(encoding="utf-8"))
+        except OSError as exc:
+            notes_error = str(exc)[:1000]
 
     errors = {
         key: value
@@ -194,11 +218,13 @@ def main() -> int:
         "calendar": calendar,
         "reminders": reminders,
         "weather": weather,
+        "sourceCounts": {
+            "calendar": len(calendar),
+            "reminders": len(reminders),
+            "weeklyDirection": len(current_week_direction),
+        },
         "notes": {
-            "root": str(SECOND_BRAIN),
-            "instructionsFile": str(SECOND_BRAIN / "AGENTS.md"),
-            "currentWeekHubPath": str(SECOND_BRAIN / "Journal" / f"{monday.isoformat()}-weekly-plan.md"),
-            "recentSecondBrainPaths": paths,
+            "currentWeekDirection": current_week_direction,
         },
     }
     add_authoritative_local_times(payload)

@@ -151,6 +151,8 @@ Keep, refine, or remove each component based on observed use rather than complet
 
 For Bryan, read `references/bryan-personal-routine-contract.md`, `/Users/bryan/second-brain/AGENTS.md`, and the canonical exploration named there before capture.
 
+The only recurring scheduled interactive routine is `Personal Weekly Orientation` on Sunday. Its opening collector is intentionally minimal and its delivery asks one concrete question. Weekday and Saturday modes remain available on demand. `Personal Morning Brief` is a separate read-only delta report: it uses only its locally filtered injected payload, carries its previous completed output for deduplication, and must remain silent when nothing materially changed.
+
 Start every interactive routine by using `date` for Pacific time and running:
 
 ```text

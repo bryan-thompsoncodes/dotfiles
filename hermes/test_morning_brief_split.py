@@ -9,9 +9,11 @@ ROOT = Path(__file__).resolve().parent
 MANIFEST = ROOT / "manifest.json"
 WORK_PROMPT = ROOT / "automations" / "workday-morning-brief" / "prompt.md"
 PERSONAL_PROMPT = ROOT / "automations" / "personal-morning-brief" / "prompt.md"
+WEEKLY_ORIENTATION_PROMPT = ROOT / "automations" / "personal-weekly-orientation" / "prompt.md"
 WORK_COLLECTOR = ROOT / "scripts" / "sgg-morning-brief.py"
 WORK_SYNC = ROOT / "scripts" / "sgg-sync-workday-note.py"
 PERSONAL_COLLECTOR = ROOT / "scripts" / "personal-morning-brief.py"
+WEEKLY_ORIENTATION_COLLECTOR = ROOT / "scripts" / "personal-weekly-orientation.py"
 ALIGNMENT_COLLECTOR = ROOT / "scripts" / "personal-alignment-brief.py"
 
 
@@ -29,7 +31,8 @@ class MorningBriefSplitContractTest(unittest.TestCase):
         jobs = {job["name"]: job for job in manifest["cronJobs"]}
         expected = {
             "Workday Morning Brief": ("gpt-5.6-terra", "openai-codex", None),
-            "Personal Morning Brief": ("qwen3.8:27b-mlx", "custom:local-qwen38", "http://127.0.0.1:11434/v1"),
+            "Personal Morning Brief": ("gpt-5.6-terra", "openai-codex", None),
+            "Personal Weekly Orientation": ("gemma4:31b-mlx", "custom:local-gemma4", "http://127.0.0.1:11434/v1"),
             "Personal Weekday Close": ("gemma4:31b-mlx", "custom:local-gemma4", "http://127.0.0.1:11434/v1"),
             "Personal Saturday Orientation": ("gemma4:31b-mlx", "custom:local-gemma4", "http://127.0.0.1:11434/v1"),
             "Personal Sunday Reset": ("gemma4:31b-mlx", "custom:local-gemma4", "http://127.0.0.1:11434/v1"),
@@ -47,12 +50,23 @@ class MorningBriefSplitContractTest(unittest.TestCase):
         job = next(job for job in manifest["cronJobs"] if job["name"] == "Personal Morning Brief")
 
         self.assertEqual(job["schedule"], "20 7 * * 1-5")
-        self.assertEqual(job["model"], "qwen3.8:27b-mlx")
-        self.assertEqual(job["provider"], "custom:local-qwen38")
-        self.assertEqual(job["baseUrl"], "http://127.0.0.1:11434/v1")
+        self.assertEqual(job["model"], "gpt-5.6-terra")
+        self.assertEqual(job["provider"], "openai-codex")
+        self.assertNotIn("baseUrl", job)
         self.assertEqual(job["deliver"], "matrix:!5hH-Wud0Gd7hS1Z214EwjEMUvqtH8FBVOZhIZj0sqR4")
         self.assertEqual(job["script"], "personal-morning-brief.py")
         self.assertEqual(job["workdir"], "/Users/bryan/second-brain")
+        self.assertTrue(job["attachToSession"])
+        self.assertTrue(job["carryPreviousOutput"])
+        self.assertEqual(job["continuation"]["chatName"], "Second Brain")
+
+    def test_manifest_adds_one_recurring_weekly_capture_prompt(self) -> None:
+        manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
+        job = next(job for job in manifest["cronJobs"] if job["name"] == "Personal Weekly Orientation")
+
+        self.assertEqual(job["schedule"], "0 11 * * 0")
+        self.assertEqual(job["script"], "personal-weekly-orientation.py")
+        self.assertNotIn("repeat", job)
         self.assertTrue(job["attachToSession"])
         self.assertEqual(job["continuation"]["chatName"], "Second Brain")
 
@@ -102,7 +116,57 @@ class MorningBriefSplitContractTest(unittest.TestCase):
         self.assertNotIn("SGG_NOTES", collector)
         self.assertIn('EXCLUDED_CALENDARS = {"Bryan @ Agile6", "Traci"}', collector)
         self.assertIn("Never use or mention events from Traci's calendar", prompt)
-        self.assertIn("recentSecondBrainPaths", collector)
+        self.assertNotIn("recentSecondBrainPaths", collector)
+        self.assertIn("currentWeekDirection", collector)
+
+    def test_personal_brief_is_delta_only_and_silent_when_unchanged(self) -> None:
+        prompt = PERSONAL_PROMPT.read_text(encoding="utf-8")
+
+        self.assertIn("previous completed delivery", prompt)
+        self.assertIn("Do not repeat unchanged", prompt)
+        self.assertIn('respond with exactly `[SILENT]`', prompt)
+        self.assertIn("Never expose analysis, scratch work, or a drafting preamble", prompt)
+        self.assertNotIn("**Today's reminders**: up to 5", prompt)
+
+    def test_personal_collector_filters_prohibited_unattended_context(self) -> None:
+        collector = load_personal_collector()
+        rows = [
+            {"title": "Put the bins out", "calendar": "Home"},
+            {"title": "Buy wine", "calendar": "Home"},
+        ]
+
+        filtered = collector.filter_prohibited_rows(rows)
+
+        self.assertEqual(filtered, [{"title": "Put the bins out", "calendar": "Home"}])
+
+    def test_personal_collector_extracts_only_safe_active_weekly_direction(self) -> None:
+        collector = load_personal_collector()
+        note = """# Week
+
+## Active Goals and Projects
+- **Body:** Keep the gym as a workday reset.
+- **Alcohol:** A prohibited unattended topic.
+
+## Explicitly Parked
+- Leave this out.
+"""
+
+        self.assertEqual(
+            collector.extract_active_goals(note),
+            ["**Body:** Keep the gym as a workday reset."],
+        )
+
+    def test_weekly_orientation_collector_is_minimal(self) -> None:
+        collector = WEEKLY_ORIENTATION_COLLECTOR.read_text(encoding="utf-8")
+        prompt = WEEKLY_ORIENTATION_PROMPT.read_text(encoding="utf-8")
+
+        self.assertIn("nextWeekHubPath", collector)
+        self.assertNotIn("collect_calendar", collector)
+        self.assertNotIn("collect_reminders", collector)
+        self.assertNotIn("collect_mail", collector)
+        self.assertNotIn("collect_weather", collector)
+        self.assertIn("exactly one concrete question", prompt)
+        self.assertIn("Do not preview an agenda", prompt)
 
     def test_personal_collector_adds_authoritative_pacific_timestamps(self) -> None:
         collector = load_personal_collector()
@@ -142,6 +206,7 @@ class MorningBriefSplitContractTest(unittest.TestCase):
     def test_personal_routines_do_not_resurface_alcohol_by_default(self) -> None:
         prompt_paths = [
             PERSONAL_PROMPT,
+            WEEKLY_ORIENTATION_PROMPT,
             ROOT / "automations" / "personal-weekday-close" / "prompt.md",
             ROOT / "automations" / "personal-saturday-orientation" / "prompt.md",
             ROOT / "automations" / "personal-sunday-reset" / "prompt.md",

@@ -109,6 +109,7 @@ def main() -> int:
             "enabled_toolsets": definition["enabledToolsets"],
             "workdir": definition["workdir"],
             "attach_to_session": definition["attachToSession"],
+            "continuity": bool(definition.get("carryPreviousOutput", False)),
         }
         # Apply finite repeat counts only on creation. Reconciliation must not
         # reset completed pilot runs.
@@ -118,6 +119,11 @@ def main() -> int:
             action = "update"
             current = matches[0]
             update_fields = dict(common)
+            if current.get("base_url") and not definition.get("baseUrl"):
+                # The cron update API treats None as "not supplied". Use the
+                # documented empty-string clear so a local/custom route does
+                # not survive an atomic migration to a named provider.
+                update_fields["base_url"] = ""
             if current.get("state") in {"completed", "error"} and not current.get("enabled", True):
                 if current.get("schedule_display") != definition["schedule"]:
                     fail(
@@ -169,6 +175,19 @@ def main() -> int:
             mismatches["attach_to_session"] = {
                 "expected": definition["attachToSession"],
                 "actual": actual_attach,
+            }
+        stored_refs = job.get("context_from") or []
+        if isinstance(stored_refs, str):
+            stored_refs = [stored_refs]
+        actual_continuity = any(
+            str(ref).strip().lower() == "self" or ref == job.get("id")
+            for ref in stored_refs
+        )
+        expected_continuity = bool(definition.get("carryPreviousOutput", False))
+        if actual_continuity != expected_continuity:
+            mismatches["continuity"] = {
+                "expected": expected_continuity,
+                "actual": actual_continuity,
             }
         if job.get("origin") != expected_origin:
             mismatches["origin"] = {
